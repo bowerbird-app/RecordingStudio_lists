@@ -187,6 +187,11 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @page.id.to_s, query["recording_id"]
     assert_equal "/", query["return_to"]
     assert_select "a[href='#{new_list["href"]}'] svg[data-flat-pack--icon-name-value='plus']"
+    assert_select "form[data-recording-studio-lists--add-to-list-target=create][hidden]", count: 2 do
+      assert_select "input[name='list[name]']"
+      assert_select "input[name=recording_id][value=?]", @page.id
+      assert_select "button", text: "Save"
+    end
 
     get "/lists"
     assert_select "button", text: "Add to list", count: 0
@@ -285,6 +290,38 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert_match %r{\A/lists/}, URI.parse(response.headers["Location"]).path
+  end
+
+  test "creating from the menu adds the recording without leaving" do
+    post "/lists",
+      params: {
+        list: { name: "From the menu" },
+        idempotency_key: "menu-#{SecureRandom.hex(4)}",
+        recording_id: @page.id
+      },
+      headers: { "X-Lists-Menu" => "1" }
+
+    assert_response :created
+    body = JSON.parse(response.body)
+    list = RecordingStudio::Lists.lists(@root).find { |item| item.name == "From the menu" }
+    assert_equal list.id, body["id"]
+    assert_equal "From the menu", body["name"]
+    assert_equal "/lists/#{list.id}/items", body["add_url"]
+    assert_equal "/lists/#{list.id}/items/#{@page.id}", body["remove_url"]
+    assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+
+    assert_no_difference -> { RecordingStudio::Lists::List.count } do
+      post "/lists",
+        params: {
+          list: { name: "  " },
+          idempotency_key: "blank-menu-#{SecureRandom.hex(4)}",
+          recording_id: @page.id
+        },
+        headers: { "X-Lists-Menu" => "1" }
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "Name can't be blank.", JSON.parse(response.body)["error"]
   end
 
   private

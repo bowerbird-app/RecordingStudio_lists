@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `recording_studio_add_to_list` renders a menu of list names. A check sits to the right of lists that already hold the recording, so the name stays put. Choosing a name adds or removes it and the check follows. `icon:` takes any heroicon, `text: ""` leaves the label off, and `show_chevron: false` hides the arrow. List opens the new-list form and adds the recording on save.
+- `recording_studio_add_to_list` renders a menu of list names. A check sits to the right of lists that already hold the recording, so the name stays put. Choosing a name adds or removes it and the check follows. `icon:` takes any heroicon, `text: ""` leaves the label off, and `show_chevron: false` hides the arrow. List opens a name field in the menu. Saving creates the list and adds the recording there.
 
 ## [0.3.0] - 2026-09-29
 

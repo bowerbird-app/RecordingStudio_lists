@@ -62,6 +62,6 @@ The index lists names and member counts. New list asks for a name and an optiona
 <%= recording_studio_add_to_list(page) %>
 ```
 
-The menu lists names under the current root. A check sits to the right of a name when the recording is already on that list, so the name stays put. Choosing a name without a check adds it and the check appears. Choosing a checked name removes it and the check goes away. The page stays put. List opens the new-list form, and saving also adds the recording, then returns to that page.
+The menu lists names under the current root. A check sits to the right of a name when the recording is already on that list, so the name stays put. Choosing a name without a check adds it and the check appears. Choosing a checked name removes it and the check goes away. The page stays put. List opens a name field in the menu. Saving creates the list, adds the recording, and checks the new name. The lists page still uses the new-list form when a description is needed.
 
 Pass `text:`, `icon:`, `style:`, `size:`, `show_chevron:`, `placement:`, `parent:`, or `return_to:` when the defaults are wrong. `text: ""` leaves the label off. `icon:` is any heroicon name. `show_chevron: false` hides the arrow. `parent:` defaults to the current root.

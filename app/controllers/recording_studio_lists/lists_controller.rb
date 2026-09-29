@@ -25,8 +25,12 @@ module RecordingStudioLists
         actor: current_actor
       )
       attach_recording(list)
+      return render json: menu_list_payload(list), status: :created if menu_request?
+
       redirect_to safe_return_path || list_path(list), notice: "List created."
-    rescue RecordingStudio::Lists::BlankName
+    rescue RecordingStudio::Lists::BlankName => error
+      return render json: { error: error.message }, status: :unprocessable_entity if menu_request?
+
       @name = list_params[:name]
       @description = list_params[:description]
       @idempotency_key = params[:idempotency_key].presence || SecureRandom.uuid
@@ -34,6 +38,8 @@ module RecordingStudioLists
       assign_add_context
       render :new, status: :unprocessable_entity
     rescue RecordingStudio::Lists::Error => error
+      return render json: { error: error.message }, status: :unprocessable_entity if menu_request?
+
       redirect_to safe_return_path || lists_path, alert: error.message
     end
 
@@ -101,6 +107,16 @@ module RecordingStudioLists
       return if params[:recording_id].blank?
 
       RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
+    end
+
+    def menu_list_payload(list)
+      payload = { id: list.id, name: list.name.to_s }
+      return payload if params[:recording_id].blank?
+
+      payload.merge(
+        add_url: items_list_path(list),
+        remove_url: item_list_path(list, recording_id: params[:recording_id])
+      )
     end
 
     def safe_return_path
