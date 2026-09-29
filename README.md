@@ -62,6 +62,6 @@ The index lists names and member counts. New list asks for a name and an optiona
 <%= recording_studio_add_to_list(page) %>
 ```
 
-The menu lists names under the current root. Choosing one adds the recording and stays on the page. List opens the new-list form, and saving also adds the recording, then returns to that page.
+The menu lists names under the current root. A check sits to the left of a name when the recording is already on that list. Choosing a name without a check adds it and the check appears. Choosing a checked name removes it and the check goes away. The page stays put. List opens the new-list form, and saving also adds the recording, then returns to that page.
 
 Pass `text:`, `icon:`, `style:`, `size:`, `placement:`, `parent:`, or `return_to:` when the defaults are wrong. `parent:` defaults to the current root.

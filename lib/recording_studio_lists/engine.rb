@@ -113,6 +113,16 @@ module RecordingStudioLists
       end
     end
 
+    initializer "recording_studio_lists.assets" do |app|
+      app.config.assets.paths << root.join("app/javascript") if app.config.respond_to?(:assets)
+    end
+
+    initializer "recording_studio_lists.importmap", before: "importmap" do |app|
+      next unless app.config.respond_to?(:importmap)
+
+      app.config.importmap.paths << root.join("config/importmap.rb")
+    end
+
     initializer "recording_studio_lists.helpers" do
       ActiveSupport.on_load(:action_controller_base) do
         helper RecordingStudioLists::Engine.helpers

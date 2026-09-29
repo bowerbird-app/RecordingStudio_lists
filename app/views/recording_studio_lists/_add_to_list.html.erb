@@ -1,26 +1,33 @@
-<% rows.each do |row| %>
-  <% next if row[:member] %>
-  <%= form_with url: row[:url], method: :post, html: { id: row[:form_id], class: "hidden" } do %>
-    <%= hidden_field_tag :recording_id, recording_id %>
-    <%= hidden_field_tag :return_to, return_to if return_to.present? %>
-  <% end %>
-<% end %>
+<div data-controller="recording-studio-lists--add-to-list">
+  <template data-recording-studio-lists--add-to-list-target="check">
+    <%= render FlatPack::Shared::IconComponent.new(name: "check", size: :sm) %>
+  </template>
 
-<%= render FlatPack::Button::Dropdown::Component.new(
-  text: text,
-  icon: icon,
-  style: style,
-  size: size,
-  placement: placement,
-  trigger_attributes: { type: "button" }
-) do |dropdown| %>
   <% rows.each do |row| %>
-    <% if row[:member] %>
-      <% dropdown.menu_item(text: row[:name], disabled: true, type: "button") %>
-    <% else %>
-      <% dropdown.menu_item(text: row[:name], form: row[:form_id], type: "submit") %>
+    <%= form_with url: (row[:member] ? row[:remove_url] : row[:add_url]), method: (row[:member] ? :delete : :post), html: { id: row[:form_id], class: "hidden", data: { add_url: row[:add_url], remove_url: row[:remove_url] } } do %>
+      <%= hidden_field_tag :recording_id, recording_id %>
+      <%= hidden_field_tag :return_to, return_to if return_to.present? %>
     <% end %>
   <% end %>
-  <% dropdown.menu_divider if rows.any? %>
-  <% dropdown.menu_item(text: "List", icon: "plus", href: new_list_href) %>
-<% end %>
+
+  <%= render FlatPack::Button::Dropdown::Component.new(
+    text: text,
+    icon: icon,
+    style: style,
+    size: size,
+    placement: placement,
+    trigger_attributes: { type: "button" }
+  ) do |dropdown| %>
+    <% rows.each do |row| %>
+      <% dropdown.menu_item(
+        text: row[:name],
+        icon: ("check" if row[:member]),
+        form: row[:form_id],
+        type: "submit",
+        data: { action: "click->recording-studio-lists--add-to-list#toggle" }
+      ) %>
+    <% end %>
+    <% dropdown.menu_divider if rows.any? %>
+    <% dropdown.menu_item(text: "List", icon: "plus", href: new_list_href) %>
+  <% end %>
+</div>

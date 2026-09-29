@@ -153,15 +153,26 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal 1, queries.count { |sql| sql.include?("recording_studio_list_items") }
     assert_select "button", text: "Add to list"
+    assert_includes response.body, "controllers/recording_studio_lists/add_to_list_controller"
     assert_select "[role=separator]", count: 1
-    assert_select "button[disabled]", text: "Alpha" do |buttons|
-      assert_nil buttons.first["form"]
+    assert_select "[data-controller='recording-studio-lists--add-to-list']"
+    assert_select "button[disabled]", text: "Alpha", count: 0
+    assert_select "button[type=submit][form=?]", "add-to-list-1-#{alpha.id}", text: "Alpha" do |buttons|
+      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check']"
+    end
+    assert_select "form#add-to-list-1-#{alpha.id}[action=?]", "/lists/#{alpha.id}/items/#{@page.id}" do
+      assert_select "input[name=_method][value=delete]"
+      assert_select "input[name=recording_id][value=?]", @page.id
+      assert_select "input[name=return_to][value=?]", "/"
     end
     assert_select "form#add-to-list-1-#{zebra.id}[method=post][action=?]", "/lists/#{zebra.id}/items" do
       assert_select "input[name=recording_id][value=?]", @page.id
       assert_select "input[name=return_to][value=?]", "/"
+      assert_select "input[name=_method]", count: 0
     end
-    assert_select "button[type=submit][form=?]", "add-to-list-1-#{zebra.id}", text: "Zebra"
+    assert_select "button[type=submit][form=?]", "add-to-list-1-#{zebra.id}", text: "Zebra" do |buttons|
+      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check']", count: 0
+    end
     new_list = css_select("a[href*='/lists/new']").find { |link| link.text.include?("List") }
     query = Rack::Utils.parse_query(URI.parse(new_list["href"]).query)
     assert_equal @page.id.to_s, query["recording_id"]
@@ -201,6 +212,25 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     post "/lists/#{list.id}/items", params: { recording_id: @page.id, return_to: "https://evil.test/phish" }
 
     assert_redirected_to "/lists/#{list.id}"
+
+    delete "/lists/#{list.id}/items/#{@page.id}", params: { return_to: "/docs/methods" }
+
+    assert_redirected_to "/docs/methods"
+    follow_redirect!
+    assert_includes response.body, "Removed."
+    refute_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+
+    post "/lists/#{list.id}/items",
+      params: { recording_id: @page.id },
+      headers: { "X-Lists-Menu" => "1" }
+
+    assert_response :no_content
+    assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+
+    delete "/lists/#{list.id}/items/#{@page.id}", headers: { "X-Lists-Menu" => "1" }
+
+    assert_response :no_content
+    refute_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
   end
 
   test "new list can carry a recording home" do

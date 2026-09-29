@@ -47,17 +47,25 @@ module RecordingStudioLists
     def add_item
       list = RecordingStudio::Lists.find(params[:id])
       RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
+      return head :no_content if menu_request?
+
       redirect_to safe_return_path || list_path(list), notice: "Added."
     rescue RecordingStudio::Lists::Error => error
+      return head :unprocessable_entity if menu_request?
+
       redirect_to safe_return_path || list_path(params[:id]), alert: error.message
     end
 
     def remove_item
       list = RecordingStudio::Lists.find(params[:id])
       RecordingStudio::Lists.remove(list, params[:recording_id])
-      redirect_to list_path(list), notice: "Removed."
+      return head :no_content if menu_request?
+
+      redirect_to safe_return_path || list_path(list), notice: "Removed."
     rescue RecordingStudio::Lists::Error => error
-      redirect_to list_path(params[:id]), alert: error.message
+      return head :unprocessable_entity if menu_request?
+
+      redirect_to safe_return_path || list_path(params[:id]), alert: error.message
     end
 
     def destroy
@@ -97,6 +105,10 @@ module RecordingStudioLists
 
     def safe_return_path
       RecordingStudio::Lists::InternalPath.sanitize(params[:return_to])
+    end
+
+    def menu_request?
+      request.headers["X-Lists-Menu"] == "1"
     end
 
     def item_counts_for(lists)

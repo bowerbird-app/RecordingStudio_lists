@@ -61,7 +61,8 @@ module RecordingStudioLists
       lists.map do |list|
         {
           name: list.name.to_s,
-          url: recording_studio_lists.items_list_path(list),
+          add_url: recording_studio_lists.items_list_path(list),
+          remove_url: recording_studio_lists.item_list_path(list, recording_id: recording.id),
           form_id: "add-to-list-#{sequence}-#{list.id}",
           member: member_ids.include?(list.id.to_s)
         }
