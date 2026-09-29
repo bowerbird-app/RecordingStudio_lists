@@ -7,38 +7,42 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(title: @list.name, subtitle: subtitle, variant: :h1) %>
 
-  <% if @items.empty? %>
-    <p>Nothing here yet.</p>
-  <% else %>
-    <%= render FlatPack::Card::Component.new do |card| %>
-      <% card.body do %>
-        <%= render FlatPack::List::Component.new(divider: true) do %>
-          <% @items.each do |item| %>
-            <% trailing = nil %>
-            <% if item %>
-              <% trailing = capture do %>
-                <%= form_with url: item_list_path(@list, recording_id: item.id), method: :delete do %>
-                  <%= render FlatPack::Button::Component.new(
-                    text: "Remove",
-                    icon: "trash",
-                    icon_only: true,
-                    type: "submit",
-                    style: :ghost,
-                    size: :sm
-                  ) %>
+  <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
+    <div class="flex flex-col gap-6">
+      <% if @items.empty? %>
+        <p>Nothing here yet.</p>
+      <% else %>
+        <%= render FlatPack::Card::Component.new do |card| %>
+          <% card.body do %>
+            <%= render FlatPack::List::Component.new(divider: true) do %>
+              <% @items.each do |item| %>
+                <% trailing = nil %>
+                <% if item %>
+                  <% trailing = capture do %>
+                    <%= form_with url: item_list_path(@list, recording_id: item.id), method: :delete do %>
+                      <%= render FlatPack::Button::Component.new(
+                        text: "Remove",
+                        icon: "trash",
+                        icon_only: true,
+                        type: "submit",
+                        style: :ghost,
+                        size: :sm
+                      ) %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+                <%= render FlatPack::List::Item.new(trailing: trailing) do %>
+                  <%= item&.name.presence || "Missing" %>
                 <% end %>
               <% end %>
-            <% end %>
-            <%= render FlatPack::List::Item.new(trailing: trailing) do %>
-              <%= item&.name.presence || "Missing" %>
             <% end %>
           <% end %>
         <% end %>
       <% end %>
-    <% end %>
-  <% end %>
 
-  <%= form_with url: list_path(@list), method: :delete, data: { turbo_confirm: "Delete this list?" } do %>
-    <%= render FlatPack::Button::Component.new(text: "Delete list", type: "submit", style: :danger) %>
+      <%= form_with url: list_path(@list), method: :delete, data: { turbo_confirm: "Delete this list?" } do %>
+        <%= render FlatPack::Button::Component.new(text: "Delete list", type: "submit", style: :danger) %>
+      <% end %>
+    </div>
   <% end %>
 </div>

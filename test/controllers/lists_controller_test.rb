@@ -43,7 +43,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", text: "New list"
-    assert_select "form.flex.flex-col[class*='gap-(--stack-gap-md)']"
+    assert_select "div[class*='md:grid-cols-2']" do
+      assert_select "form.flex.flex-col[class*='gap-(--stack-gap-md)']"
+    end
     assert_select "input[name='list[name]']"
     assert_select "textarea[name='list[description]']"
     assert_select "button", text: "Create list"
@@ -84,9 +86,11 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Reading"
     assert_select "th", text: "Updated", count: 0
     assert_select "table", count: 0
-    assert_select "div[class*='p-[var(--card-padding-md)]']" do
-      assert_select "ul.flat-pack-list" do
-        assert_select "a", text: "Reading"
+    assert_select "div[class*='md:grid-cols-2']" do
+      assert_select "div[class*='p-[var(--card-padding-md)]']" do
+        assert_select "ul.flat-pack-list" do
+          assert_select "a", text: "Reading"
+        end
       end
     end
     assert_select "nav.flat-pack-page-nav" do
@@ -103,8 +107,10 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, @page.name
     assert_includes response.body, "1 item"
     assert_includes response.body, "Added."
-    assert_select "div[class*='p-[var(--card-padding-md)]']" do
-      assert_select "ul.flat-pack-list"
+    assert_select "div[class*='md:grid-cols-2']" do
+      assert_select "div[class*='p-[var(--card-padding-md)]']" do
+        assert_select "ul.flat-pack-list"
+      end
     end
     assert_select "table", count: 0
     assert_select "select[name='recording_id']", count: 0

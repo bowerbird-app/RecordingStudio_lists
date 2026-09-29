@@ -3,23 +3,25 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(title: "New list", variant: :h1) %>
 
-  <%= form_with url: lists_path, method: :post, class: "flex flex-col gap-(--stack-gap-md)" do %>
-    <%= hidden_field_tag :idempotency_key, @idempotency_key %>
+  <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
+    <%= form_with url: lists_path, method: :post, class: "flex flex-col gap-(--stack-gap-md)" do %>
+      <%= hidden_field_tag :idempotency_key, @idempotency_key %>
 
-    <%= render FlatPack::TextInput::Component.new(
-      name: "list[name]",
-      label: "Name",
-      value: @name,
-      required: true,
-      error: @name_error
-    ) %>
+      <%= render FlatPack::TextInput::Component.new(
+        name: "list[name]",
+        label: "Name",
+        value: @name,
+        required: true,
+        error: @name_error
+      ) %>
 
-    <%= render FlatPack::TextArea::Component.new(
-      name: "list[description]",
-      label: "Description",
-      value: @description
-    ) %>
+      <%= render FlatPack::TextArea::Component.new(
+        name: "list[description]",
+        label: "Description",
+        value: @description
+      ) %>
 
-    <%= render FlatPack::Button::Component.new(text: "Create list", type: "submit", style: :primary) %>
+      <%= render FlatPack::Button::Component.new(text: "Create list", type: "submit", style: :primary) %>
+    <% end %>
   <% end %>
 </div>
