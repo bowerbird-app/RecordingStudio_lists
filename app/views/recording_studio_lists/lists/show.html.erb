@@ -1,0 +1,42 @@
+<% item_count = @items.size %>
+<% count_label = "#{item_count} #{'item'.pluralize(item_count)}" %>
+<% description = @list.recordable.description.presence %>
+<% subtitle = [description, count_label].compact.join(" · ") %>
+<% recording_studio_page_nav(title: @list.name, page_nav_back_url: lists_path, page_nav_back_label: "Lists") %>
+<% lists_nav_right %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(title: @list.name, subtitle: subtitle, variant: :h1) %>
+
+  <% if @items.empty? %>
+    <p>Nothing here yet.</p>
+  <% else %>
+    <%= render FlatPack::Table::Component.new(data: @items) do |table| %>
+      <% table.column(title: "Name") { |item| item&.name.presence || "Missing" } %>
+      <% table.column(title: "") do |item| %>
+        <% if item %>
+          <% form_with(url: item_list_path(@list, recording_id: item.id), method: :delete) do %>
+            <% render FlatPack::Button::Component.new(text: "Remove", type: "submit", style: :ghost, size: :sm) %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <% if @addable.empty? %>
+    <p>Nothing left to add.</p>
+  <% else %>
+    <%= form_with url: items_list_path(@list), method: :post do %>
+      <%= render FlatPack::Select::Component.new(
+        name: "recording_id",
+        label: "Add",
+        options: @addable.map { |candidate| [candidate.name, candidate.id] }
+      ) %>
+      <%= render FlatPack::Button::Component.new(text: "Add", type: "submit", style: :primary) %>
+    <% end %>
+  <% end %>
+
+  <%= form_with url: list_path(@list), method: :delete, data: { turbo_confirm: "Delete this list?" } do %>
+    <%= render FlatPack::Button::Component.new(text: "Delete list", type: "submit", style: :danger) %>
+  <% end %>
+</div>

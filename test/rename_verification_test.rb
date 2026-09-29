@@ -205,17 +205,17 @@ class RenameVerificationTest < Minitest::Test
                  "Application controller should be in module #{@pascal_name}")
   end
 
-  def test_home_controller_exists
-    path = File.join(@root, "app", "controllers", @gem_name, "home_controller.rb")
+  def test_lists_controller_exists
+    path = File.join(@root, "app", "controllers", @gem_name, "lists_controller.rb")
     assert File.exist?(path),
-           "Home controller should exist at #{path}"
+           "Lists controller should exist at #{path}"
   end
 
-  def test_home_controller_has_correct_module
-    path = File.join(@root, "app", "controllers", @gem_name, "home_controller.rb")
+  def test_lists_controller_has_correct_module
+    path = File.join(@root, "app", "controllers", @gem_name, "lists_controller.rb")
     content = File.read(path)
     assert_match(/^module #{@pascal_name}$/, content,
-                 "Home controller should be in module #{@pascal_name}")
+                 "Lists controller should be in module #{@pascal_name}")
   end
 
   # ============================================================
@@ -231,7 +231,7 @@ class RenameVerificationTest < Minitest::Test
 
     ruby_files = Dir.glob(File.join(@root, "**", "*.rb"))
     # Exclude test files and this verification test itself
-    ruby_files.reject! { |f| f.include?("test/dummy") || f.include?("rename_verification_test.rb") }
+    ruby_files.reject! { |f| f.include?("/test/") }
 
     files_with_old_refs = []
 

@@ -3,12 +3,12 @@
 require "rails/generators"
 require "rails/generators/active_record"
 
-module GemTemplate
+module RecordingStudioLists
   module Generators
-    # Generator to install GemTemplate migrations into the host application.
+    # Generator to install RecordingStudioLists migrations into the host application.
     #
     # Usage:
-    #   rails generate gem_template:migrations
+    #   rails generate recording_studio_lists:migrations
     #
     # Options:
     #   --skip-existing  Skip migrations that already exist in the host app
@@ -18,7 +18,7 @@ module GemTemplate
 
       source_root File.expand_path("../../../..", __dir__)
 
-      desc "Copy GemTemplate migrations to your application"
+      desc "Copy RecordingStudioLists migrations to your application"
 
       class_option :skip_existing, type: :boolean, default: true,
                                    desc: "Skip migrations that already exist (based on name, ignoring timestamp)"
@@ -27,14 +27,14 @@ module GemTemplate
         migrations_dir = File.join(self.class.source_root, "db", "migrate")
 
         unless File.directory?(migrations_dir)
-          say "No migrations found in GemTemplate engine.", :yellow
+          say "No migrations found in RecordingStudioLists engine.", :yellow
           return
         end
 
         migration_files = Dir.glob(File.join(migrations_dir, "*.rb"))
 
         if migration_files.empty?
-          say "No migrations found in GemTemplate engine.", :yellow
+          say "No migrations found in RecordingStudioLists engine.", :yellow
           return
         end
 
@@ -42,7 +42,7 @@ module GemTemplate
 
         migration_files.each do |source_path|
           filename = File.basename(source_path)
-          # Extract migration name without timestamp (e.g., "create_gem_template_pages.rb")
+          # Extract migration name without timestamp (e.g., "create_recording_studio_lists_pages.rb")
           migration_name = filename.sub(/^\d+_/, "")
 
           if options[:skip_existing] && migration_exists?(migration_name)
@@ -57,9 +57,6 @@ module GemTemplate
 
           copy_file source_path, destination_path
           say "  create  #{destination_path}", :green
-
-          # Small delay to ensure unique timestamps
-          sleep 0.1
         end
 
         say "\nRun 'bin/rails db:migrate' to apply the migrations.", :green
@@ -72,9 +69,11 @@ module GemTemplate
       end
 
       def next_migration_number
-        ActiveRecord::Migration.next_migration_number(
-          Time.now.utc.strftime("%Y%m%d%H%M%S")
-        )
+        # Migration versions are one-second timestamps, so two copies in the same second collide.
+        number = Time.now.utc.strftime("%Y%m%d%H%M%S").to_i
+        number = @previous_migration_number + 1 if @previous_migration_number && number <= @previous_migration_number
+        @previous_migration_number = number
+        number.to_s
       end
     end
   end

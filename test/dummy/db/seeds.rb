@@ -41,6 +41,21 @@ begin
   folder_recording = find_or_record_child.call(folder, root_recording, root_recording)
 
   find_or_record_child.call(page, root_recording, folder_recording)
+
+  ["Dezeen", "ArchDaily", "Design Milk"].each do |title|
+    already_on_client = Page.where(title: title).any? do |page|
+      RecordingStudio::Recording.exists?(
+        recordable: page,
+        root_recording: accessible_root_recording,
+        parent_recording: accessible_root_recording,
+        trashed_at: nil
+      )
+    end
+    next if already_on_client
+
+    magazine = Page.create!(title: title)
+    find_or_record_child.call(magazine, accessible_root_recording, accessible_root_recording)
+  end
 ensure
   Current.actor = previous_actor
 end

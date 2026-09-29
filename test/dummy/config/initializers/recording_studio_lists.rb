@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-GemTemplate.configure do |config|
+RecordingStudioLists.configure do |config|
   # config.api_key = "..."
 end

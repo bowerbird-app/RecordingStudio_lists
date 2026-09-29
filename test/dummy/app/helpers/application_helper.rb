@@ -10,11 +10,19 @@ module ApplicationHelper
       concat recording_studio_root_switch_dropdown(style: :ghost, size: :md)
       concat render(
         FlatPack::Button::Component.new(
+          text: "Lists",
+          style: :ghost,
+          size: :md,
+          href: recording_studio_lists.lists_path
+        )
+      )
+      concat render(
+        FlatPack::Button::Component.new(
           text: "Sign out",
           style: :ghost,
           size: :md,
-          url: main_app.destroy_user_session_path,
-          data: { turbo_method: :delete }
+          href: main_app.destroy_user_session_path,
+          method: :delete
         )
       )
     end
