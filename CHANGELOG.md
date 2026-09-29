@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `recording_studio_add_to_list` renders a menu of list names. Choosing one adds the recording and stays on the page. List opens the new-list form and adds the recording on save.
+
 ## [0.3.0] - 2026-09-29
 
 ### Added

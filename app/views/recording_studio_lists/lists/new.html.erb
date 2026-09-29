@@ -6,6 +6,8 @@
   <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
     <%= form_with url: lists_path, method: :post, class: "flex flex-col gap-(--stack-gap-md)" do %>
       <%= hidden_field_tag :idempotency_key, @idempotency_key %>
+      <%= hidden_field_tag :recording_id, @recording_id if @recording_id.present? %>
+      <%= hidden_field_tag :return_to, @return_to if @return_to.present? %>
 
       <%= render FlatPack::TextInput::Component.new(
         name: "list[name]",

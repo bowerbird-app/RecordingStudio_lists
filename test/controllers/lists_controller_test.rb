@@ -98,6 +98,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_select "a", text: "Lists", count: 0
       assert_select "[data-controller='recording-studio-root-switchable--root-switch-dropdown']", count: 0
     end
+    assert_select "button", text: "Add to list", count: 0
 
     post "#{show_path}/items", params: { recording_id: @page.id }
 
@@ -140,5 +141,129 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert RecordingStudio::Recording.exists?(@page.id)
     follow_redirect!
     assert_includes response.body, "List deleted."
+  end
+
+  test "add to list menu posts back to the current page" do
+    alpha = create_list("Alpha")
+    zebra = create_list("Zebra")
+    RecordingStudio::Lists.add(alpha, @page, actor: @user)
+
+    queries = sql_during { get "/" }
+
+    assert_response :success
+    assert_equal 1, queries.count { |sql| sql.include?("recording_studio_list_items") }
+    assert_select "button", text: "Add to list"
+    assert_select "[role=separator]", count: 1
+    assert_select "button[disabled]", text: "Alpha" do |buttons|
+      assert_nil buttons.first["form"]
+    end
+    assert_select "form#add-to-list-1-#{zebra.id}[method=post][action=?]", "/lists/#{zebra.id}/items" do
+      assert_select "input[name=recording_id][value=?]", @page.id
+      assert_select "input[name=return_to][value=?]", "/"
+    end
+    assert_select "button[type=submit][form=?]", "add-to-list-1-#{zebra.id}", text: "Zebra"
+    new_list = css_select("a[href*='/lists/new']").find { |link| link.text.include?("List") }
+    query = Rack::Utils.parse_query(URI.parse(new_list["href"]).query)
+    assert_equal @page.id.to_s, query["recording_id"]
+    assert_equal "/", query["return_to"]
+    assert_select "a[href='#{new_list["href"]}'] svg[data-flat-pack--icon-name-value='plus']"
+
+    get "/lists"
+    assert_select "button", text: "Add to list", count: 0
+  end
+
+  test "adding from the menu stays on the return path" do
+    list = create_list("Reading")
+
+    post "/lists/#{list.id}/items", params: { recording_id: @page.id, return_to: "/docs/methods" }
+
+    assert_redirected_to "/docs/methods"
+    follow_redirect!
+    assert_includes response.body, "Added."
+    assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+
+    other = Workspace.create!(name: "Z Lists #{SecureRandom.hex(4)}")
+    other_root = RecordingStudio.root_recording_for(other)
+    other_page = RecordingStudio.record!(
+      action: "created",
+      recordable: Page.new(title: "Elsewhere #{SecureRandom.hex(4)}"),
+      root_recording: other_root,
+      parent_recording: other_root,
+      actor: @user
+    ).recording
+
+    post "/lists/#{list.id}/items", params: { recording_id: other_page.id, return_to: "/docs/methods" }
+
+    assert_redirected_to "/docs/methods"
+    follow_redirect!
+    assert_includes response.body, "That lives somewhere else."
+
+    post "/lists/#{list.id}/items", params: { recording_id: @page.id, return_to: "https://evil.test/phish" }
+
+    assert_redirected_to "/lists/#{list.id}"
+  end
+
+  test "new list can carry a recording home" do
+    get "/lists/new", params: { recording_id: @page.id, return_to: "https://evil.test/phish" }
+
+    assert_select "input[name=recording_id][value=?]", @page.id
+    assert_select "input[name=return_to]", count: 0
+
+    get "/lists/new", params: { recording_id: @page.id, return_to: "/docs/install" }
+
+    assert_select "input[name=return_to][value=?]", "/docs/install"
+
+    post "/lists", params: {
+      list: { name: "  " },
+      idempotency_key: "blank-#{SecureRandom.hex(4)}",
+      recording_id: @page.id,
+      return_to: "/docs/install"
+    }
+
+    assert_response :unprocessable_entity
+    assert_select "input[name=recording_id][value=?]", @page.id
+    assert_select "input[name=return_to][value=?]", "/docs/install"
+
+    post "/lists", params: {
+      list: { name: "From the page", description: "Magazines" },
+      idempotency_key: "carry-#{SecureRandom.hex(4)}",
+      recording_id: @page.id,
+      return_to: "/docs/methods"
+    }
+
+    assert_redirected_to "/docs/methods"
+    follow_redirect!
+    assert_includes response.body, "List created."
+    list = RecordingStudio::Lists.lists(@root).find { |item| item.name == "From the page" }
+    assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+
+    post "/lists", params: {
+      list: { name: "Stay here" },
+      idempotency_key: "stay-#{SecureRandom.hex(4)}",
+      recording_id: @page.id,
+      return_to: "//evil.test"
+    }
+
+    assert_response :redirect
+    assert_match %r{\A/lists/}, URI.parse(response.headers["Location"]).path
+  end
+
+  private
+
+  def create_list(name)
+    RecordingStudio::Lists.create(parent: @root, name: name, actor: @user)
+  end
+
+  def sql_during
+    queries = []
+    subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |*, payload|
+      next if payload[:name] == "SCHEMA" || payload[:cached]
+
+      queries << payload[:sql].to_s
+    end
+    yield
+    queries
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
   end
 end

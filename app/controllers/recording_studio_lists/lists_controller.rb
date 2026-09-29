@@ -13,6 +13,7 @@ module RecordingStudioLists
 
     def new
       @idempotency_key = SecureRandom.uuid
+      assign_add_context
     end
 
     def create
@@ -23,15 +24,17 @@ module RecordingStudioLists
         idempotency_key: params[:idempotency_key],
         actor: current_actor
       )
-      redirect_to list_path(list), notice: "List created."
+      attach_recording(list)
+      redirect_to safe_return_path || list_path(list), notice: "List created."
     rescue RecordingStudio::Lists::BlankName
       @name = list_params[:name]
       @description = list_params[:description]
       @idempotency_key = params[:idempotency_key].presence || SecureRandom.uuid
       @name_error = "Name can't be blank."
+      assign_add_context
       render :new, status: :unprocessable_entity
-    rescue RecordingStudio::Lists::ParentNotAllowed => error
-      redirect_to lists_path, alert: error.message
+    rescue RecordingStudio::Lists::Error => error
+      redirect_to safe_return_path || lists_path, alert: error.message
     end
 
     def show
@@ -44,9 +47,9 @@ module RecordingStudioLists
     def add_item
       list = RecordingStudio::Lists.find(params[:id])
       RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
-      redirect_to list_path(list), notice: "Added."
+      redirect_to safe_return_path || list_path(list), notice: "Added."
     rescue RecordingStudio::Lists::Error => error
-      redirect_to list_path(params[:id]), alert: error.message
+      redirect_to safe_return_path || list_path(params[:id]), alert: error.message
     end
 
     def remove_item
@@ -79,6 +82,21 @@ module RecordingStudioLists
 
     def current_actor
       Current.actor if defined?(Current)
+    end
+
+    def assign_add_context
+      @recording_id = params[:recording_id].presence
+      @return_to = safe_return_path
+    end
+
+    def attach_recording(list)
+      return if params[:recording_id].blank?
+
+      RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
+    end
+
+    def safe_return_path
+      RecordingStudio::Lists::InternalPath.sanitize(params[:return_to])
     end
 
     def item_counts_for(lists)

@@ -53,3 +53,15 @@ RecordingStudio::Lists.delete(list)
 ## Screens
 
 The index lists names and member counts. New list asks for a name and an optional description. The list page removes a member or deletes the list.
+
+## Add to a list
+
+`recording_studio_add_to_list` drops a menu on any page that already has a recording. It is not part of the list screens.
+
+```erb
+<%= recording_studio_add_to_list(page) %>
+```
+
+The menu lists names under the current root. Choosing one adds the recording and stays on the page. List opens the new-list form, and saving also adds the recording, then returns to that page.
+
+Pass `text:`, `icon:`, `style:`, `size:`, `placement:`, `parent:`, or `return_to:` when the defaults are wrong. `parent:` defaults to the current root.

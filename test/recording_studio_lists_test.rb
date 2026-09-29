@@ -157,6 +157,7 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes readme, "/lists"
     assert_includes readme, "/lists/new"
     assert_includes readme, "/lists/:id"
+    assert_includes readme, "recording_studio_add_to_list"
     refute_includes readme, "GemTemplate"
     refute_includes readme, "addon template"
     refute_includes readme, "this is a template"
@@ -169,6 +170,7 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes view_source, 'title: "Lists"'
     assert_includes view_source, "href: recording_studio_lists.lists_path"
     assert_includes view_source, "dummy_page_nav"
+    assert_includes view_source, "recording_studio_add_to_list(@featured_recording)"
     refute_includes view_source, "Template Demo"
     refute_includes view_source, "FlatPack::Card::Component"
     refute_includes view_source, "FlatPack::Breadcrumb::Component"

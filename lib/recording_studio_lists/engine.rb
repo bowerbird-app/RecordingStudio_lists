@@ -113,6 +113,12 @@ module RecordingStudioLists
       end
     end
 
+    initializer "recording_studio_lists.helpers" do
+      ActiveSupport.on_load(:action_controller_base) do
+        helper RecordingStudioLists::Engine.helpers
+      end
+    end
+
     initializer "recording_studio_lists.recordable_types", after: :load_config_initializers do
       next unless defined?(RecordingStudio)
 

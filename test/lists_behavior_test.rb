@@ -188,6 +188,19 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal expected_ids, candidates.map(&:id)
   end
 
+  test "return paths stay on this site" do
+    assert_equal "/lists", RecordingStudio::Lists::InternalPath.sanitize("/lists")
+    assert_equal "/lists?x=1", RecordingStudio::Lists::InternalPath.sanitize("  /lists?x=1  ")
+    assert_nil RecordingStudio::Lists::InternalPath.sanitize(nil)
+    assert_nil RecordingStudio::Lists::InternalPath.sanitize("lists")
+    assert_nil RecordingStudio::Lists::InternalPath.sanitize("https://evil.test/phish")
+    assert_nil RecordingStudio::Lists::InternalPath.sanitize("//evil.test")
+    assert_nil RecordingStudio::Lists::InternalPath.sanitize("/\\evil.test")
+    assert_nil RecordingStudio::Lists::InternalPath.sanitize("/%2f/evil")
+    assert_nil RecordingStudio::Lists::InternalPath.sanitize("/%2F/evil")
+    assert_nil RecordingStudio::Lists::InternalPath.sanitize("/lists\nSet-Cookie: x")
+  end
+
   private
 
   def without_lists_capability

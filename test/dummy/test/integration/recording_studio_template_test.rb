@@ -3,6 +3,10 @@
 require "test_helper"
 
 class RecordingStudioTemplateTest < ActiveSupport::TestCase
+  test "host views include the add to list helper" do
+    assert_respond_to ApplicationController.helpers, :recording_studio_add_to_list
+  end
+
   test "dummy app loads root switchable config and controller support" do
     assert_equal [ "all_workspaces" ], RecordingStudioRootSwitchable.configuration.scopes.keys
     assert_equal :application_layout, RecordingStudioRootSwitchable.configuration.layout

@@ -83,6 +83,7 @@ module RecordingStudio
   end
 end
 
+require "recording_studio/lists/internal_path"
 require "recording_studio/lists/services"
 
 RecordingStudio.register_capability(
