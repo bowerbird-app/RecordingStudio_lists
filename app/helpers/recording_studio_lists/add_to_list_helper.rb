@@ -8,6 +8,7 @@ module RecordingStudioLists
       icon: nil,
       style: :default,
       size: :md,
+      show_chevron: true,
       placement: :bottom_left,
       parent: nil,
       return_to: nil
@@ -20,10 +21,11 @@ module RecordingStudioLists
       return_path = add_to_list_return_path(return_to)
       render(
         "recording_studio_lists/add_to_list",
-        text: text.presence || "Add to list",
+        text: text.to_s,
         icon: icon,
         style: style,
         size: size,
+        show_chevron: show_chevron,
         placement: placement,
         rows: add_to_list_rows(lists, target),
         new_list_href: add_to_list_new_href(target, return_path),

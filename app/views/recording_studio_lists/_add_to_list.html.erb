@@ -10,13 +10,17 @@
     <% end %>
   <% end %>
 
+  <% trigger_attributes = { type: "button" } %>
+  <% trigger_attributes[:aria] = { label: "Add to list" } if text.blank? %>
+
   <%= render FlatPack::Button::Dropdown::Component.new(
     text: text,
     icon: icon,
     style: style,
     size: size,
+    show_chevron: show_chevron,
     placement: placement,
-    trigger_attributes: { type: "button" }
+    trigger_attributes: trigger_attributes
   ) do |dropdown| %>
     <% rows.each do |row| %>
       <% dropdown.menu_item(

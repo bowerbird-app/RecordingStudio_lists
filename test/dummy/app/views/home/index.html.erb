@@ -16,7 +16,16 @@
   <% if @featured_recording %>
     <div class="flex flex-col gap-(--stack-gap-md)">
       <p><%= @featured_recording.name %></p>
-      <%= recording_studio_add_to_list(@featured_recording) %>
+      <div class="flex items-center gap-(--stack-gap-md)">
+        <%= recording_studio_add_to_list(@featured_recording) %>
+        <%= recording_studio_add_to_list(
+          @featured_recording,
+          text: "",
+          icon: "heart",
+          show_chevron: false,
+          style: :ghost
+        ) %>
+      </div>
     </div>
   <% end %>
 </div>

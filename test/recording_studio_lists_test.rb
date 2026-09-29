@@ -171,6 +171,9 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes view_source, "href: recording_studio_lists.lists_path"
     assert_includes view_source, "dummy_page_nav"
     assert_includes view_source, "recording_studio_add_to_list(@featured_recording)"
+    assert_includes view_source, 'icon: "heart"'
+    assert_includes view_source, "show_chevron: false"
+    assert_includes view_source, "style: :ghost"
     refute_includes view_source, "Template Demo"
     refute_includes view_source, "FlatPack::Card::Component"
     refute_includes view_source, "FlatPack::Breadcrumb::Component"

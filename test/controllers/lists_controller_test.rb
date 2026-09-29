@@ -152,9 +152,16 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal 1, queries.count { |sql| sql.include?("recording_studio_list_items") }
-    assert_select "button", text: "Add to list"
+    assert_select "button", text: "Add to list" do |buttons|
+      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='chevron-down']"
+    end
+    assert_select "button[aria-label='Add to list'][data-fp-style='ghost']" do |buttons|
+      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='heart']"
+      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='chevron-down']", count: 0
+      assert_select buttons.first, "span", text: "Add to list", count: 0
+    end
     assert_includes response.body, "controllers/recording_studio_lists/add_to_list_controller"
-    assert_select "[role=separator]", count: 1
+    assert_select "[role=separator]", count: 2
     assert_select "[data-controller='recording-studio-lists--add-to-list']"
     assert_select "button[disabled]", text: "Alpha", count: 0
     assert_select "button[type=submit][form=?]", "add-to-list-1-#{alpha.id}", text: "Alpha" do |buttons|
