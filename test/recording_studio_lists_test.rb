@@ -170,15 +170,12 @@ class RecordingStudioListsTest < Minitest::Test
     refute_includes view_source, "FlatPack::Breadcrumb::Component"
   end
 
-  def test_dummy_page_nav_links_to_lists_and_signs_out_with_href
+  def test_dummy_page_nav_leaves_the_default_layout_right_slot_empty
     helper = File.read(File.expand_path("dummy/app/helpers/application_helper.rb", __dir__))
 
-    assert_includes helper, 'text: "Lists"'
-    assert_includes helper, "href: recording_studio_lists.lists_path"
-    assert_includes helper, "href: main_app.destroy_user_session_path"
-    assert_includes helper, "method: :delete"
-    refute_includes helper, "url: main_app"
-    refute_includes helper, "turbo_method"
+    refute_includes helper, "recording_studio_page_nav_right"
+    refute_includes helper, "recording_studio_root_switch_dropdown"
+    refute_includes helper, "destroy_user_session_path"
   end
 
   def test_lists_implementation_does_not_name_the_dummy_root_type

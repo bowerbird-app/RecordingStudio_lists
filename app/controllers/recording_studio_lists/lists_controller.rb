@@ -37,7 +37,6 @@ module RecordingStudioLists
     def show
       @list = RecordingStudio::Lists.find(params[:id])
       @items = RecordingStudio::Lists.items(@list)
-      @addable = RecordingStudio::Lists.addable(@list)
     rescue RecordingStudio::Lists::InvalidList
       head :not_found
     end

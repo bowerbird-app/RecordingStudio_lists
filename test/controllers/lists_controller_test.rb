@@ -78,6 +78,14 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
     get "/lists"
     assert_includes response.body, "Reading"
+    assert_select "th", text: "Name"
+    assert_select "th", text: "Items"
+    assert_select "th", text: "Updated", count: 0
+    assert_select "nav.flat-pack-page-nav" do
+      assert_select "a", text: "Sign out", count: 0
+      assert_select "a", text: "Lists", count: 0
+      assert_select "[data-controller='recording-studio-root-switchable--root-switch-dropdown']", count: 0
+    end
     assert_select "tbody tr", text: /Reading/ do
       assert_select "a", text: "Reading"
     end
@@ -90,8 +98,17 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, @page.name
     assert_includes response.body, "1 item"
     assert_includes response.body, "Added."
-    assert_select "tbody tr", text: /#{Regexp.escape(@page.name)}/ do
-      assert_select "button", text: "Remove"
+    assert_select "ul.flat-pack-list"
+    assert_select "table", count: 0
+    assert_select "select[name='recording_id']", count: 0
+    assert_select "button", text: "Remove", count: 0
+    assert_select "nav.flat-pack-page-nav" do
+      assert_select "a", text: "Sign out", count: 0
+      assert_select "a", text: "Lists", count: 0
+      assert_select "[data-controller='recording-studio-root-switchable--root-switch-dropdown']", count: 0
+    end
+    assert_select "li", text: /#{Regexp.escape(@page.name)}/ do
+      assert_select "button[aria-label='Remove']"
     end
 
     delete "#{show_path}/items/#{@page.id}"

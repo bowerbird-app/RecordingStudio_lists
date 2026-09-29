@@ -52,4 +52,4 @@ RecordingStudio::Lists.delete(list)
 
 ## Screens
 
-The index lists names, member counts, and the last update. New list asks for a name and an optional description. The list page adds a member, removes one, or deletes the list.
+The index lists names and member counts. New list asks for a name and an optional description. The list page removes a member or deletes the list.
