@@ -51,13 +51,11 @@ module RecordingStudioLists
       end
     end
 
-    # Run before_initialize hooks
     initializer "recording_studio_lists.before_initialize", before: "recording_studio_lists.load_config" do |_app|
       RecordingStudioLists.configuration.hooks.run(:before_initialize, self)
     end
 
     initializer "recording_studio_lists.load_config" do |app|
-      # Load config/recording_studio_lists.yml via Rails config_for if present
       if app.respond_to?(:config_for)
         begin
           yaml = begin
@@ -66,38 +64,33 @@ module RecordingStudioLists
             nil
           end
           RecordingStudioLists.configuration.merge!(yaml) if yaml.respond_to?(:each)
-        rescue StandardError => _e
-          # ignore load errors; host app can provide initializer overrides
+        rescue StandardError
+          nil
         end
       end
 
-      # Merge Rails.application.config.x.recording_studio_lists if present
       if app.config.respond_to?(:x) && app.config.x.respond_to?(:recording_studio_lists)
         xcfg = app.config.x.recording_studio_lists
         if xcfg.respond_to?(:to_h)
           RecordingStudioLists.configuration.merge!(xcfg.to_h)
         else
           begin
-            # try converting OrderedOptions
             hash = {}
             xcfg.each_pair { |k, v| hash[k] = v } if xcfg.respond_to?(:each_pair)
             RecordingStudioLists.configuration.merge!(hash) if hash&.any?
-          rescue StandardError => _e
-            # ignore
+          rescue StandardError
+            nil
           end
         end
       end
 
-      # Run on_configuration hooks after config is loaded
       RecordingStudioLists.configuration.hooks.run(:on_configuration, RecordingStudioLists.configuration)
     end
 
-    # Run after_initialize hooks
     initializer "recording_studio_lists.after_initialize", after: "recording_studio_lists.load_config" do |_app|
       RecordingStudioLists.configuration.hooks.run(:after_initialize, self)
     end
 
-    # Apply model extensions when models are loaded
     initializer "recording_studio_lists.apply_model_extensions" do
       config.to_prepare do
         next unless defined?(ActiveRecord::Base)
@@ -110,7 +103,6 @@ module RecordingStudioLists
       end
     end
 
-    # Apply controller extensions
     initializer "recording_studio_lists.apply_controller_extensions" do
       config.to_prepare do
         next unless defined?(ActionController::Base)

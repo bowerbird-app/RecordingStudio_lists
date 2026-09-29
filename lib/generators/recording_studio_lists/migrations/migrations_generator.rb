@@ -5,14 +5,6 @@ require "rails/generators/active_record"
 
 module RecordingStudioLists
   module Generators
-    # Generator to install RecordingStudioLists migrations into the host application.
-    #
-    # Usage:
-    #   rails generate recording_studio_lists:migrations
-    #
-    # Options:
-    #   --skip-existing  Skip migrations that already exist in the host app
-    #
     class MigrationsGenerator < Rails::Generators::Base
       include ActiveRecord::Generators::Migration
 
@@ -42,7 +34,6 @@ module RecordingStudioLists
 
         migration_files.each do |source_path|
           filename = File.basename(source_path)
-          # Extract migration name without timestamp (e.g., "create_recording_studio_lists_pages.rb")
           migration_name = filename.sub(/^\d+_/, "")
 
           if options[:skip_existing] && migration_exists?(migration_name)
@@ -50,7 +41,6 @@ module RecordingStudioLists
             next
           end
 
-          # Generate new timestamp for the host app
           timestamp = next_migration_number
           destination_filename = "#{timestamp}_#{migration_name}"
           destination_path = File.join("db/migrate", destination_filename)

@@ -1,5 +1,4 @@
 # frozen_string_literal: true
 
-RecordingStudioLists.configure do |config|
-  # config.api_key = "..."
+RecordingStudioLists.configure do
 end
