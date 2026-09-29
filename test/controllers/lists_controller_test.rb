@@ -34,12 +34,16 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "Lists"
     assert_select "h3", text: "No lists yet."
-    assert_includes response.body, "New list"
+    assert_select "a", text: "List" do
+      assert_select "svg[data-flat-pack--icon-name-value='plus']"
+    end
+    assert_select "a", text: "New list", count: 0
 
     get "/lists/new"
 
     assert_response :success
     assert_select "h1", text: "New list"
+    assert_select "form.flex.flex-col[class*='gap-(--stack-gap-md)']"
     assert_select "input[name='list[name]']"
     assert_select "textarea[name='list[description]']"
     assert_select "button", text: "Create list"

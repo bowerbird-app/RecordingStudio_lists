@@ -3,7 +3,7 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(title: "Lists", variant: :h1) do |page_title| %>
     <% page_title.slot do %>
-      <%= render FlatPack::Button::Component.new(text: "New list", href: new_list_path, style: :primary) %>
+      <%= render FlatPack::Button::Component.new(text: "List", icon: "plus", href: new_list_path, style: :primary) %>
     <% end %>
   <% end %>
 
