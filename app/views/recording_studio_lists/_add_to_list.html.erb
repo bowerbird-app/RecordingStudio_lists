@@ -24,6 +24,7 @@
         icon: ("check" if row[:member]),
         form: row[:form_id],
         type: "submit",
+        class: "[&>svg]:order-last",
         data: { action: "click->recording-studio-lists--add-to-list#toggle" }
       ) %>
     <% end %>

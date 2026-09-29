@@ -158,6 +158,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-controller='recording-studio-lists--add-to-list']"
     assert_select "button[disabled]", text: "Alpha", count: 0
     assert_select "button[type=submit][form=?]", "add-to-list-1-#{alpha.id}", text: "Alpha" do |buttons|
+      assert_includes buttons.first["class"], "[&>svg]:order-last"
       assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check']"
     end
     assert_select "form#add-to-list-1-#{alpha.id}[action=?]", "/lists/#{alpha.id}/items/#{@page.id}" do
@@ -171,6 +172,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_select "input[name=_method]", count: 0
     end
     assert_select "button[type=submit][form=?]", "add-to-list-1-#{zebra.id}", text: "Zebra" do |buttons|
+      assert_includes buttons.first["class"], "[&>svg]:order-last"
       assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check']", count: 0
     end
     new_list = css_select("a[href*='/lists/new']").find { |link| link.text.include?("List") }

@@ -41,7 +41,7 @@ export default class extends Controller {
 
     if (!item.querySelector("[data-flat-pack--icon-name-value='check']")) {
       const icon = this.checkTarget.content.querySelector("svg")?.cloneNode(true)
-      if (icon) item.insertBefore(icon, item.firstChild)
+      if (icon) item.append(icon)
     }
     form.setAttribute("action", form.dataset.removeUrl)
     if (!form.querySelector("[name='_method']")) {
