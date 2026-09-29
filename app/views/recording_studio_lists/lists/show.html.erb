@@ -14,7 +14,7 @@
       <% else %>
         <%= render FlatPack::Card::Component.new do |card| %>
           <% card.body do %>
-            <%= render FlatPack::List::Component.new(divider: true) do %>
+            <%= render FlatPack::List::Component.new(divider: true, class: "!space-y-0") do %>
               <% @items.each do |item| %>
                 <% trailing = nil %>
                 <% if item %>
@@ -31,7 +31,7 @@
                     <% end %>
                   <% end %>
                 <% end %>
-                <%= render FlatPack::List::Item.new(trailing: trailing) do %>
+                <%= render FlatPack::List::Item.new(trailing: trailing, class: "!items-center") do %>
                   <%= item&.name.presence || "Missing" %>
                 <% end %>
               <% end %>

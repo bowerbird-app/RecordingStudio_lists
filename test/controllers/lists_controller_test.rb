@@ -120,7 +120,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_select "a", text: "Lists", count: 0
       assert_select "[data-controller='recording-studio-root-switchable--root-switch-dropdown']", count: 0
     end
-    assert_select "li", text: /#{Regexp.escape(@page.name)}/ do
+    assert_select "li", text: /#{Regexp.escape(@page.name)}/ do |items|
+      assert_match(/!items-center/, items.first["class"])
       assert_select "button[aria-label='Remove']"
     end
 
