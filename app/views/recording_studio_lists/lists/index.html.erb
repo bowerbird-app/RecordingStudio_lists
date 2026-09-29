@@ -10,11 +10,18 @@
   <% if @lists.empty? %>
     <%= render FlatPack::EmptyState::Component.new(title: "No lists yet.") %>
   <% else %>
-    <%= render FlatPack::Table::Component.new(data: @lists) do |table| %>
-      <% table.column(title: "Name") do |list| %>
-        <% render(FlatPack::Link::Component.new(href: list_path(list))) { list.name } %>
+    <%= render FlatPack::Card::Component.new do |card| %>
+      <% card.body do %>
+        <%= render FlatPack::List::Component.new(divider: true) do %>
+          <% @lists.each do |list| %>
+            <%= render FlatPack::List::Item.new(trailing: @item_counts.fetch(list.id.to_s, 0).to_s) do %>
+              <%= render FlatPack::Link::Component.new(href: list_path(list)) do %>
+                <%= list.name %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
       <% end %>
-      <% table.column(title: "Items") { |list| @item_counts.fetch(list.id.to_s, 0) } %>
     <% end %>
   <% end %>
 </div>
