@@ -26,6 +26,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       actor: @user
     ).recording
     sign_in @user
+    select_root(@root)
   end
 
   test "index and new list screens render" do
@@ -326,6 +327,14 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def select_root(root)
+    patch "/recording_studio_root_switchable/v1/root_switch", params: {
+      scope: "all_workspaces",
+      root_switch: { root_recording_id: root.id, return_to: "/" }
+    }
+    follow_redirect!
+  end
 
   def create_list(name)
     RecordingStudio::Lists.create(parent: @root, name: name, actor: @user)
