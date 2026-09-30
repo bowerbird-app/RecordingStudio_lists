@@ -7,15 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- `recording_studio_add_to_list` renders a menu of list names. A check sits to the right of lists that already hold the recording, so the name stays put. Choosing a name adds or removes it and the check follows. `icon:` takes any heroicon, `text: ""` leaves the label off, and `show_chevron: false` hides the arrow. List opens a name field in the menu. Saving creates the list and adds the recording there.
-
 ## [0.3.0] - 2026-09-29
 
 ### Added
 - List and list item recordables. Membership is a child recording that points at an existing recording.
 - `RecordingStudio::Lists` for create, add, remove, items, lists, find, addable, and delete.
 - Index, new, and show screens mounted with the engine.
+- `recording_studio_add_to_list` renders a menu of list names. A check sits to the right of lists that already hold the recording, so the name stays put. Choosing a name adds or removes it and the check follows. `icon:` takes any heroicon, `text: ""` leaves the label off, and `show_chevron: false` hides the arrow. List opens a name field in the menu. Saving creates the list and adds the recording there.
 
 ### Upgrade notes
 - Register `RecordingStudio::Lists::List` and `RecordingStudio::Lists::ListItem`.
@@ -106,7 +104,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.3.0
 [0.2.2]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.2
 [0.2.1]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.1
 [0.2.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.0

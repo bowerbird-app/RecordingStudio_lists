@@ -50,7 +50,8 @@ class ListsBehaviorTest < ActiveSupport::TestCase
           parent_recording: root
         )
       end
-      assert_no_difference -> { RecordingStudio::Recording.where(recordable_type: "RecordingStudio::Lists::List").count } do
+      scope = RecordingStudio::Recording.where(recordable_type: "RecordingStudio::Lists::List")
+      assert_no_difference -> { scope.count } do
         assert_raises(RecordingStudio::Lists::ParentNotAllowed) do
           RecordingStudio::Lists.create(parent: root, name: "Blocked")
         end

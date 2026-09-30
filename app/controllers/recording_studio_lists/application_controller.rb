@@ -8,9 +8,7 @@ module RecordingStudioLists
   end
 
   class ApplicationController < RecordingStudioLists.host_application_controller
-    unless included_modules.include?(RecordingStudio::UsesDefaultLayout)
-      include RecordingStudio::UsesDefaultLayout
-    end
+    include RecordingStudio::UsesDefaultLayout unless included_modules.include?(RecordingStudio::UsesDefaultLayout)
 
     helper RecordingStudio::LayoutHelper
   end

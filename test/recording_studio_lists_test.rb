@@ -130,7 +130,11 @@ class RecordingStudioListsTest < Minitest::Test
     initializer_source = File.read(initializer_path)
 
     assert_includes initializer_source, "config.require_recordable_declarations = true"
-    assert_includes initializer_source, 'config.recordable_types = ["Workspace", "Folder", "Page", "RecordingStudio::Lists::List", "RecordingStudio::Lists::ListItem"]'
+    expected = [
+      'config.recordable_types = ["Workspace", "Folder", "Page", ',
+      '"RecordingStudio::Lists::List", "RecordingStudio::Lists::ListItem"]'
+    ].join
+    assert_includes initializer_source, expected
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
 
-RecordingStudioLists.configure do
+RecordingStudioLists.configure do |config|
+  config
 end

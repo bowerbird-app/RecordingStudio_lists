@@ -56,35 +56,7 @@ module RecordingStudioLists
     end
 
     initializer "recording_studio_lists.load_config" do |app|
-      if app.respond_to?(:config_for)
-        begin
-          yaml = begin
-            app.config_for(:recording_studio_lists)
-          rescue StandardError
-            nil
-          end
-          RecordingStudioLists.configuration.merge!(yaml) if yaml.respond_to?(:each)
-        rescue StandardError
-          nil
-        end
-      end
-
-      if app.config.respond_to?(:x) && app.config.x.respond_to?(:recording_studio_lists)
-        xcfg = app.config.x.recording_studio_lists
-        if xcfg.respond_to?(:to_h)
-          RecordingStudioLists.configuration.merge!(xcfg.to_h)
-        else
-          begin
-            hash = {}
-            xcfg.each_pair { |k, v| hash[k] = v } if xcfg.respond_to?(:each_pair)
-            RecordingStudioLists.configuration.merge!(hash) if hash&.any?
-          rescue StandardError
-            nil
-          end
-        end
-      end
-
-      RecordingStudioLists.configuration.hooks.run(:on_configuration, RecordingStudioLists.configuration)
+      RecordingStudioLists.load_configuration(app)
     end
 
     initializer "recording_studio_lists.after_initialize", after: "recording_studio_lists.load_config" do |_app|

@@ -54,6 +54,7 @@ module RecordingStudio
         include Resolve
 
         def initialize(parent:, name:, description: nil, idempotency_key: nil, actor: nil)
+          super()
           @parent = parent
           @name = name
           @description = description
@@ -64,22 +65,30 @@ module RecordingStudio
         def perform
           return halt(BlankName.new) if @name.to_s.strip.empty?
 
-          parent = recording_for(@parent)
-          unless parent&.persisted? && RecordingStudio.parent_allowed?(child_type: LIST_TYPE, parent_recording: parent)
-            return halt(ParentNotAllowed.new)
-          end
+          parent = allowed_parent
+          return parent if parent.is_a?(RESULT)
 
-          key = @idempotency_key.presence
-          recording = if key
-                        # record! reuses an idempotency key only after a recording already exists.
-                        with_idempotency_lock(key) { existing_list(key) || record_list(parent, key) }
-                      else
-                        record_list(parent, nil)
-                      end
-          success(recording)
+          success(create_recording(parent))
         end
 
         private
+
+        def allowed_parent
+          parent = recording_for(@parent)
+          allowed = parent&.persisted? && RecordingStudio.parent_allowed?(child_type: LIST_TYPE,
+                                                                          parent_recording: parent)
+          return halt(ParentNotAllowed.new) unless allowed
+
+          parent
+        end
+
+        def create_recording(parent)
+          key = @idempotency_key.presence
+          return record_list(parent, nil) unless key
+
+          # record! reuses an idempotency key only after a recording already exists.
+          with_idempotency_lock(key) { existing_list(key) || record_list(parent, key) }
+        end
 
         def record_list(parent, key)
           list = RecordingStudio::Lists::List.new(name: @name.to_s.strip, description: @description.presence)
@@ -116,6 +125,7 @@ module RecordingStudio
         include Resolve
 
         def initialize(list:, target:, actor: nil)
+          super()
           @list = list
           @target = target
           @actor = actor
@@ -127,29 +137,45 @@ module RecordingStudio
 
           target = require_target(@target)
           return target if target.is_a?(RESULT)
+          return reject_target(list, target) if rejected_target?(list, target)
 
-          return halt(SelfTarget.new) if target.id == list.id
-          return halt(ListItemTarget.new) if target.recordable_type == ITEM_TYPE
-          return halt(DifferentRoot.new) if target.root_recording_id != list.root_recording_id
-
-          RecordingStudio::Recording.transaction do
-            lock_list!(list)
-            already_there = list_item_recordings(list).any? do |child|
-              child.recordable.item_recording_id.to_s == target.id.to_s
-            end
-            unless already_there
-              position = next_position(list)
-              list.record(RecordingStudio::Lists::ListItem, parent_recording: list, actor: @actor) do |item|
-                item.item_recording = target
-                item.position = position
-              end
-            end
-          end
-
+          append_membership(list, target)
           success(target)
         end
 
         private
+
+        def rejected_target?(list, target)
+          target.id == list.id ||
+            target.recordable_type == ITEM_TYPE ||
+            target.root_recording_id != list.root_recording_id
+        end
+
+        def reject_target(list, target)
+          return halt(SelfTarget.new) if target.id == list.id
+          return halt(ListItemTarget.new) if target.recordable_type == ITEM_TYPE
+
+          halt(DifferentRoot.new)
+        end
+
+        def append_membership(list, target)
+          RecordingStudio::Recording.transaction do
+            lock_list!(list)
+            next if member?(list, target)
+
+            position = next_position(list)
+            list.record(RecordingStudio::Lists::ListItem, parent_recording: list, actor: @actor) do |item|
+              item.item_recording = target
+              item.position = position
+            end
+          end
+        end
+
+        def member?(list, target)
+          list_item_recordings(list).any? do |child|
+            child.recordable.item_recording_id.to_s == target.id.to_s
+          end
+        end
 
         def next_position(list)
           positions = list_item_recordings(list).map { |child| child.recordable.position.to_i }
@@ -163,6 +189,7 @@ module RecordingStudio
         include Resolve
 
         def initialize(list:, target:)
+          super()
           @list = list
           @target = target
         end
@@ -174,6 +201,13 @@ module RecordingStudio
           target = require_target(@target)
           return target if target.is_a?(RESULT)
 
+          destroy_membership(list, target)
+          success(target)
+        end
+
+        private
+
+        def destroy_membership(list, target)
           RecordingStudio::Recording.transaction do
             lock_list!(list)
             child = list_item_recordings(list).find do |item|
@@ -181,8 +215,6 @@ module RecordingStudio
             end
             child&.destroy!
           end
-
-          success(target)
         end
       end
 
@@ -190,6 +222,7 @@ module RecordingStudio
         include Resolve
 
         def initialize(list:)
+          super()
           @list = list
         end
 
@@ -206,6 +239,7 @@ module RecordingStudio
         include Resolve
 
         def initialize(parent:)
+          super()
           @parent = parent
         end
 
@@ -223,6 +257,7 @@ module RecordingStudio
         include Resolve
 
         def initialize(id:)
+          super()
           @id = id
         end
 
@@ -238,6 +273,7 @@ module RecordingStudio
         include Resolve
 
         def initialize(list:)
+          super()
           @list = list
         end
 
@@ -245,12 +281,23 @@ module RecordingStudio
           list = require_list(@list)
           return list if list.is_a?(RESULT)
 
-          taken_ids = list_item_recordings(list).map { |child| child.recordable.item_recording_id }
+          success(addable_recordings(list))
+        end
+
+        private
+
+        def addable_recordings(list)
           scope = RecordingStudio::Recording.where(root_recording_id: list.root_recording_id)
+          exclude_listed(scope, list).order(:created_at, :id).to_a
+        end
+
+        def exclude_listed(scope, list)
+          taken_ids = list_item_recordings(list).map { |child| child.recordable.item_recording_id }
           scope = scope.where.not(id: list.id)
           scope = scope.where.not(recordable_type: [LIST_TYPE, ITEM_TYPE])
-          scope = scope.where.not(id: taken_ids) if taken_ids.any?
-          success(scope.order(:created_at, :id).to_a)
+          return scope if taken_ids.empty?
+
+          scope.where.not(id: taken_ids)
         end
       end
 
@@ -258,6 +305,7 @@ module RecordingStudio
         include Resolve
 
         def initialize(list:)
+          super()
           @list = list
         end
 
@@ -266,6 +314,13 @@ module RecordingStudio
           return success(nil) if recording.nil?
           return halt(InvalidList.new) unless recording.recordable_type == LIST_TYPE
 
+          destroy_list(recording)
+          success(recording)
+        end
+
+        private
+
+        def destroy_list(recording)
           RecordingStudio::Recording.transaction do
             lock_list!(recording)
             children = RecordingStudio::Recording.where(parent_recording_id: recording.id).to_a
@@ -273,8 +328,6 @@ module RecordingStudio
             owned.each(&:destroy!)
             recording.destroy!
           end
-
-          success(recording)
         end
       end
     end

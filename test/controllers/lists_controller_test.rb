@@ -151,7 +151,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     queries = sql_during { get "/" }
 
     assert_response :success
-    assert_equal 1, queries.count { |sql| sql.include?("recording_studio_list_items") }
+    membership_queries = queries.count { |sql| sql.include?("recording_studio_list_items") }
+    assert_equal 1, membership_queries
     assert_select "button", text: "Add to list" do |buttons|
       assert_select buttons.first, "svg[data-flat-pack--icon-name-value='chevron-down']"
     end
@@ -186,7 +187,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     query = Rack::Utils.parse_query(URI.parse(new_list["href"]).query)
     assert_equal @page.id.to_s, query["recording_id"]
     assert_equal "/", query["return_to"]
-    assert_select "a[href='#{new_list["href"]}'] svg[data-flat-pack--icon-name-value='plus']"
+    assert_select "a[href='#{new_list['href']}'] svg[data-flat-pack--icon-name-value='plus']"
     assert_select "form[data-recording-studio-lists--add-to-list-target=create][hidden]", count: 2 do
       assert_select "input[name='list[name]']"
       assert_select "input[name=recording_id][value=?]", @page.id
@@ -235,8 +236,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     refute_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
 
     post "/lists/#{list.id}/items",
-      params: { recording_id: @page.id },
-      headers: { "X-Lists-Menu" => "1" }
+         params: { recording_id: @page.id },
+         headers: { "X-Lists-Menu" => "1" }
 
     assert_response :no_content
     assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
@@ -294,12 +295,12 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
   test "creating from the menu adds the recording without leaving" do
     post "/lists",
-      params: {
-        list: { name: "From the menu" },
-        idempotency_key: "menu-#{SecureRandom.hex(4)}",
-        recording_id: @page.id
-      },
-      headers: { "X-Lists-Menu" => "1" }
+         params: {
+           list: { name: "From the menu" },
+           idempotency_key: "menu-#{SecureRandom.hex(4)}",
+           recording_id: @page.id
+         },
+         headers: { "X-Lists-Menu" => "1" }
 
     assert_response :created
     body = JSON.parse(response.body)
@@ -312,12 +313,12 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_difference -> { RecordingStudio::Lists::List.count } do
       post "/lists",
-        params: {
-          list: { name: "  " },
-          idempotency_key: "blank-menu-#{SecureRandom.hex(4)}",
-          recording_id: @page.id
-        },
-        headers: { "X-Lists-Menu" => "1" }
+           params: {
+             list: { name: "  " },
+             idempotency_key: "blank-menu-#{SecureRandom.hex(4)}",
+             recording_id: @page.id
+           },
+           headers: { "X-Lists-Menu" => "1" }
     end
 
     assert_response :unprocessable_entity

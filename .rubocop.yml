@@ -31,6 +31,10 @@ Metrics/AbcSize:
     - 'test/**/*'
     - 'lib/generators/**/*'
 
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*'
+
 # Allow empty blocks in tests (common for stubs/mocks)
 Lint/EmptyBlock:
   Exclude:
