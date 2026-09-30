@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
-GemTemplate::Engine.routes.draw do
-  root "home#index"
+RecordingStudioLists::Engine.routes.draw do
+  resources :lists, only: %i[index new create show destroy] do
+    member do
+      post :items, action: :add_item
+      delete "items/:recording_id", action: :remove_item, as: :item
+    end
+  end
 end

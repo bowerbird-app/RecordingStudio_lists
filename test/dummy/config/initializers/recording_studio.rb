@@ -2,13 +2,13 @@
 
 RecordingStudio.configure do |config|
   # Registered delegated_type recordables (strings or classes)
-  config.recordable_types = [ "Workspace", "Folder", "Page" ]
+  config.recordable_types = ["Workspace", "Folder", "Page", "RecordingStudio::Lists::List", "RecordingStudio::Lists::ListItem"]
 
   # Require each configured ActiveRecord type to call recording_studio_recordable.
   config.require_recordable_declarations = true
 
   # Shown in the shared default layout title fallback.
-  config.app_name = "Addon Template" if config.respond_to?(:app_name=)
+  config.app_name = "Lists" if config.respond_to?(:app_name=)
 
   # Actor resolver for events when no actor is explicitly supplied
   config.actor = -> { Current.actor }

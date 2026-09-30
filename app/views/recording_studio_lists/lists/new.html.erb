@@ -1,0 +1,29 @@
+<% recording_studio_page_nav(title: "New list", page_nav_back_url: lists_path, page_nav_back_label: "Lists") %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(title: "New list", variant: :h1) %>
+
+  <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
+    <%= form_with url: lists_path, method: :post, class: "flex flex-col gap-(--stack-gap-md)" do %>
+      <%= hidden_field_tag :idempotency_key, @idempotency_key %>
+      <%= hidden_field_tag :recording_id, @recording_id if @recording_id.present? %>
+      <%= hidden_field_tag :return_to, @return_to if @return_to.present? %>
+
+      <%= render FlatPack::TextInput::Component.new(
+        name: "list[name]",
+        label: "Name",
+        value: @name,
+        required: true,
+        error: @name_error
+      ) %>
+
+      <%= render FlatPack::TextArea::Component.new(
+        name: "list[description]",
+        label: "Description",
+        value: @description
+      ) %>
+
+      <%= render FlatPack::Button::Component.new(text: "Create list", type: "submit", style: :primary) %>
+    <% end %>
+  <% end %>
+</div>

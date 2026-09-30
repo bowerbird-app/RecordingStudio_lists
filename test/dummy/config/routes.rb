@@ -26,4 +26,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "home#index"
+
+  # Mount last so host routes keep / and the engine serves /lists.
+  mount RecordingStudioLists::Engine, at: "/"
 end

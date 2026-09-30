@@ -1,0 +1,29 @@
+<% recording_studio_page_nav(title: "Lists", page_nav_back_url: main_app.root_path, page_nav_back_label: "Home") %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(title: "Lists", variant: :h1) do |page_title| %>
+    <% page_title.slot do %>
+      <%= render FlatPack::Button::Component.new(text: "List", icon: "plus", href: new_list_path, style: :primary) %>
+    <% end %>
+  <% end %>
+
+  <% if @lists.empty? %>
+    <%= render FlatPack::EmptyState::Component.new(title: "No lists yet.") %>
+  <% else %>
+    <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
+      <%= render FlatPack::Card::Component.new do |card| %>
+        <% card.body do %>
+          <%= render FlatPack::List::Component.new(divider: true) do %>
+            <% @lists.each do |list| %>
+              <%= render FlatPack::List::Item.new(trailing: @item_counts.fetch(list.id.to_s, 0).to_s) do %>
+                <%= render FlatPack::Link::Component.new(href: list_path(list)) do %>
+                  <%= list.name %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>
