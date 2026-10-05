@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Bump Recording Studio GitHub pin from `v4.2.0` to `v4.2.2` (root and dummy Gemfiles).
+
 ## [0.3.0] - 2026-09-29
 
 ### Added
