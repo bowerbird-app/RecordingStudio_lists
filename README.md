@@ -56,6 +56,8 @@ RecordingStudio::Lists.delete(list)
 
 The index lists names and member counts. New list asks for a name and an optional description. The list page removes a member or deletes the list.
 
+Static interface copy on these screens (and the add-to-list menu) uses Rails I18n keys under `recording_studio.lists`. The gem ships English only in `config/locales/en.yml`. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`.
+
 ## Add to a list
 
 `recording_studio_add_to_list` drops a menu on any page that already has a recording. It is not part of the list screens.

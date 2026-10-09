@@ -7,6 +7,7 @@ DUMMY_TEST_FILES = [
   File.expand_path("test/controllers/docs_controller_test.rb", __dir__),
   File.expand_path("test/controllers/lists_controller_test.rb", __dir__),
   File.expand_path("test/lists_behavior_test.rb", __dir__),
+  File.expand_path("test/locales_test.rb", __dir__),
   File.expand_path("test/recording_studio_declarations_test.rb", __dir__)
 ].freeze
 DUMMY_GEMFILE = File.expand_path("test/dummy/Gemfile", __dir__)
@@ -17,6 +18,7 @@ ROOT_TEST_EXCLUSIONS = %w[
   test/controllers/lists_controller_test.rb
   test/dummy/**/*_test.rb
   test/lists_behavior_test.rb
+  test/locales_test.rb
   test/recording_studio_declarations_test.rb
   test/rename_verification_test.rb
 ].freeze

@@ -35,6 +35,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "Lists"
     assert_select "h3", text: "No lists yet."
+    assert_includes response.body, "Home"
     assert_select "a", text: "List" do
       assert_select "svg[data-flat-pack--icon-name-value='plus']"
     end
@@ -44,6 +45,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", text: "New list"
+    assert_includes response.body, "Lists"
+    assert_includes response.body, "Name"
+    assert_includes response.body, "Description"
     assert_select "div[class*='md:grid-cols-2']" do
       assert_select "form.flex.flex-col[class*='gap-(--stack-gap-md)']"
     end
@@ -51,6 +55,37 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "textarea[name='list[description]']"
     assert_select "button", text: "Create list"
     assert_select "input[name='idempotency_key']"
+  end
+
+  test "empty list show renders empty copy and delete control" do
+    list = create_list("Bare Shelf")
+
+    get "/lists/#{list.id}"
+
+    assert_response :success
+    assert_includes response.body, "Bare Shelf"
+    assert_includes response.body, "0 items"
+    assert_includes response.body, "Nothing here yet."
+    assert_select "button", text: "Delete list"
+    assert_select "form[data-turbo-confirm='Delete this list?']"
+    assert_includes response.body, "Lists"
+  end
+
+  test "show falls back to Missing when a member recording is gone" do
+    list = create_list("Broken")
+    original_find = RecordingStudio::Lists.method(:find)
+    original_items = RecordingStudio::Lists.method(:items)
+    RecordingStudio::Lists.define_singleton_method(:find) { |_id| list }
+    RecordingStudio::Lists.define_singleton_method(:items) { |_list| [nil] }
+
+    get "/lists/#{list.id}"
+
+    assert_response :success
+    assert_includes response.body, "Missing"
+    assert_select "button[aria-label='Remove']", count: 0
+  ensure
+    RecordingStudio::Lists.define_singleton_method(:find, original_find)
+    RecordingStudio::Lists.define_singleton_method(:items, original_items)
   end
 
   test "create show add remove and delete" do

@@ -1,8 +1,8 @@
 <% item_count = @items.size %>
-<% count_label = "#{item_count} #{'item'.pluralize(item_count)}" %>
+<% count_label = t("recording_studio.lists.show.item_count", count: item_count) %>
 <% description = @list.recordable.description.presence %>
 <% subtitle = [description, count_label].compact.join(" · ") %>
-<% recording_studio_page_nav(title: @list.name, page_nav_back_url: lists_path, page_nav_back_label: "Lists") %>
+<% recording_studio_page_nav(title: @list.name, page_nav_back_url: lists_path, page_nav_back_label: t("recording_studio.lists.show.back")) %>
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(title: @list.name, subtitle: subtitle, variant: :h1) %>
@@ -10,7 +10,7 @@
   <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
     <div class="flex flex-col gap-6">
       <% if @items.empty? %>
-        <p>Nothing here yet.</p>
+        <p><%= t("recording_studio.lists.show.empty") %></p>
       <% else %>
         <%= render FlatPack::Card::Component.new do |card| %>
           <% card.body do %>
@@ -21,7 +21,7 @@
                   <% trailing = capture do %>
                     <%= form_with url: item_list_path(@list, recording_id: item.id), method: :delete do %>
                       <%= render FlatPack::Button::Component.new(
-                        text: "Remove",
+                        text: t("recording_studio.lists.show.remove"),
                         icon: "trash",
                         icon_only: true,
                         type: "submit",
@@ -32,7 +32,7 @@
                   <% end %>
                 <% end %>
                 <%= render FlatPack::List::Item.new(trailing: trailing, class: "!items-center") do %>
-                  <%= item&.name.presence || "Missing" %>
+                  <%= item&.name.presence || t("recording_studio.lists.show.missing") %>
                 <% end %>
               <% end %>
             <% end %>
@@ -40,8 +40,8 @@
         <% end %>
       <% end %>
 
-      <%= form_with url: list_path(@list), method: :delete, data: { turbo_confirm: "Delete this list?" } do %>
-        <%= render FlatPack::Button::Component.new(text: "Delete list", type: "submit", style: :danger) %>
+      <%= form_with url: list_path(@list), method: :delete, data: { turbo_confirm: t("recording_studio.lists.show.delete_confirm") } do %>
+        <%= render FlatPack::Button::Component.new(text: t("recording_studio.lists.show.delete"), type: "submit", style: :danger) %>
       <% end %>
     </div>
   <% end %>
