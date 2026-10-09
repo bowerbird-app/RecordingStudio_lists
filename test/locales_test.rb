@@ -78,6 +78,13 @@ class LocalesTest < ActiveSupport::TestCase
     assert_equal({ "one" => "%{count} item", "other" => "%{count} items" }, show.fetch("item_count").transform_keys(&:to_s))
   end
 
+  test "gem does not ship a legacy recording_studio_lists locale namespace" do
+    tree = locale_tree(File.join(engine_locales_dir, "en.yml"), "en")
+
+    refute tree.key?("recording_studio_lists")
+    refute Dir[File.join(engine_locales_dir, "*recording_studio_lists*")].any?
+  end
+
   private
 
   def assert_key(full_key, english)

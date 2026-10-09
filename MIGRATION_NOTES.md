@@ -19,6 +19,10 @@ alerts from the controller, JS client error strings, icon/style tokens, the
 add-to-list row template placeholder `Name` (replaced by JavaScript), and
 dummy app views.
 
+This gem never shipped a top-level `recording_studio_lists.*` locale
+namespace. There is nothing to deprecate or keep in parallel. Host overrides
+belong under `recording_studio.lists`.
+
 ### Upgrade Steps
 
 No migration is required. English hosts need no change. To override or add
