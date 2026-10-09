@@ -1,0 +1,29 @@
+en:
+  recording_studio:
+    lists:
+      index:
+        title: "Lists"
+        home: "Home"
+        new_button: "List"
+        empty: "No lists yet."
+      new:
+        title: "New list"
+        back: "Lists"
+        name: "Name"
+        description: "Description"
+        create: "Create list"
+      show:
+        back: "Lists"
+        empty: "Nothing here yet."
+        missing: "Missing"
+        remove: "Remove"
+        delete: "Delete list"
+        delete_confirm: "Delete this list?"
+        item_count:
+          one: "%{count} item"
+          other: "%{count} items"
+      add_to_list:
+        trigger: "Add to list"
+        new_list: "List"
+        name: "Name"
+        save: "Save"

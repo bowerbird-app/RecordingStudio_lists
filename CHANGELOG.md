@@ -7,8 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-09
+
+### Added
+
+* English Rails I18n keys for static interface copy in the gem's own lists
+  screens and add-to-list helper (`config/locales/en.yml` under
+  `recording_studio.lists`)
+
 ### Changed
-- Bump Recording Studio GitHub pin from `v4.2.0` to `v4.2.2` (root and dummy Gemfiles).
+
+* Index, new, show, and add-to-list view copy resolve through `t(...)`
+  (English output unchanged)
+
+### Upgrade notes
+
+- No migration or host code change is required for English.
+- To translate or override the defaults, add keys under
+  `recording_studio.lists` in the host's locale files.
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-040).
 
 ## [0.3.0] - 2026-09-29
 
