@@ -75,7 +75,11 @@ class LocalesTest < ActiveSupport::TestCase
     SHOW_KEYS.each do |key, english|
       assert_equal english, show.fetch(key)
     end
-    assert_equal({ "one" => "%{count} item", "other" => "%{count} items" }, show.fetch("item_count").transform_keys(&:to_s))
+    expected_counts = {
+      "one" => "%{count} item", # rubocop:disable Style/FormatStringToken -- I18n pluralization syntax
+      "other" => "%{count} items" # rubocop:disable Style/FormatStringToken -- I18n pluralization syntax
+    }
+    assert_equal expected_counts, show.fetch("item_count").transform_keys(&:to_s)
   end
 
   test "gem does not ship a legacy recording_studio_lists locale namespace" do
