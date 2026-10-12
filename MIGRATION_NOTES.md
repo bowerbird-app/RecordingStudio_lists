@@ -1,5 +1,41 @@
 # Migration Notes
 
+## Upgrading To 0.5.0
+
+This is a non-breaking upgrade for English hosts. Rendered English interface
+text, flash notices, and error messages stay byte-identical to 0.4.0 / main.
+
+### What Changed
+
+- Controller flashes, blank-name form errors, and `RecordingStudio::Lists::*`
+  exception defaults resolve through Rails I18n under `recording_studio.lists`
+  with English `default:` values.
+- Public error `MESSAGE` constants and recordable `LABEL` / `PLURAL_LABEL`
+  constants remain the English literals (public API). Call-time helpers
+  (`Copy.t`, `recordable_type_label`, exception `#message` with no override)
+  follow the active locale.
+- Add-to-list Stimulus errors use `data-blank-name` and `data-save-failed` on
+  the create form; JS keeps English fallbacks if those attributes are absent.
+- Recordable labels `List` / `List item` / `List items` stay on
+  `recording_studio_recordable` as English (class-load DSL) and also ship as
+  pluralized `recording_studio.lists.recordables.*.label` keys for call-time
+  `recordable_type_label` / `recordable_type_plural_label`.
+
+Left untranslated on purpose: list names and descriptions (user data),
+generator CLI text, developer-facing ArgumentErrors / logs, icon/style tokens,
+and the add-to-list row template placeholder `Name` (replaced by JavaScript
+when a list is created). Admin column headers stay English (none ship here).
+
+This gem never shipped a top-level `recording_studio_lists.*` locale
+namespace. Host overrides belong under `recording_studio.lists`.
+
+### Upgrade Steps
+
+No migration is required. English hosts need no change. To override or add
+another language, set the `recording_studio.lists` keys in the host's
+`config/locales`. Prefer call-time label helpers over comparing against
+`LABEL` / `PLURAL_LABEL` when the locale may not be English.
+
 ## Upgrading To 0.4.0
 
 This is a non-breaking upgrade. Rendered English interface text is unchanged.

@@ -1,0 +1,10 @@
+# Test-only host override. Appended last to I18n.load_path inside one
+# integration test; not loaded from config/locales.
+en:
+  recording_studio:
+    lists:
+      index:
+        title: "HOST Lists"
+        empty: "HOST No lists yet."
+      add_to_list:
+        trigger: "HOST Add to list"

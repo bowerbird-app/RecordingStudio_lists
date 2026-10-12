@@ -27,3 +27,29 @@ en:
         new_list: "List"
         name: "Name"
         save: "Save"
+      flashes:
+        created: "List created."
+        added: "Added."
+        removed: "Removed."
+        deleted: "List deleted."
+      errors:
+        blank_name: "Name can't be blank."
+        invalid_list: "That list is missing."
+        missing_target: "Pick something to add."
+        different_root: "That lives somewhere else."
+        self_target: "A list can't contain itself."
+        list_item_target: "That can't go on a list."
+        parent_not_allowed: "Lists can't be created here."
+        choose_place: "Choose a place for this list first."
+      js:
+        blank_name: "Name can't be blank."
+        save_failed: "That didn't save. Try again."
+      recordables:
+        list:
+          label:
+            one: "List"
+            other: "Lists"
+        list_item:
+          label:
+            one: "List item"
+            other: "List items"

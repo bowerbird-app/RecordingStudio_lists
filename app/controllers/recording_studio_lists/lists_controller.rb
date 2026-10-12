@@ -7,7 +7,8 @@ module RecordingStudioLists
     def respond_created(list)
       return render json: menu_list_payload(list), status: :created if menu_request?
 
-      redirect_to safe_return_path || list_path(list), notice: "List created."
+      redirect_to safe_return_path || list_path(list),
+                  notice: Copy.t("flashes.created", default: "List created.")
     end
 
     def respond_blank_name(error)
@@ -16,7 +17,7 @@ module RecordingStudioLists
       @name = list_params[:name]
       @description = list_params[:description]
       @idempotency_key = params[:idempotency_key].presence || SecureRandom.uuid
-      @name_error = "Name can't be blank."
+      @name_error = Copy.t("errors.blank_name", default: RecordingStudio::Lists::BlankName::MESSAGE)
       assign_add_context
       render :new, status: :unprocessable_entity
     end
@@ -95,7 +96,7 @@ module RecordingStudioLists
     def add_item
       list = RecordingStudio::Lists.find(params[:id])
       RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
-      respond_membership(list, "Added.")
+      respond_membership(list, Copy.t("flashes.added", default: "Added."))
     rescue RecordingStudio::Lists::Error => e
       respond_membership_error(e)
     end
@@ -103,14 +104,14 @@ module RecordingStudioLists
     def remove_item
       list = RecordingStudio::Lists.find(params[:id])
       RecordingStudio::Lists.remove(list, params[:recording_id])
-      respond_membership(list, "Removed.")
+      respond_membership(list, Copy.t("flashes.removed", default: "Removed."))
     rescue RecordingStudio::Lists::Error => e
       respond_membership_error(e)
     end
 
     def destroy
       RecordingStudio::Lists.delete(params[:id])
-      redirect_to lists_path, notice: "List deleted."
+      redirect_to lists_path, notice: Copy.t("flashes.deleted", default: "List deleted.")
     rescue RecordingStudio::Lists::InvalidList => e
       redirect_to lists_path, alert: e.message
     end
@@ -129,7 +130,10 @@ module RecordingStudioLists
 
     def parent_recording
       recording = current_root_recording if respond_to?(:current_root_recording)
-      raise RecordingStudio::Lists::ParentNotAllowed, "Choose a place for this list first." if recording.blank?
+      if recording.blank?
+        raise RecordingStudio::Lists::ParentNotAllowed,
+              Copy.t("errors.choose_place", default: "Choose a place for this list first.")
+      end
 
       recording
     end

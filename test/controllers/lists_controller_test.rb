@@ -219,7 +219,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_includes buttons.first["class"], "[&>svg]:order-last"
       assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check']", count: 0
     end
-    new_list = css_select("a[href*='/lists/new']").find { |link| link.text.include?("List") }
+    assert_select "[data-recording-studio-lists--add-to-list-target=reveal]", text: "List"
+    new_list = css_select("[data-recording-studio-lists--add-to-list-target=reveal]").first
     query = Rack::Utils.parse_query(URI.parse(new_list["href"]).query)
     assert_equal @page.id.to_s, query["recording_id"]
     assert_equal "/", query["return_to"]
@@ -228,7 +229,10 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_select "input[name='list[name]']"
       assert_select "input[name=recording_id][value=?]", @page.id
       assert_select "button", text: "Save"
+      assert_select "label", text: "Name"
     end
+    assert_includes response.body, 'data-blank-name="Name can&#39;t be blank."'
+    assert_match(/data-save-failed="/, response.body)
 
     get "/lists"
     assert_select "button", text: "Add to list", count: 0

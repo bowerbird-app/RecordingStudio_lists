@@ -90,7 +90,7 @@ module RecordingStudioLists
 
     # Each keyword is a button or menu setting on the public helper.
     def add_to_list_options( # rubocop:disable Metrics/ParameterLists
-      text: I18n.t("recording_studio.lists.add_to_list.trigger"),
+      text: I18n.t("recording_studio.lists.add_to_list.trigger", default: "Add to list"),
       icon: nil,
       style: :default,
       size: :md,

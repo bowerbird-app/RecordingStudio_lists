@@ -4,6 +4,7 @@ require "recording_studio"
 require "recording_studio_lists/version"
 require "recording_studio_lists/engine"
 require "recording_studio_lists/configuration"
+require "recording_studio_lists/copy"
 require "recording_studio_lists/capabilities/example"
 require "recording_studio/lists"
 

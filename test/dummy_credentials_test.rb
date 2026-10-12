@@ -33,23 +33,25 @@ class DummyCredentialsTest < Minitest::Test
   end
 
   def test_dummy_credentials_decrypt_when_master_key_is_available
-    skip "Set RAILS_MASTER_KEY or test/dummy/config/master.key to the shared dummy key" unless master_key_available?
+    skip "Set EMBEDDABLE_DUMMY_DEVELOPMENT_KEY, RAILS_MASTER_KEY, or test/dummy/config/master.key" unless master_key_available?
 
-    parsed = YAML.safe_load(
-      ActiveSupport::EncryptedFile.new(
-        content_path: dummy_credentials_path,
-        key_path: dummy_master_key_path,
-        env_key: "RAILS_MASTER_KEY",
-        raise_if_missing_key: true
-      ).read
-    )
+    with_rails_master_key_from_embeddable do
+      parsed = YAML.safe_load(
+        ActiveSupport::EncryptedFile.new(
+          content_path: dummy_credentials_path,
+          key_path: dummy_master_key_path,
+          env_key: "RAILS_MASTER_KEY",
+          raise_if_missing_key: true
+        ).read
+      )
 
-    assert_operator parsed.fetch("secret_key_base").to_s.length, :>=, 64
-    assert_equal PLACEHOLDER, parsed.dig("gem_template", "api_key")
-    assert_equal PLACEHOLDER, parsed.dig("smtp", "user_name")
-    assert_equal PLACEHOLDER, parsed.dig("smtp", "password")
-    assert_equal PLACEHOLDER, parsed.dig("aws", "access_key_id")
-    assert_equal PLACEHOLDER, parsed.dig("aws", "secret_access_key")
+      assert_operator parsed.fetch("secret_key_base").to_s.length, :>=, 64
+      assert_equal PLACEHOLDER, parsed.dig("gem_template", "api_key")
+      assert_equal PLACEHOLDER, parsed.dig("smtp", "user_name")
+      assert_equal PLACEHOLDER, parsed.dig("smtp", "password")
+      assert_equal PLACEHOLDER, parsed.dig("aws", "access_key_id")
+      assert_equal PLACEHOLDER, parsed.dig("aws", "secret_access_key")
+    end
   end
 
   private
@@ -63,6 +65,27 @@ class DummyCredentialsTest < Minitest::Test
   end
 
   def master_key_available?
-    ENV["RAILS_MASTER_KEY"].to_s.strip.present? || File.exist?(dummy_master_key_path)
+    ENV["EMBEDDABLE_DUMMY_DEVELOPMENT_KEY"].to_s.strip.present? ||
+      ENV["RAILS_MASTER_KEY"].to_s.strip.present? ||
+      File.exist?(dummy_master_key_path)
+  end
+
+  def with_rails_master_key_from_embeddable
+    embeddable = ENV["EMBEDDABLE_DUMMY_DEVELOPMENT_KEY"].to_s.strip
+    if embeddable.present? && ENV["RAILS_MASTER_KEY"].to_s.strip.empty?
+      previous = ENV.fetch("RAILS_MASTER_KEY", nil)
+      ENV["RAILS_MASTER_KEY"] = embeddable
+      begin
+        yield
+      ensure
+        if previous.nil?
+          ENV.delete("RAILS_MASTER_KEY")
+        else
+          ENV["RAILS_MASTER_KEY"] = previous
+        end
+      end
+    else
+      yield
+    end
   end
 end

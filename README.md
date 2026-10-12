@@ -23,7 +23,7 @@ The screens are `/lists`, `/lists/new`, and `/lists/:id`.
 
 Register both recordable types in the host initializer. Enable `:lists` on the host root type. The dummy app enables it on Workspace.
 
-Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
+Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `EMBEDDABLE_DUMMY_DEVELOPMENT_KEY` or `RAILS_MASTER_KEY`, or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
 
 ```ruby
 config.recordable_types = [
@@ -56,7 +56,7 @@ RecordingStudio::Lists.delete(list)
 
 The index lists names and member counts. New list asks for a name and an optional description. The list page removes a member or deletes the list.
 
-Static interface copy on these screens (and the add-to-list menu) uses Rails I18n keys under `recording_studio.lists`. The gem ships English only in `config/locales/en.yml`. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`.
+Static interface copy on these screens (and the add-to-list menu), controller flashes, error messages, JS client strings, and call-time recordable labels use Rails I18n keys under `recording_studio.lists`. The gem ships English only in `config/locales/en.yml`. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`.
 
 ## Add to a list
 

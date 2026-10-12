@@ -1,0 +1,9 @@
+# Host nested override for a rarely shown key (JS save-failed string, only in a
+# Stimulus data attribute on the add-to-list create form). Loaded by Rails from
+# config/locales — do not append this path in tests. Common visible labels
+# stay on gem English.
+en:
+  recording_studio:
+    lists:
+      js:
+        save_failed: "HOST That didn't save. Try again."

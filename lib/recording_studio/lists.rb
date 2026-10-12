@@ -8,44 +8,58 @@ module RecordingStudio
     class Error < StandardError; end
 
     class BlankName < Error
-      def initialize(message = "Name can't be blank.")
-        super
+      MESSAGE = "Name can't be blank."
+
+      def initialize(message = nil)
+        super(message || RecordingStudioLists::Copy.t("errors.blank_name", default: MESSAGE))
       end
     end
 
     class InvalidList < Error
-      def initialize(message = "That list is missing.")
-        super
+      MESSAGE = "That list is missing."
+
+      def initialize(message = nil)
+        super(message || RecordingStudioLists::Copy.t("errors.invalid_list", default: MESSAGE))
       end
     end
 
     class MissingTarget < Error
-      def initialize(message = "Pick something to add.")
-        super
+      MESSAGE = "Pick something to add."
+
+      def initialize(message = nil)
+        super(message || RecordingStudioLists::Copy.t("errors.missing_target", default: MESSAGE))
       end
     end
 
     class DifferentRoot < Error
-      def initialize(message = "That lives somewhere else.")
-        super
+      MESSAGE = "That lives somewhere else."
+
+      def initialize(message = nil)
+        super(message || RecordingStudioLists::Copy.t("errors.different_root", default: MESSAGE))
       end
     end
 
     class SelfTarget < Error
-      def initialize(message = "A list can't contain itself.")
-        super
+      MESSAGE = "A list can't contain itself."
+
+      def initialize(message = nil)
+        super(message || RecordingStudioLists::Copy.t("errors.self_target", default: MESSAGE))
       end
     end
 
     class ListItemTarget < Error
-      def initialize(message = "That can't go on a list.")
-        super
+      MESSAGE = "That can't go on a list."
+
+      def initialize(message = nil)
+        super(message || RecordingStudioLists::Copy.t("errors.list_item_target", default: MESSAGE))
       end
     end
 
     class ParentNotAllowed < Error
-      def initialize(message = "Lists can't be created here.")
-        super
+      MESSAGE = "Lists can't be created here."
+
+      def initialize(message = nil)
+        super(message || RecordingStudioLists::Copy.t("errors.parent_not_allowed", default: MESSAGE))
       end
     end
 
