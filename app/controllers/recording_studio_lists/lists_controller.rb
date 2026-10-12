@@ -63,6 +63,9 @@ module RecordingStudioLists
       key = ERROR_COPY_KEYS[error.class]
       return error.message unless key
 
+      default_message = error.class.new.message
+      return error.message unless error.message == default_message
+
       Copy.t("errors.#{key}", default: error.message)
     end
 

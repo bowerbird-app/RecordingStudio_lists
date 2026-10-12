@@ -33,9 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   site
 * Public error classes keep main's literal English default messages (no new
   exception types; no unused `MESSAGE` constants)
-* Add-to-list helper default `text:` stays main's literal `"Add to list"`; the
-  partial swaps that literal at the render site while keeping main's
-  `text.blank?` aria conditional
+* Add-to-list helper keeps main's `text: I18n.t("recording_studio.lists.add_to_list.trigger")`
+  and adds English `default: "Add to list"`
 * Add-to-list Stimulus client errors read `data-blank-name` /
   `data-save-failed` from the create form, with English fallbacks in JS
 * View `t(...)` calls pass English `default:` values

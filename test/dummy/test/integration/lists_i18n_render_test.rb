@@ -101,7 +101,7 @@ class ListsI18nRenderTest < ActionDispatch::IntegrationTest
     assert_select "h3", text: "No lists yet."
   end
 
-  test "different root membership alert translates at the render site by error class" do
+  test "different root membership alert translates when message matches class default" do
     list = RecordingStudio::Lists.create(parent: @root, name: "Shelf", actor: @user)
     other = Workspace.create!(name: "Z I18n #{SecureRandom.hex(4)}")
     other_root = RecordingStudio.root_recording_for(other)
@@ -136,6 +136,38 @@ class ListsI18nRenderTest < ActionDispatch::IntegrationTest
       "That lives somewhere else.",
       RecordingStudio::Lists::DifferentRoot.new.message
     )
+  end
+
+  test "custom list error message passes through verbatim in english" do
+    list = RecordingStudio::Lists.create(parent: @root, name: "Shelf", actor: @user)
+    custom = "Keep this custom English alert."
+    original_add = RecordingStudio::Lists.method(:add)
+    RecordingStudio::Lists.define_singleton_method(:add) do |*_args, **_kwargs|
+      raise RecordingStudio::Lists::DifferentRoot, custom
+    end
+
+    with_restored_i18n_backend do
+      I18n.backend.store_translations(
+        :en,
+        recording_studio: {
+          lists: {
+            errors: {
+              different_root: "HOST That lives somewhere else."
+            }
+          }
+        }
+      )
+
+      post "/lists/#{list.id}/items", params: { recording_id: @page.id, return_to: "/" }
+
+      assert_redirected_to "/"
+      follow_redirect!
+      assert_includes response.body, custom
+      refute_includes response.body, "HOST That lives somewhere else."
+      refute_includes response.body, "That lives somewhere else."
+    end
+  ensure
+    RecordingStudio::Lists.define_singleton_method(:add, original_add)
   end
 
   private

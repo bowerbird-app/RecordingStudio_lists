@@ -14,7 +14,7 @@
   <% trigger_attributes[:aria] = { label: t("recording_studio.lists.add_to_list.trigger", default: "Add to list") } if text.blank? %>
 
   <%= render FlatPack::Button::Dropdown::Component.new(
-    text: text == "Add to list" ? t("recording_studio.lists.add_to_list.trigger", default: "Add to list") : text,
+    text: text,
     icon: icon,
     style: style,
     size: size,

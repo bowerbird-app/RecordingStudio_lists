@@ -15,10 +15,9 @@ text, flash notices, and error messages stay byte-identical to 0.4.0 / main.
   The missing-root path still raises `ParentNotAllowed` with main's literal
   `"Choose a place for this list first."` and swaps that literal at the flash
   site.
-- `recording_studio_add_to_list` keeps main's literal default
-  `text: "Add to list"`. The add-to-list partial swaps that literal at the
-  render site (main's `text.blank?` aria conditional unchanged). Pass
-  `text: t(...)` from the host when needed.
+- `recording_studio_add_to_list` keeps main's
+  `text: I18n.t("recording_studio.lists.add_to_list.trigger")` and adds
+  English `default: "Add to list"`. Pass `text:` from the host when needed.
 - Add-to-list Stimulus errors use `data-blank-name` and `data-save-failed` on
   the create form; JS keeps English fallbacks if those attributes are absent.
 - Recordable labels stay English on `recording_studio_recordable` (class-load

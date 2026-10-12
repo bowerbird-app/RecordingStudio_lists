@@ -89,10 +89,8 @@ module RecordingStudioLists
     end
 
     # Each keyword is a button or menu setting on the public helper.
-    # Default trigger text stays main's English literal; the partial translates
-    # that literal at the render site when it is still in place.
     def add_to_list_options( # rubocop:disable Metrics/ParameterLists
-      text: "Add to list",
+      text: I18n.t("recording_studio.lists.add_to_list.trigger", default: "Add to list"),
       icon: nil,
       style: :default,
       size: :md,
