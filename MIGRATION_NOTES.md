@@ -7,19 +7,20 @@ text, flash notices, and error messages stay byte-identical to 0.4.0 / main.
 
 ### What Changed
 
-- Controller flashes, blank-name form errors, and `RecordingStudio::Lists::*`
-  exception defaults resolve through Rails I18n under `recording_studio.lists`
+- Controller flashes and list error alerts / JSON / blank-name form errors
+  resolve through Rails I18n under `recording_studio.lists` at the render site,
   with English `default:` values.
-- Public error `MESSAGE` constants and recordable `LABEL` / `PLURAL_LABEL`
-  constants remain the English literals (public API). Call-time helpers
-  (`Copy.t`, `recordable_type_label`, exception `#message` with no override)
-  follow the active locale.
+- Public error classes keep main's literal English defaults and `MESSAGE`
+  constants. `#message` stays English; the controller maps exception class →
+  locale key (including `ChoosePlace` for the missing-root path).
+- `recording_studio_add_to_list` keeps main's literal default
+  `text: "Add to list"`. The add-to-list partial translates when that default
+  is still in place. Pass `text: t(...)` from the host when needed.
 - Add-to-list Stimulus errors use `data-blank-name` and `data-save-failed` on
   the create form; JS keeps English fallbacks if those attributes are absent.
-- Recordable labels `List` / `List item` / `List items` stay on
-  `recording_studio_recordable` as English (class-load DSL) and also ship as
-  pluralized `recording_studio.lists.recordables.*.label` keys for call-time
-  `recordable_type_label` / `recordable_type_plural_label`.
+- Recordable labels stay English on `recording_studio_recordable` (class-load
+  DSL). Catalog keys under `recording_studio.lists.recordables.*` are available
+  for host render sites; the gem does not translate inside model methods.
 
 Left untranslated on purpose: list names and descriptions (user data),
 generator CLI text, developer-facing ArgumentErrors / logs, icon/style tokens,
@@ -33,8 +34,8 @@ namespace. Host overrides belong under `recording_studio.lists`.
 
 No migration is required. English hosts need no change. To override or add
 another language, set the `recording_studio.lists` keys in the host's
-`config/locales`. Prefer call-time label helpers over comparing against
-`LABEL` / `PLURAL_LABEL` when the locale may not be English.
+`config/locales`. Translate at render call sites; do not compare against
+English message strings to pick a key.
 
 ## Upgrading To 0.4.0
 

@@ -11,11 +11,12 @@
   <% end %>
 
   <% trigger_label = t("recording_studio.lists.add_to_list.trigger", default: "Add to list") %>
+  <% button_text = local_assigns[:translate_default_trigger] ? trigger_label : text.to_s %>
   <% trigger_attributes = { type: "button" } %>
-  <% trigger_attributes[:aria] = { label: trigger_label } if text.blank? %>
+  <% trigger_attributes[:aria] = { label: trigger_label } if button_text.blank? %>
 
   <%= render FlatPack::Button::Dropdown::Component.new(
-    text: text,
+    text: button_text,
     icon: icon,
     style: style,
     size: size,

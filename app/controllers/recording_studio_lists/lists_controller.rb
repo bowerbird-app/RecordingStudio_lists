@@ -2,6 +2,17 @@
 
 module RecordingStudioLists
   module MenuResponses
+    ERROR_COPY_KEYS = {
+      RecordingStudio::Lists::BlankName => "blank_name",
+      RecordingStudio::Lists::InvalidList => "invalid_list",
+      RecordingStudio::Lists::MissingTarget => "missing_target",
+      RecordingStudio::Lists::DifferentRoot => "different_root",
+      RecordingStudio::Lists::SelfTarget => "self_target",
+      RecordingStudio::Lists::ListItemTarget => "list_item_target",
+      RecordingStudio::Lists::ChoosePlace => "choose_place",
+      RecordingStudio::Lists::ParentNotAllowed => "parent_not_allowed"
+    }.freeze
+
     private
 
     def respond_created(list)
@@ -12,20 +23,22 @@ module RecordingStudioLists
     end
 
     def respond_blank_name(error)
-      return render json: { error: error.message }, status: :unprocessable_entity if menu_request?
+      message = list_error_copy(error)
+      return render json: { error: message }, status: :unprocessable_entity if menu_request?
 
       @name = list_params[:name]
       @description = list_params[:description]
       @idempotency_key = params[:idempotency_key].presence || SecureRandom.uuid
-      @name_error = Copy.t("errors.blank_name", default: RecordingStudio::Lists::BlankName::MESSAGE)
+      @name_error = message
       assign_add_context
       render :new, status: :unprocessable_entity
     end
 
     def respond_list_error(error)
-      return render json: { error: error.message }, status: :unprocessable_entity if menu_request?
+      message = list_error_copy(error)
+      return render json: { error: message }, status: :unprocessable_entity if menu_request?
 
-      redirect_to safe_return_path || lists_path, alert: error.message
+      redirect_to safe_return_path || lists_path, alert: message
     end
 
     def respond_membership(list, notice)
@@ -37,7 +50,14 @@ module RecordingStudioLists
     def respond_membership_error(error)
       return head :unprocessable_entity if menu_request?
 
-      redirect_to safe_return_path || list_path(params[:id]), alert: error.message
+      redirect_to safe_return_path || list_path(params[:id]), alert: list_error_copy(error)
+    end
+
+    def list_error_copy(error)
+      key = ERROR_COPY_KEYS[error.class]
+      return error.message unless key
+
+      Copy.t("errors.#{key}", default: error.message)
     end
 
     def menu_list_payload(list)
@@ -68,7 +88,7 @@ module RecordingStudioLists
     rescue RecordingStudio::Lists::ParentNotAllowed => e
       @lists = []
       @item_counts = {}
-      flash.now[:alert] = e.message
+      flash.now[:alert] = list_error_copy(e)
     end
 
     def new
@@ -113,7 +133,7 @@ module RecordingStudioLists
       RecordingStudio::Lists.delete(params[:id])
       redirect_to lists_path, notice: Copy.t("flashes.deleted", default: "List deleted.")
     rescue RecordingStudio::Lists::InvalidList => e
-      redirect_to lists_path, alert: e.message
+      redirect_to lists_path, alert: list_error_copy(e)
     end
 
     private
@@ -130,10 +150,7 @@ module RecordingStudioLists
 
     def parent_recording
       recording = current_root_recording if respond_to?(:current_root_recording)
-      if recording.blank?
-        raise RecordingStudio::Lists::ParentNotAllowed,
-              Copy.t("errors.choose_place", default: "Choose a place for this list first.")
-      end
+      raise RecordingStudio::Lists::ChoosePlace if recording.blank?
 
       recording
     end

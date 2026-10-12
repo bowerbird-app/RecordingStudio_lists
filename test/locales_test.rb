@@ -90,14 +90,7 @@ class LocalesTest < ActiveSupport::TestCase
       ADD_TO_LIST_KEYS.each { |key, english| assert_key("recording_studio.lists.add_to_list.#{key}", english) }
       FLASH_KEYS.each { |key, english| assert_key("recording_studio.lists.flashes.#{key}", english) }
       ERROR_KEYS.each { |key, english| assert_key("recording_studio.lists.errors.#{key}", english) }
-      JS_KEYS.each do |key, english|
-        # dummy always-loads a host override for js.save_failed (boot-order guard)
-        next if key == "save_failed"
-
-        assert_key("recording_studio.lists.js.#{key}", english)
-      end
-      assert_equal "HOST That didn't save. Try again.",
-                   I18n.t("recording_studio.lists.js.save_failed", raise: true)
+      JS_KEYS.each { |key, english| assert_key("recording_studio.lists.js.#{key}", english) }
 
       assert_equal "0 items", I18n.t("recording_studio.lists.show.item_count", count: 0)
       assert_equal "1 item", I18n.t("recording_studio.lists.show.item_count", count: 1)
@@ -145,18 +138,26 @@ class LocalesTest < ActiveSupport::TestCase
   end
 
   test "error class english defaults match main message constants" do
-    I18n.with_locale(:en) do
-      assert_equal RecordingStudio::Lists::BlankName::MESSAGE, RecordingStudio::Lists::BlankName.new.message
-      assert_equal RecordingStudio::Lists::InvalidList::MESSAGE, RecordingStudio::Lists::InvalidList.new.message
-      assert_equal RecordingStudio::Lists::MissingTarget::MESSAGE, RecordingStudio::Lists::MissingTarget.new.message
-      assert_equal RecordingStudio::Lists::DifferentRoot::MESSAGE, RecordingStudio::Lists::DifferentRoot.new.message
-      assert_equal RecordingStudio::Lists::SelfTarget::MESSAGE, RecordingStudio::Lists::SelfTarget.new.message
-      assert_equal RecordingStudio::Lists::ListItemTarget::MESSAGE, RecordingStudio::Lists::ListItemTarget.new.message
-      assert_equal RecordingStudio::Lists::ParentNotAllowed::MESSAGE, RecordingStudio::Lists::ParentNotAllowed.new.message
-    end
+    assert_equal "Name can't be blank.", RecordingStudio::Lists::BlankName::MESSAGE
+    assert_equal "That list is missing.", RecordingStudio::Lists::InvalidList::MESSAGE
+    assert_equal "Pick something to add.", RecordingStudio::Lists::MissingTarget::MESSAGE
+    assert_equal "That lives somewhere else.", RecordingStudio::Lists::DifferentRoot::MESSAGE
+    assert_equal "A list can't contain itself.", RecordingStudio::Lists::SelfTarget::MESSAGE
+    assert_equal "That can't go on a list.", RecordingStudio::Lists::ListItemTarget::MESSAGE
+    assert_equal "Lists can't be created here.", RecordingStudio::Lists::ParentNotAllowed::MESSAGE
+    assert_equal "Choose a place for this list first.", RecordingStudio::Lists::ChoosePlace::MESSAGE
+
+    assert_equal RecordingStudio::Lists::BlankName::MESSAGE, RecordingStudio::Lists::BlankName.new.message
+    assert_equal RecordingStudio::Lists::InvalidList::MESSAGE, RecordingStudio::Lists::InvalidList.new.message
+    assert_equal RecordingStudio::Lists::MissingTarget::MESSAGE, RecordingStudio::Lists::MissingTarget.new.message
+    assert_equal RecordingStudio::Lists::DifferentRoot::MESSAGE, RecordingStudio::Lists::DifferentRoot.new.message
+    assert_equal RecordingStudio::Lists::SelfTarget::MESSAGE, RecordingStudio::Lists::SelfTarget.new.message
+    assert_equal RecordingStudio::Lists::ListItemTarget::MESSAGE, RecordingStudio::Lists::ListItemTarget.new.message
+    assert_equal RecordingStudio::Lists::ParentNotAllowed::MESSAGE, RecordingStudio::Lists::ParentNotAllowed.new.message
+    assert_equal RecordingStudio::Lists::ChoosePlace::MESSAGE, RecordingStudio::Lists::ChoosePlace.new.message
   end
 
-  test "error class messages follow a non-english locale while constants stay english" do
+  test "error class messages stay english when the locale is not english" do
     I18n.available_locales = Array(I18n.available_locales) | %i[en fr]
     I18n.backend.store_translations(
       :fr,
@@ -164,17 +165,26 @@ class LocalesTest < ActiveSupport::TestCase
         lists: {
           errors: {
             blank_name: "Le nom ne peut pas être vide.",
-            different_root: "Ça vit ailleurs."
+            different_root: "Ça vit ailleurs.",
+            choose_place: "Choisissez d'abord un endroit pour cette liste."
           }
         }
       }
     )
 
     I18n.with_locale(:fr) do
-      assert_equal "Name can't be blank.", RecordingStudio::Lists::BlankName::MESSAGE
-      assert_equal "Le nom ne peut pas être vide.", RecordingStudio::Lists::BlankName.new.message
-      assert_equal "Ça vit ailleurs.", RecordingStudio::Lists::DifferentRoot.new.message
+      assert_equal "Name can't be blank.", RecordingStudio::Lists::BlankName.new.message
+      assert_equal "That lives somewhere else.", RecordingStudio::Lists::DifferentRoot.new.message
+      assert_equal "Choose a place for this list first.", RecordingStudio::Lists::ChoosePlace.new.message
+      assert_equal(
+        "Le nom ne peut pas être vide.",
+        RecordingStudioLists::Copy.t("errors.blank_name", default: RecordingStudio::Lists::BlankName::MESSAGE)
+      )
     end
+  end
+
+  test "add to list helper default trigger text stays main english literal" do
+    assert_equal "Add to list", RecordingStudioLists::AddToListHelper::DEFAULT_TRIGGER_TEXT
   end
 
   private
