@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-12
+
+### Added
+
+* English Rails I18n keys for controller flashes, error messages, JS client
+  strings, and recordable label catalog keys under `recording_studio.lists`
+  (`flashes.*`, `errors.*`, `js.*`, `recordables.*`)
+* Always-loaded dummy host override
+  `test/dummy/config/locales/recording_studio_lists_host.en.yml` on the rarely
+  shown `index.home` key (lists page-nav back label)
+* Locale regression: every `lib/**/*.rb` file must not mention
+  `i18n.load_path` / `I18n.load_path`
+* Record Recording Studio GitHub pin `v4.4.0` (root and dummy Gemfiles; the
+  unreleased pin bullet was dropped when 0.4.0 shipped)
+* Record Recording Studio GitHub pin `v4.5.0` (root and dummy Gemfiles; core
+  i18n wave 2)
+
+### Changed
+
+* Controller flash/notice/alert copy resolves through
+  `RecordingStudioLists::Copy.t(..., default: <main English>)` at the render
+  site (English output unchanged)
+* List error alerts / JSON / blank-name form errors translate at the controller
+  render site by exception class (`default: error.message`); the missing-root
+  path still raises `ParentNotAllowed` with main's literal
+  `"Choose a place for this list first."` and swaps that literal at the flash
+  site
+* Public error classes keep main's literal English default messages (no new
+  exception types; no unused `MESSAGE` constants)
+* Add-to-list helper keeps main's `text: I18n.t("recording_studio.lists.add_to_list.trigger")`
+  and adds English `default: "Add to list"`
+* Add-to-list Stimulus client errors read `data-blank-name` /
+  `data-save-failed` from the create form, with English fallbacks in JS
+* View `t(...)` calls pass English `default:` values
+
+### Upgrade notes
+
+- No migration or host code change is required for English.
+- To translate or override the new defaults, add keys under
+  `recording_studio.lists.flashes`, `errors`, `js`, and `recordables` in the
+  host's locale files.
+- Public model / helper defaults stay English. Translate at your render call
+  sites (or rely on the gem's controller / partial sites).
+- `recording_studio_add_to_list` still defaults `text:` to `"Add to list"`.
+  Pass your own `text: t(...)` when the host label should follow the locale.
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-050).
+
 ## [0.4.0] - 2026-10-09
 
 ### Added
@@ -124,7 +171,9 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.5.0
+[0.4.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.3.0
 [0.2.2]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.2
 [0.2.1]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.1

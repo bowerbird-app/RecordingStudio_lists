@@ -1,14 +1,14 @@
-<% recording_studio_page_nav(title: t("recording_studio.lists.index.title"), page_nav_back_url: main_app.root_path, page_nav_back_label: t("recording_studio.lists.index.home")) %>
+<% recording_studio_page_nav(title: t("recording_studio.lists.index.title", default: "Lists"), page_nav_back_url: main_app.root_path, page_nav_back_label: t("recording_studio.lists.index.home", default: "Home")) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(title: t("recording_studio.lists.index.title"), variant: :h1) do |page_title| %>
+  <%= render FlatPack::PageTitle::Component.new(title: t("recording_studio.lists.index.title", default: "Lists"), variant: :h1) do |page_title| %>
     <% page_title.slot do %>
-      <%= render FlatPack::Button::Component.new(text: t("recording_studio.lists.index.new_button"), icon: "plus", href: new_list_path, style: :primary) %>
+      <%= render FlatPack::Button::Component.new(text: t("recording_studio.lists.index.new_button", default: "List"), icon: "plus", href: new_list_path, style: :primary) %>
     <% end %>
   <% end %>
 
   <% if @lists.empty? %>
-    <%= render FlatPack::EmptyState::Component.new(title: t("recording_studio.lists.index.empty")) %>
+    <%= render FlatPack::EmptyState::Component.new(title: t("recording_studio.lists.index.empty", default: "No lists yet.")) %>
   <% else %>
     <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
       <%= render FlatPack::Card::Component.new do |card| %>

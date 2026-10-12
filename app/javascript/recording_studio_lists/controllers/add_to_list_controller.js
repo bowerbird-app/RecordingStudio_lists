@@ -31,6 +31,14 @@ export default class extends Controller {
     this.nameInput?.removeEventListener("input", this.boundClearError)
   }
 
+  blankNameMessage() {
+    return this.createForm?.dataset.blankName || "Name can't be blank."
+  }
+
+  saveFailedMessage() {
+    return this.createForm?.dataset.saveFailed || "That didn't save. Try again."
+  }
+
   clearError() {
     if (this.errorMessage) this.errorMessage.textContent = ""
   }
@@ -55,7 +63,7 @@ export default class extends Controller {
 
     const name = this.nameInput.value.trim()
     if (name === "") {
-      this.errorMessage.textContent = "Name can't be blank."
+      this.errorMessage.textContent = this.blankNameMessage()
       return
     }
 
@@ -75,7 +83,7 @@ export default class extends Controller {
       })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) {
-        this.errorMessage.textContent = payload.error || "That didn't save. Try again."
+        this.errorMessage.textContent = payload.error || this.saveFailedMessage()
         return
       }
 
