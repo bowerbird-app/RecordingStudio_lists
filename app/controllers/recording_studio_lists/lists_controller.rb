@@ -24,13 +24,12 @@ module RecordingStudioLists
     end
 
     def respond_blank_name(error)
-      message = list_error_copy(error)
-      return render json: { error: message }, status: :unprocessable_entity if menu_request?
+      return render json: { error: list_error_copy(error) }, status: :unprocessable_entity if menu_request?
 
       @name = list_params[:name]
       @description = list_params[:description]
       @idempotency_key = params[:idempotency_key].presence || SecureRandom.uuid
-      @name_error = message
+      @name_error = Copy.t("errors.blank_name", default: "Name can't be blank.")
       assign_add_context
       render :new, status: :unprocessable_entity
     end

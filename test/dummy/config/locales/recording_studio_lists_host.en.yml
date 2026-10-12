@@ -1,0 +1,8 @@
+# Host nested override for a rarely shown key (lists index back-label).
+# Loaded by Rails from config/locales — do not append this path in tests.
+# Common visible labels (title, empty, new button) stay on gem English.
+en:
+  recording_studio:
+    lists:
+      index:
+        home: "HOST Home"

@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * English Rails I18n keys for controller flashes, error messages, JS client
   strings, and recordable label catalog keys under `recording_studio.lists`
   (`flashes.*`, `errors.*`, `js.*`, `recordables.*`)
+* Always-loaded dummy host override
+  `test/dummy/config/locales/recording_studio_lists_host.en.yml` on the rarely
+  shown `index.home` key (lists page-nav back label)
 * Locale regression: every `lib/**/*.rb` file must not mention
   `i18n.load_path` / `I18n.load_path`
 * Record Recording Studio GitHub pin `v4.4.0` (root and dummy Gemfiles; the

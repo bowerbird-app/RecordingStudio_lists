@@ -84,7 +84,13 @@ class LocalesTest < ActiveSupport::TestCase
 
   test "english lists keys resolve without missing translations" do
     I18n.with_locale(:en) do
-      INDEX_KEYS.each { |key, english| assert_key("recording_studio.lists.index.#{key}", english) }
+      INDEX_KEYS.each do |key, english|
+        # dummy always-loads a host override for index.home (boot-order guard)
+        next if key == "home"
+
+        assert_key("recording_studio.lists.index.#{key}", english)
+      end
+      assert_equal "HOST Home", I18n.t("recording_studio.lists.index.home", raise: true)
       NEW_KEYS.each { |key, english| assert_key("recording_studio.lists.new.#{key}", english) }
       SHOW_KEYS.each { |key, english| assert_key("recording_studio.lists.show.#{key}", english) }
       ADD_TO_LIST_KEYS.each { |key, english| assert_key("recording_studio.lists.add_to_list.#{key}", english) }
