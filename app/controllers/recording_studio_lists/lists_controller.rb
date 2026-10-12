@@ -9,9 +9,10 @@ module RecordingStudioLists
       RecordingStudio::Lists::DifferentRoot => "different_root",
       RecordingStudio::Lists::SelfTarget => "self_target",
       RecordingStudio::Lists::ListItemTarget => "list_item_target",
-      RecordingStudio::Lists::ChoosePlace => "choose_place",
       RecordingStudio::Lists::ParentNotAllowed => "parent_not_allowed"
     }.freeze
+
+    CHOOSE_PLACE_MESSAGE = "Choose a place for this list first."
 
     private
 
@@ -54,6 +55,11 @@ module RecordingStudioLists
     end
 
     def list_error_copy(error)
+      if error.is_a?(RecordingStudio::Lists::ParentNotAllowed) &&
+         error.message == CHOOSE_PLACE_MESSAGE
+        return Copy.t("errors.choose_place", default: CHOOSE_PLACE_MESSAGE)
+      end
+
       key = ERROR_COPY_KEYS[error.class]
       return error.message unless key
 
@@ -150,7 +156,7 @@ module RecordingStudioLists
 
     def parent_recording
       recording = current_root_recording if respond_to?(:current_root_recording)
-      raise RecordingStudio::Lists::ChoosePlace if recording.blank?
+      raise RecordingStudio::Lists::ParentNotAllowed, "Choose a place for this list first." if recording.blank?
 
       recording
     end

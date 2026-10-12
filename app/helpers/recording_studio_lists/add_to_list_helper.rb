@@ -2,10 +2,6 @@
 
 module RecordingStudioLists
   module AddToListHelper
-    # Public default stays main's English literal. The add-to-list partial
-    # translates when this exact default object is still in place.
-    DEFAULT_TRIGGER_TEXT = "Add to list"
-
     MEMBERSHIP_JOIN = "INNER JOIN recording_studio_list_items " \
                       "ON recording_studio_list_items.id = recording_studio_recordings.recordable_id"
 
@@ -84,8 +80,7 @@ module RecordingStudioLists
     def add_to_list_locals(target, place, options)
       return_path = add_to_list_return_path(options[:return_to])
       options.slice(:icon, :style, :size, :show_chevron, :placement).merge(
-        text: options[:text],
-        translate_default_trigger: options[:text].equal?(DEFAULT_TRIGGER_TEXT),
+        text: options[:text].to_s,
         rows: add_to_list_rows(RecordingStudio::Lists.lists(place), target),
         new_list_href: add_to_list_new_href(target, return_path),
         recording_id: target.id,
@@ -95,9 +90,9 @@ module RecordingStudioLists
 
     # Each keyword is a button or menu setting on the public helper.
     # Default trigger text stays main's English literal; the partial translates
-    # when the caller left the default in place.
+    # that literal at the render site when it is still in place.
     def add_to_list_options( # rubocop:disable Metrics/ParameterLists
-      text: DEFAULT_TRIGGER_TEXT,
+      text: "Add to list",
       icon: nil,
       style: :default,
       size: :md,

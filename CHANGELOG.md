@@ -14,9 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * English Rails I18n keys for controller flashes, error messages, JS client
   strings, and recordable label catalog keys under `recording_studio.lists`
   (`flashes.*`, `errors.*`, `js.*`, `recordables.*`)
-* `RecordingStudio::Lists::ChoosePlace` (subclass of `ParentNotAllowed`) so the
-  lists controller can translate "choose a place" at the render site by class
-  without comparing message strings
 * Locale regression: every `lib/**/*.rb` file must not mention
   `i18n.load_path` / `I18n.load_path`
 * Record Recording Studio GitHub pin `v4.4.0` (root and dummy Gemfiles; the
@@ -30,15 +27,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `RecordingStudioLists::Copy.t(..., default: <main English>)` at the render
   site (English output unchanged)
 * List error alerts / JSON / blank-name form errors translate at the controller
-  render site by exception class (`default: error.message`); public error
-  classes keep main's literal English defaults / `MESSAGE` constants
+  render site by exception class (`default: error.message`); the missing-root
+  path still raises `ParentNotAllowed` with main's literal
+  `"Choose a place for this list first."` and swaps that literal at the flash
+  site
+* Public error classes keep main's literal English default messages (no new
+  exception types; no unused `MESSAGE` constants)
 * Add-to-list helper default `text:` stays main's literal `"Add to list"`; the
-  partial translates when that default is still in place
+  partial swaps that literal at the render site while keeping main's
+  `text.blank?` aria conditional
 * Add-to-list Stimulus client errors read `data-blank-name` /
   `data-save-failed` from the create form, with English fallbacks in JS
 * View `t(...)` calls pass English `default:` values
-* Dummy credentials decrypt tests also accept `EMBEDDABLE_DUMMY_DEVELOPMENT_KEY`
-  (same shared development key as `RAILS_MASTER_KEY`)
 
 ### Upgrade notes
 
@@ -47,8 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `recording_studio.lists.flashes`, `errors`, `js`, and `recordables` in the
   host's locale files.
 - Public model / helper defaults stay English. Translate at your render call
-  sites (or rely on the gem's controller / partial sites). Do not compare
-  against English message strings to pick a translation key.
+  sites (or rely on the gem's controller / partial sites).
 - `recording_studio_add_to_list` still defaults `text:` to `"Add to list"`.
   Pass your own `text: t(...)` when the host label should follow the locale.
 - See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-050).

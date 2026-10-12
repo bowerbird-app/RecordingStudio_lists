@@ -8,68 +8,43 @@ module RecordingStudio
     class Error < StandardError; end
 
     class BlankName < Error
-      MESSAGE = "Name can't be blank."
-
-      def initialize(message = MESSAGE)
+      def initialize(message = "Name can't be blank.")
         super
       end
     end
 
     class InvalidList < Error
-      MESSAGE = "That list is missing."
-
-      def initialize(message = MESSAGE)
+      def initialize(message = "That list is missing.")
         super
       end
     end
 
     class MissingTarget < Error
-      MESSAGE = "Pick something to add."
-
-      def initialize(message = MESSAGE)
+      def initialize(message = "Pick something to add.")
         super
       end
     end
 
     class DifferentRoot < Error
-      MESSAGE = "That lives somewhere else."
-
-      def initialize(message = MESSAGE)
+      def initialize(message = "That lives somewhere else.")
         super
       end
     end
 
     class SelfTarget < Error
-      MESSAGE = "A list can't contain itself."
-
-      def initialize(message = MESSAGE)
+      def initialize(message = "A list can't contain itself.")
         super
       end
     end
 
     class ListItemTarget < Error
-      MESSAGE = "That can't go on a list."
-
-      def initialize(message = MESSAGE)
+      def initialize(message = "That can't go on a list.")
         super
       end
     end
 
     class ParentNotAllowed < Error
-      MESSAGE = "Lists can't be created here."
-
-      def initialize(message = MESSAGE)
-        super
-      end
-    end
-
-    # Raised when the lists controller has no current root/place. Distinct from
-    # ParentNotAllowed so render sites can translate without comparing message
-    # strings. Hosts that rescue ParentNotAllowed still catch this.
-    class ChoosePlace < ParentNotAllowed
-      MESSAGE = "Choose a place for this list first."
-
-      def initialize(message = MESSAGE)
+      def initialize(message = "Lists can't be created here.")
         super
       end
     end
