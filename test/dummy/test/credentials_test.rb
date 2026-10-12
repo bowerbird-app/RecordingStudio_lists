@@ -4,7 +4,9 @@ require "test_helper"
 
 class CredentialsTest < ActiveSupport::TestCase
   test "dummy credentials expose shared keys when the master key is available" do
-    skip "Set EMBEDDABLE_DUMMY_DEVELOPMENT_KEY, RAILS_MASTER_KEY, or test/dummy/config/master.key" unless master_key_available?
+    unless master_key_available?
+      skip "Set EMBEDDABLE_DUMMY_DEVELOPMENT_KEY, RAILS_MASTER_KEY, or test/dummy/config/master.key"
+    end
 
     with_rails_master_key_from_embeddable do
       credentials = Rails.application.credentials

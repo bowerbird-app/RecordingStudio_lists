@@ -33,7 +33,9 @@ class DummyCredentialsTest < Minitest::Test
   end
 
   def test_dummy_credentials_decrypt_when_master_key_is_available
-    skip "Set EMBEDDABLE_DUMMY_DEVELOPMENT_KEY, RAILS_MASTER_KEY, or test/dummy/config/master.key" unless master_key_available?
+    unless master_key_available?
+      skip "Set EMBEDDABLE_DUMMY_DEVELOPMENT_KEY, RAILS_MASTER_KEY, or test/dummy/config/master.key"
+    end
 
     with_rails_master_key_from_embeddable do
       parsed = YAML.safe_load(
