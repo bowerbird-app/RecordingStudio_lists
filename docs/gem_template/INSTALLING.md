@@ -201,11 +201,13 @@ This template's dummy app uses RecordingStudio `v4.5.0` (`~> 4.2` in the gemspec
 `recording_studio_recordable(...)`, and create roots with `RecordingStudio.root_recording_for(recordable)`.
 Child recordings must be created with an explicit `parent_recording`.
 
-When Accessible is bundled, pin the dummy or host Gemfile to `v0.15.0`, run
-`bin/rails generate recording_studio_accessible:migrations`, migrate, and rebuild Tailwind after
-bumping FlatPack (`v0.1.196`). Accessible `0.10+` adds access invitations; `0.11+`
-stores grant roles as strings (`view` / `edit` / `admin`); `0.14+` adds optional
-action-audience constraint and rule tables.
+When Accessible is bundled, pin the dummy or host Gemfile to `v0.17.0`, and pin
+`recording_studio_trashable` to `v0.10.0` with `require: false` (Accessible loads
+the query API only). Run `bin/rails generate recording_studio_accessible:migrations`,
+migrate, and rebuild Tailwind after bumping FlatPack (`v0.1.196`). Accessible
+`0.10+` adds access invitations; `0.11+` stores grant roles as strings
+(`view` / `edit` / `admin`); `0.14+` adds optional action-audience constraint and
+rule tables; `0.17+` filters kept recordings through Trashable’s query SQL.
 
 ---
 

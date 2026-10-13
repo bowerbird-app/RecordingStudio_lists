@@ -1,10 +1,11 @@
 find_or_record_child = lambda do |recordable, root_recording, parent_recording|
-  RecordingStudio::Recording.find_by(
-    root_recording: root_recording,
-    parent_recording: parent_recording,
-    recordable: recordable,
-    trashed_at: nil
-  ) || RecordingStudio.record!(
+  RecordingStudio::Recording
+    .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+    .find_by(
+      root_recording: root_recording,
+      parent_recording: parent_recording,
+      recordable: recordable
+    ) || RecordingStudio.record!(
     action: "created",
     recordable: recordable,
     root_recording: root_recording,
@@ -37,12 +38,13 @@ begin
 
   ["Dezeen", "ArchDaily", "Design Milk"].each do |title|
     already_on_client = Page.where(title: title).any? do |page|
-      RecordingStudio::Recording.exists?(
-        recordable: page,
-        root_recording: accessible_root_recording,
-        parent_recording: accessible_root_recording,
-        trashed_at: nil
-      )
+      RecordingStudio::Recording
+        .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+        .exists?(
+          recordable: page,
+          root_recording: accessible_root_recording,
+          parent_recording: accessible_root_recording
+        )
     end
     next if already_on_client
 

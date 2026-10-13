@@ -10,7 +10,8 @@ class HomeController < ApplicationController
     return if root.blank?
 
     RecordingStudio::Recording
-      .where(root_recording_id: root.id, recordable_type: "Page", trashed_at: nil)
+      .where(root_recording_id: root.id, recordable_type: "Page")
+      .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
       .order(:created_at, :id)
       .first
   end
