@@ -1,5 +1,33 @@
 # Migration Notes
 
+## Upgrading To 0.7.0
+
+This is a non-breaking upgrade for English hosts. Rendered English interface
+text, flash notices, and error messages stay byte-identical to 0.6.0 / main.
+
+### What Changed
+
+- Call sites use `RecordingStudio.t` / `RecordingStudioLists::Copy.t` instead of
+  plain `t` / `I18n.t` with hand-copied English `default:` values.
+- The engine registers `config/locales/en.yml` with
+  `RecordingStudio::Translation.register_shipped_english` at boot so missing
+  active-locale keys still show gem English after the loaded `:en` backend is
+  pruned.
+- Requires Recording Studio `~> 4.7` (dummy pin `v4.7.0`).
+- Fallback comes from the loaded English, host overrides included.
+- Only this gem's `recording_studio.lists.*` keys use `RecordingStudio.t`;
+  host or other-namespace keys stay on `I18n.t` with main's `default:`.
+- A plain `default:` with no interpolation is returned as a plain
+  (non-html_safe) String, so views will escape it. Interpolating caller
+  `default:` on a missing `_html` key is stricter than view `t` (args escaped,
+  result html_safe).
+
+### Upgrade Steps
+
+No migration is required. English hosts need no change beyond pinning
+Recording Studio `~> 4.7`. Host overrides still belong under
+`recording_studio.lists` in the host's `config/locales`.
+
 ## Upgrading To 0.6.0
 
 List item order moves from a lists-owned `position` column to Recording Studio
@@ -117,7 +145,7 @@ another language, set the `recording_studio.lists` keys in the host's
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio 4.x (`~> 4.2` in the gemspec; dummy GitHub tag `v4.6.0`)
+- Recording Studio `~> 4.7` (gemspec; dummy GitHub tag `v4.7.0`)
 - Orderable `~> 0.3` (dummy GitHub tag `v0.3.1`)
 - Accessible dummy tag `v0.18.0`, Trashable dummy tag `v0.10.0` (`require: false`), Root Switchable dummy tag `v0.9.0`, Metrics dummy tag `v0.2.0`, and Cache dummy tag `v0.5.0`
 - FlatPack dummy tag `v0.1.196`

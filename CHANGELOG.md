@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-14
+
+### Added
+
+* English fallback for shipped `recording_studio.lists.*` keys when the active
+  locale has no translation: call sites use `RecordingStudio.t` /
+  `RecordingStudioLists::Copy.t`, and the engine registers
+  `config/locales/en.yml` via
+  `RecordingStudio::Translation.register_shipped_english` at boot (before
+  `recording_studio.load_shipped_english`). Fallback comes from the loaded
+  English, host overrides included, then the caller's `default:`, then the
+  merged gem-shipped table.
+* Require Recording Studio `~> 4.7` (root and dummy GitHub pin `v4.7.0`)
+
+### Changed
+
+* View, helper, and controller copy lookups drop hand-copied English
+  `default:` values that matched `en.yml`; English still comes from the gem
+  locale file / loaded `:en` backend
+* `RecordingStudioLists::Copy.t` routes through `RecordingStudio.t`
+
+### Upgrade notes
+
+- No migration or host code change is required for English.
+- Pin Recording Studio `~> 4.7`. Addon engines that ship
+  `recording_studio.lists.*` English rely on
+  `RecordingStudio::Translation.register_shipped_english` so keys remain
+  available after the loaded `:en` backend is pruned.
+- Fallback comes from the loaded English, host overrides included.
+- Only this gem's `recording_studio.lists.*` keys use `RecordingStudio.t`;
+  host or other-namespace keys stay on `I18n.t` with main's `default:`.
+- A plain `default:` with no interpolation is returned as a plain
+  (non-html_safe) String, so views will escape it. Interpolating caller
+  `default:` on a missing `_html` key is stricter than main/view `t` (args
+  escaped, result html_safe).
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-070).
+
 ## [0.6.0] - 2026-10-14
 
 ### Changed
@@ -210,7 +247,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.4.0

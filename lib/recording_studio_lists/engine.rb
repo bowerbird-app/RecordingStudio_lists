@@ -51,6 +51,13 @@ module RecordingStudioLists
       end
     end
 
+    initializer "recording_studio_lists.register_shipped_english",
+                before: "recording_studio.load_shipped_english" do
+      RecordingStudio::Translation.register_shipped_english(
+        root.join("config/locales/en.yml")
+      )
+    end
+
     initializer "recording_studio_lists.before_initialize", before: "recording_studio_lists.load_config" do |_app|
       RecordingStudioLists.configuration.hooks.run(:before_initialize, self)
     end

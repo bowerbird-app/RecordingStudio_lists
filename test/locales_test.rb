@@ -181,9 +181,59 @@ class LocalesTest < ActiveSupport::TestCase
       )
       assert_equal(
         "Le nom ne peut pas être vide.",
-        RecordingStudioLists::Copy.t("errors.blank_name", default: "Name can't be blank.")
+        RecordingStudioLists::Copy.t("errors.blank_name")
+      )
+      assert_equal(
+        "Le nom ne peut pas être vide.",
+        RecordingStudio.t("recording_studio.lists.errors.blank_name")
       )
     end
+  end
+
+  test "engine registers shipped english before recording_studio load" do
+    names = RecordingStudioLists::Engine.initializers.map(&:name)
+    assert_includes names, "recording_studio_lists.register_shipped_english"
+
+    initializer = RecordingStudioLists::Engine.initializers.find do |entry|
+      entry.name == "recording_studio_lists.register_shipped_english"
+    end
+    assert_equal "recording_studio.load_shipped_english", initializer.before
+
+    # Boot-time registration only. Do not call initializer.block — this
+    # assertion must fail on its own if the path was never registered.
+    expected = File.expand_path(
+      RecordingStudioLists::Engine.root.join("config/locales/en.yml")
+    )
+    paths = RecordingStudio::Translation.send(:registered_shipped_english_paths)
+    assert_includes paths, expected
+    assert_equal "Lists",
+                 RecordingStudio::Translation.shipped_english.fetch(
+                   "recording_studio.lists.index.title"
+                 )
+  end
+
+  test "RecordingStudio.t production call sites only use recording_studio.lists keys" do
+    root = File.expand_path("..", __dir__)
+    offenders = []
+
+    Dir[File.join(root, "{app,lib}", "**", "*.{rb,erb}")].each do |path|
+      next if path.include?("/generators/")
+      # Copy.t builds "recording_studio.lists.#{key}" dynamically; skip that wrapper.
+      next if path.end_with?("/lib/recording_studio_lists/copy.rb")
+
+      source = File.read(path)
+      source.scan(/RecordingStudio\.t\(\s*(["'])([^"'\#]+)\1/) do |_quote, key|
+        next if key.start_with?("recording_studio.lists.")
+
+        offenders << "#{path.delete_prefix("#{root}/")}: RecordingStudio.t(#{key.inspect})"
+      end
+    end
+
+    assert_empty offenders, <<~MSG
+      Only this gem's recording_studio.lists.* keys may use RecordingStudio.t.
+      Host or other-namespace keys stay on I18n.t with main's default:.
+      #{offenders.join("\n")}
+    MSG
   end
 
   private
@@ -193,6 +243,7 @@ class LocalesTest < ActiveSupport::TestCase
 
     assert_equal english, translation, "#{full_key} should resolve to #{english.inspect}"
     assert_equal english, I18n.t(full_key, raise: true)
+    assert_equal english, RecordingStudio.t(full_key)
   end
 
   def engine_locales_dir
