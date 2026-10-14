@@ -1,5 +1,51 @@
 # Migration Notes
 
+## Upgrading To 0.6.0
+
+List item order moves from a lists-owned `position` column to Recording Studio
+Orderable on the child recording.
+
+### What Changed
+
+- `RecordingStudio::Lists::List` includes
+  `RecordingStudio::Capabilities::Orderable.to(allows: ["RecordingStudio::Lists::ListItem"])`.
+- `RecordingStudio::Lists.add` appends with `recording_studio_orderable_append!`
+  (falls back to writing `recording_studio_orderable_position` when Orderable
+  rejects the write, for example Accessible edit denied).
+- `RecordingStudio::Lists.items` (and internal membership reads) use
+  `recording_studio_orderable_children`.
+- `recording_studio_list_items.position` and
+  `recording_studio_list_items_position_check` are removed.
+
+### Data Migration And Rollback
+
+Migration `MoveListItemPositionsToOrderable`:
+
+1. Requires `recording_studio_recordings.recording_studio_orderable_position`
+   (install Orderable migrations first).
+2. **up:** `UPDATE` each list-item recording's
+   `recording_studio_orderable_position` from the list item's `position`
+   (same integer values, so relative order is unchanged), then drop the check
+   constraint and `position` column.
+3. **down:** re-add `position` (nullable), renumber each list's items to
+   contiguous 1-based `position` values from the current Orderable order
+   (`ROW_NUMBER` by `recording_studio_orderable_position`, `created_at`, `id`),
+   set any remaining nulls to `1`, make the column non-null, and restore
+   `recording_studio_list_items_position_check` (`position >= 1`). Exact
+   integers may differ from pre-upgrade values when Orderable used 0-based
+   indexes; relative order is preserved.
+
+### Upgrade Steps
+
+1. Add `recording_studio_orderable` (`~> 0.3`; GitHub tag `v0.3.1`).
+2. `bin/rails generate recording_studio_orderable:migrations`
+3. `bin/rails generate recording_studio_lists:migrations`
+4. `bin/rails db:migrate`
+5. Stop reading `list_item.position`; use Orderable on the recording instead.
+
+Public `RecordingStudio::Lists` methods keep the same signatures and return
+membership in the same order.
+
 ## Upgrading To 0.5.0
 
 This is a non-breaking upgrade for English hosts. Rendered English interface
@@ -72,6 +118,7 @@ another language, set the `recording_studio.lists` keys in the host's
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
 - Recording Studio 4.x (`~> 4.2` in the gemspec; dummy GitHub tag `v4.6.0`)
+- Orderable `~> 0.3` (dummy GitHub tag `v0.3.1`)
 - Accessible dummy tag `v0.17.0`, Trashable dummy tag `v0.10.0` (`require: false`), Root Switchable dummy tag `v0.9.0`, Metrics dummy tag `v0.2.0`, and Cache dummy tag `v0.5.0`
 - FlatPack dummy tag `v0.1.196`
 - Public RubyGems and GitHub access for dependency installation

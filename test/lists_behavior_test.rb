@@ -19,6 +19,11 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     refute item_declaration.root?
     assert_equal ["RecordingStudio::Lists::List"], item_declaration.allowed_parent_types
     assert RecordingStudio.capability_enabled?(:lists, for: Workspace)
+    assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudio::Lists::List")
+    assert_equal(
+      { allows: ["RecordingStudio::Lists::ListItem"] },
+      RecordingStudio.capability_options(:orderable, for: "RecordingStudio::Lists::List")
+    )
   end
 
   test "list is not a root and a list item cannot sit under a workspace" do
@@ -31,7 +36,6 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     error = assert_raises(RecordingStudio::InvalidParent) do
       root.record(RecordingStudio::Lists::ListItem, parent_recording: root) do |item|
         item.item_recording = root
-        item.position = 1
       end
     end
     assert_match(/cannot be recorded under/, error.message)
@@ -91,21 +95,43 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal "RecordingStudio::Lists::ListItem", child.recordable_type
     assert_equal first.id, child.recordable.item_recording_id
     assert_equal list.id, child.parent_recording_id
-    assert_equal 1, child.recordable.position
+    assert_equal 0, child.recording_studio_orderable_position
 
     assert_no_difference -> { RecordingStudio::Recording.where(parent_recording_id: list.id).count } do
       assert_equal first, RecordingStudio::Lists.add(list, first)
     end
-    assert_equal 1, list_item_for(list, first).recordable.position
+    assert_equal 0, list_item_for(list, first).recording_studio_orderable_position
 
     RecordingStudio::Lists.add(list, second)
     assert_equal [first, second], RecordingStudio::Lists.items(list)
-    assert_equal [1, 2], item_positions(list)
+    assert_equal [0, 1], item_positions(list)
+    assert_equal [first.id, second.id], list.recording_studio_orderable_children.map { |c| c.recordable.item_recording_id }
 
     RecordingStudio::Lists.add(other, first)
     assert_equal [first], RecordingStudio::Lists.items(other)
     assert_equal [first, second], RecordingStudio::Lists.items(list)
     assert_equal 3, RecordingStudio::Recording.where(recordable_type: "RecordingStudio::Lists::ListItem").count
+  end
+
+  test "reorder through orderable keeps Lists.items in the new order" do
+    root = workspace_root
+    first = page_under(root, "Alpha")
+    second = page_under(root, "Beta")
+    third = page_under(root, "Gamma")
+    list = RecordingStudio::Lists.create(parent: root, name: "Reorder")
+
+    RecordingStudio::Lists.add(list, first)
+    RecordingStudio::Lists.add(list, second)
+    RecordingStudio::Lists.add(list, third)
+    assert_equal [first, second, third], RecordingStudio::Lists.items(list)
+
+    children = list.recording_studio_orderable_children.to_a
+    list.recording_studio_orderable_reorder!(
+      ordered_recording_ids: [children[2].id, children[0].id, children[1].id]
+    )
+
+    assert_equal [third, first, second], RecordingStudio::Lists.items(list)
+    assert_equal [0, 1, 2], item_positions(list)
   end
 
   test "remove and delete drop list recordings and leave the target" do
@@ -229,7 +255,7 @@ class ListsBehaviorTest < ActiveSupport::TestCase
   end
 
   def item_positions(list)
-    list.child_recordings.reload.map { |child| child.recordable.position }.sort
+    list.recording_studio_orderable_children.reload.map(&:recording_studio_orderable_position)
   end
 
   def unique_name(prefix)

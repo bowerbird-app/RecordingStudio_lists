@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-14
+
+### Changed
+
+* List item order now uses Recording Studio Orderable. `RecordingStudio::Lists::List`
+  opts into `RecordingStudio::Capabilities::Orderable.to(allows: ["RecordingStudio::Lists::ListItem"])`.
+  Membership order is stored on `recording_studio_recordings.recording_studio_orderable_position`
+  instead of a lists-owned `position` column on `recording_studio_list_items`.
+* `RecordingStudio::Lists.add` / `items` read and append through Orderable
+  (`recording_studio_orderable_children`, `recording_studio_orderable_append!`).
+* Gemspec depends on `recording_studio_orderable`, `~> 0.3`. Root and dummy Gemfiles
+  pin GitHub tag `v0.3.1`.
+
+### Removed
+
+* `recording_studio_list_items.position` and check constraint
+  `recording_studio_list_items_position_check` (migrated away for existing hosts;
+  omitted from the create migration for new installs).
+
+### Upgrade notes
+
+- Add `recording_studio_orderable` (GitHub tag `v0.3.1` or compatible `~> 0.3`).
+- Run `bin/rails generate recording_studio_orderable:migrations` and migrate so
+  `recording_studio_orderable_position` exists before the lists data migration.
+- Run `bin/rails generate recording_studio_lists:migrations` then `bin/rails db:migrate`.
+  The data migration copies each list item's `position` onto the child recording's
+  `recording_studio_orderable_position` (same integers, order unchanged), then drops
+  the lists-owned column and check constraint. `down` restores the column and
+  renumbers each list to contiguous 1-based positions from the current Orderable
+  order (so `position >= 1` holds even after 0-based Orderable writes).
+- Public `RecordingStudio::Lists` call sites are unchanged. Hosts that call
+  `recordable.position` on list items must switch to Orderable
+  (`recording.recording_studio_orderable_position` or
+  `list.recording_studio_orderable_children`).
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-060).
+
 ## [0.5.0] - 2026-10-12
 
 ### Added
@@ -171,7 +207,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.6.0
 [0.5.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.5.0
 [0.4.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.4.0
 [0.3.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.3.0
