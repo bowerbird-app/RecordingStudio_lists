@@ -105,7 +105,8 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     RecordingStudio::Lists.add(list, second)
     assert_equal [first, second], RecordingStudio::Lists.items(list)
     assert_equal [0, 1], item_positions(list)
-    assert_equal [first.id, second.id], list.recording_studio_orderable_children.map { |c| c.recordable.item_recording_id }
+    ordered_item_ids = list.recording_studio_orderable_children.map { |child| child.recordable.item_recording_id }
+    assert_equal [first.id, second.id], ordered_item_ids
 
     RecordingStudio::Lists.add(other, first)
     assert_equal [first], RecordingStudio::Lists.items(other)

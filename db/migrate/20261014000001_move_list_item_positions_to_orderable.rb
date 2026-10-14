@@ -7,6 +7,28 @@
 class MoveListItemPositionsToOrderable < ActiveRecord::Migration[8.1]
   POSITION_CHECK = "recording_studio_list_items_position_check"
   LIST_ITEM_TYPE = "RecordingStudio::Lists::ListItem"
+  RENUMBER_POSITIONS_SQL = <<~SQL.squish
+    UPDATE recording_studio_list_items AS list_items
+    SET position = ordered.position
+    FROM (
+      SELECT
+        recordings.recordable_id AS list_item_id,
+        ROW_NUMBER() OVER (
+          PARTITION BY recordings.parent_recording_id
+          ORDER BY recordings.recording_studio_orderable_position ASC NULLS LAST,
+                   recordings.created_at ASC,
+                   recordings.id ASC
+        ) AS position
+      FROM recording_studio_recordings AS recordings
+      WHERE recordings.recordable_type = '#{LIST_ITEM_TYPE}'
+    ) AS ordered
+    WHERE list_items.id = ordered.list_item_id
+  SQL
+  FILL_NULL_POSITIONS_SQL = <<~SQL.squish
+    UPDATE recording_studio_list_items
+    SET position = 1
+    WHERE position IS NULL
+  SQL
 
   def up
     ensure_orderable_position_column!
@@ -54,29 +76,8 @@ class MoveListItemPositionsToOrderable < ActiveRecord::Migration[8.1]
     # Orderable may store 0-based indexes after append!/reorder!. Renumber to
     # contiguous 1-based positions per parent so the restored check constraint
     # (`position >= 1`) holds while relative order stays the same.
-    execute <<~SQL.squish
-      UPDATE recording_studio_list_items AS list_items
-      SET position = ordered.position
-      FROM (
-        SELECT
-          recordings.recordable_id AS list_item_id,
-          ROW_NUMBER() OVER (
-            PARTITION BY recordings.parent_recording_id
-            ORDER BY recordings.recording_studio_orderable_position ASC NULLS LAST,
-                     recordings.created_at ASC,
-                     recordings.id ASC
-          ) AS position
-        FROM recording_studio_recordings AS recordings
-        WHERE recordings.recordable_type = '#{LIST_ITEM_TYPE}'
-      ) AS ordered
-      WHERE list_items.id = ordered.list_item_id
-    SQL
-
-    execute <<~SQL.squish
-      UPDATE recording_studio_list_items
-      SET position = 1
-      WHERE position IS NULL
-    SQL
+    execute RENUMBER_POSITIONS_SQL
+    execute FILL_NULL_POSITIONS_SQL
   end
 
   def remove_position_check_constraint!

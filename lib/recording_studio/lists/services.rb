@@ -41,9 +41,7 @@ module RecordingStudio
         end
 
         def ordered_list_item_recordings(list)
-          if list.respond_to?(:recording_studio_orderable_children)
-            return list.recording_studio_orderable_children
-          end
+          return list.recording_studio_orderable_children if list.respond_to?(:recording_studio_orderable_children)
 
           RecordingStudio::Recording
             .where(parent_recording_id: list.id, recordable_type: ITEM_TYPE)
