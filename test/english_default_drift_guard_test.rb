@@ -2,7 +2,6 @@
 
 require "test_helper"
 require "yaml"
-require "set"
 
 # Ensures production call sites for gem keys do not hand-copy English from
 # en.yml (or constants equal to those strings) as `default:`. English fallback

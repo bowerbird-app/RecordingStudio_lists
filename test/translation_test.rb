@@ -102,6 +102,8 @@ class TranslationTest < ActiveSupport::TestCase
   end
 
   test "parity matrix non-gem keys match I18n.t" do
+    # I18n interpolation tokens use %{name}; RuboCop prefers %<name>s for Kernel#sprintf.
+    # rubocop:disable Style/FormatStringToken
     I18n.backend.store_translations(:en, {
                                       probe: {
                                         greet: "Hi %{name}",
@@ -113,6 +115,7 @@ class TranslationTest < ActiveSupport::TestCase
                                       }
                                     })
     I18n.backend.store_translations(:de, { probe: { greet: "Hallo %{name}" } })
+    # rubocop:enable Style/FormatStringToken
 
     I18n.with_locale(:de) do
       assert_parity("probe.greet", name: "M")
@@ -136,6 +139,7 @@ class TranslationTest < ActiveSupport::TestCase
     key = "recording_studio.lists.index.title"
     missing = "recording_studio.lists.index.missing_key_for_parity"
 
+    # rubocop:disable Style/FormatStringToken -- I18n interpolation syntax
     I18n.backend.store_translations(:en, {
                                       recording_studio: {
                                         lists: {
@@ -150,6 +154,7 @@ class TranslationTest < ActiveSupport::TestCase
                                         }
                                       }
                                     })
+    # rubocop:enable Style/FormatStringToken
 
     I18n.with_locale(:en) do
       assert_equal I18n.t(key), RecordingStudio.t(key)
@@ -248,6 +253,7 @@ class TranslationTest < ActiveSupport::TestCase
   end
 
   test "html gem keys escape unsafe interpolation like view t" do
+    # rubocop:disable Style/FormatStringToken -- I18n interpolation syntax
     I18n.backend.store_translations(:en, {
                                       recording_studio: {
                                         lists: {
@@ -262,6 +268,7 @@ class TranslationTest < ActiveSupport::TestCase
                                         }
                                       }
                                     })
+    # rubocop:enable Style/FormatStringToken
     view = ActionController::Base.helpers
 
     I18n.with_locale(:en) do
@@ -452,4 +459,3 @@ class TranslationTest < ActiveSupport::TestCase
     yield node, leaf if node.is_a?(Hash)
   end
 end
-
