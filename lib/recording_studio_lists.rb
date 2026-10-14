@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio"
+require "recording_studio_orderable"
 require "recording_studio_lists/version"
 require "recording_studio_lists/engine"
 require "recording_studio_lists/configuration"
