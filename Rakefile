@@ -9,6 +9,7 @@ DUMMY_TEST_FILES = [
   File.expand_path("test/english_default_drift_guard_test.rb", __dir__),
   File.expand_path("test/lists_behavior_test.rb", __dir__),
   File.expand_path("test/locales_test.rb", __dir__),
+  File.expand_path("test/move_list_item_positions_to_orderable_migration_test.rb", __dir__),
   File.expand_path("test/recording_studio_declarations_test.rb", __dir__),
   File.expand_path("test/translation_test.rb", __dir__)
 ].freeze
@@ -22,6 +23,7 @@ ROOT_TEST_EXCLUSIONS = %w[
   test/english_default_drift_guard_test.rb
   test/lists_behavior_test.rb
   test/locales_test.rb
+  test/move_list_item_positions_to_orderable_migration_test.rb
   test/recording_studio_declarations_test.rb
   test/rename_verification_test.rb
   test/translation_test.rb

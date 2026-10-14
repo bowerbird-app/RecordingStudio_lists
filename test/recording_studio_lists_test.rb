@@ -15,6 +15,7 @@ class RecordingStudioListsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_lists.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.7"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
   end
 
   def test_gemspec_excludes_cursor_config
@@ -45,7 +46,8 @@ class RecordingStudioListsTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.7.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.17.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
@@ -55,6 +57,17 @@ class RecordingStudioListsTest < Minitest::Test
     refute_includes gemfile, 'tag: "v0.1.133"'
     refute_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "0.3.1"'
+  end
+
+  def test_dummy_schema_uses_orderable_position_not_list_item_position
+    schema = File.read(File.expand_path("dummy/db/schema.rb", __dir__))
+
+    assert_includes schema, 't.integer "recording_studio_orderable_position"'
+    refute_includes schema, "recording_studio_list_items_position_check"
+
+    list_items = schema[/create_table "recording_studio_list_items".*?end/m]
+    refute_nil list_items
+    refute_includes list_items, 't.integer "position"'
   end
 
   def test_dummy_schema_includes_accessible_depends_on_recording_id
@@ -200,6 +213,7 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes readme, "mount RecordingStudioLists::Engine, at: \"/\""
     assert_includes readme, "enable_capability(:lists, on: Workspace)"
+    assert_includes readme, "generate recording_studio_orderable:migrations"
     assert_includes readme, "RecordingStudio::Lists.create"
     assert_includes readme, "RecordingStudio::Lists.add"
     assert_includes readme, "RecordingStudio::Lists.delete"

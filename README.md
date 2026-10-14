@@ -4,9 +4,12 @@ A list is a child recording under a parent you choose. Each member is a list ite
 
 ## Mount
 
-Add `recording_studio_lists` to the host Gemfile. Copy the migrations and migrate.
+Add `recording_studio_lists` and `recording_studio_orderable` to the host Gemfile.
+Orderable owns sibling position on recordings; lists opts `List` into that capability
+for `ListItem` children. Copy both engines' migrations and migrate Orderable first.
 
 ```bash
+bin/rails generate recording_studio_orderable:migrations
 bin/rails generate recording_studio_lists:migrations
 bin/rails db:migrate
 ```
@@ -36,6 +39,14 @@ config.recordable_types = [
 
 RecordingStudio.enable_capability(:lists, on: Workspace)
 ```
+
+`RecordingStudio::Lists::List` already includes Orderable for its list-item
+children. Hosts do not enable `:orderable` separately for lists.
+
+`RecordingStudio::Lists.add` writes the next Orderable position (`max + 1`) and
+does not call Orderable `append!` / reorder. Membership add therefore does not
+renumber siblings, log a `reordered` event, or run Orderable's reorder access
+check — same as main.
 
 ## Ruby
 
