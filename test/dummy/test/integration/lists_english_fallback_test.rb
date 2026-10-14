@@ -66,8 +66,8 @@ class ListsEnglishFallbackTest < ActionDispatch::IntegrationTest
       get "/lists"
 
       assert_response :success
-      assert_select "h1", text: "Lists"
-      assert_select "h3", text: "No lists yet."
+      assert_select "h1", text: "Lists", count: 1
+      assert_select "h3", text: "No lists yet.", count: 1
       refute_lists_translation_missing!(response.body)
     end
   end
@@ -76,8 +76,8 @@ class ListsEnglishFallbackTest < ActionDispatch::IntegrationTest
     I18n.with_locale(:en) do
       get "/lists"
       assert_response :success
-      assert_select "h1", text: "Lists"
-      assert_select "h3", text: "No lists yet."
+      assert_select "h1", text: "Lists", count: 1
+      assert_select "h3", text: "No lists yet.", count: 1
       assert_includes response.body, "HOST Home"
       refute_lists_translation_missing!(response.body)
     end
@@ -100,8 +100,8 @@ class ListsEnglishFallbackTest < ActionDispatch::IntegrationTest
           get "/lists"
 
           assert_response :success, "expected 200 in #{locale} raise=#{raise_on_missing}"
-          assert_select "h1", text: "Lists"
-          assert_select "h3", text: "No lists yet."
+          assert_select "h1", text: "Lists", count: 1
+          assert_select "h3", text: "No lists yet.", count: 1
           refute_lists_translation_missing!(response.body)
         end
       end
@@ -127,7 +127,7 @@ class ListsEnglishFallbackTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_includes response.body, "HOST Home"
-      assert_select "h1", text: "Lists"
+      assert_select "h1", text: "Lists", count: 1
       refute_includes response.body, ">Home<"
       refute_lists_translation_missing!(response.body)
     end
