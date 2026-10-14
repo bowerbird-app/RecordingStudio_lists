@@ -17,9 +17,10 @@ text, flash notices, and error messages stay byte-identical to 0.6.0 / main.
 - Fallback comes from the loaded English, host overrides included.
 - Only this gem's `recording_studio.lists.*` keys use `RecordingStudio.t`;
   host or other-namespace keys stay on `I18n.t` with main's `default:`.
-- Interpolating caller `default:` on a missing `_html` key is stricter than
-  view `t` (args escaped, result html_safe). Non-interpolating caller defaults
-  on a missing `_html` key stay unsafe like view `t`.
+- A plain `default:` with no interpolation is returned as a plain
+  (non-html_safe) String, so views will escape it. Interpolating caller
+  `default:` on a missing `_html` key is stricter than view `t` (args escaped,
+  result html_safe).
 
 ### Upgrade Steps
 

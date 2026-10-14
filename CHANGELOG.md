@@ -38,9 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fallback comes from the loaded English, host overrides included.
 - Only this gem's `recording_studio.lists.*` keys use `RecordingStudio.t`;
   host or other-namespace keys stay on `I18n.t` with main's `default:`.
-- A missing `_html` key with a non-interpolating caller `default:` stays
-  unsafe like view `t`; interpolating caller `default:` on a missing `_html`
-  key is stricter than main/view `t` (args escaped, result html_safe).
+- A plain `default:` with no interpolation is returned as a plain
+  (non-html_safe) String, so views will escape it. Interpolating caller
+  `default:` on a missing `_html` key is stricter than main/view `t` (args
+  escaped, result html_safe).
 - See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-070).
 
 ## [0.6.0] - 2026-10-14
@@ -249,12 +250,12 @@ New addons copied from this template are born on Recording Studio 4.x.
 [Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.7.0...HEAD
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.5.0
-[0.4.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.4.0
-[0.3.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.3.0
-[0.2.2]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.2
-[0.2.1]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.1
-[0.2.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.0
-[0.1.2]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.1.2
-[0.1.1]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.1.1
-[0.1.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.1.0
+[0.5.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/bowerbird-app/RecordingStudio_lists/releases/tag/v0.3.0
+[0.2.2]: https://github.com/bowerbird-app/RecordingStudio_lists/releases/tag/v0.2.2
+[0.2.1]: https://github.com/bowerbird-app/RecordingStudio_lists/releases/tag/v0.2.1
+[0.2.0]: https://github.com/bowerbird-app/RecordingStudio_lists/releases/tag/v0.2.0
+[0.1.2]: https://github.com/bowerbird-app/RecordingStudio_lists/releases/tag/v0.1.2
+[0.1.1]: https://github.com/bowerbird-app/RecordingStudio_lists/releases/tag/v0.1.1
+[0.1.0]: https://github.com/bowerbird-app/RecordingStudio_lists/releases/tag/v0.1.0

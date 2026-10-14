@@ -101,7 +101,7 @@ class ListsEnglishFallbackTest < ActionDispatch::IntegrationTest
 
           assert_response :success, "expected 200 in #{locale} raise=#{raise_on_missing}"
           assert_select "h1", text: "Lists"
-          assert_includes response.body, "No lists yet."
+          assert_select "h3", text: "No lists yet."
           refute_lists_translation_missing!(response.body)
         end
       end
