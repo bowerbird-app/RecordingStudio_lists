@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_044345) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_050001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -98,9 +98,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_044345) do
   create_table "recording_studio_list_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.uuid "item_recording_id", null: false
-    t.integer "position", null: false
     t.index ["item_recording_id"], name: "index_recording_studio_list_items_on_item_recording_id"
-    t.check_constraint "\"position\" >= 1", name: "recording_studio_list_items_position_check"
   end
 
   create_table "recording_studio_lists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -114,9 +112,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_044345) do
     t.uuid "parent_recording_id"
     t.uuid "recordable_id", null: false
     t.string "recordable_type", null: false
+    t.integer "recording_studio_orderable_position"
     t.uuid "root_recording_id"
     t.datetime "trashed_at"
     t.datetime "updated_at", null: false
+    t.index ["parent_recording_id", "recording_studio_orderable_position"], name: "idx_rs_recordings_orderable_sibling_position"
     t.index ["parent_recording_id"], name: "index_recording_studio_recordings_on_parent_recording_id"
     t.index ["recordable_type", "recordable_id", "parent_recording_id", "trashed_at"], name: "index_recording_studio_recordings_on_recordable_parent_trashed"
     t.index ["recordable_type", "recordable_id"], name: "index_recording_studio_recordings_on_recordable"
