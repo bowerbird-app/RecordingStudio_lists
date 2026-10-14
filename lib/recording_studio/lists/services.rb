@@ -37,11 +37,15 @@ module RecordingStudio
         end
 
         def list_item_recordings(list)
+          ordered_list_item_recordings(list).includes(recordable: :item_recording).to_a
+        end
+
+        def ordered_list_item_recordings(list)
+          return list.recording_studio_orderable_children if list.respond_to?(:recording_studio_orderable_children)
+
           RecordingStudio::Recording
             .where(parent_recording_id: list.id, recordable_type: ITEM_TYPE)
-            .includes(recordable: :item_recording)
-            .to_a
-            .sort_by { |child| [child.recordable.position.to_i, child.id.to_s] }
+            .reorder(:recording_studio_orderable_position, :created_at, :id)
         end
 
         def lock_list!(list)
@@ -163,11 +167,10 @@ module RecordingStudio
             lock_list!(list)
             next if member?(list, target)
 
-            position = next_position(list)
-            list.record(RecordingStudio::Lists::ListItem, parent_recording: list, actor: @actor) do |item|
+            child = list.record(RecordingStudio::Lists::ListItem, parent_recording: list, actor: @actor) do |item|
               item.item_recording = target
-              item.position = position
             end
+            place_at_end!(list, child)
           end
         end
 
@@ -177,8 +180,20 @@ module RecordingStudio
           end
         end
 
-        def next_position(list)
-          positions = list_item_recordings(list).map { |child| child.recordable.position.to_i }
+        def place_at_end!(list, child)
+          # Write max+1 only. Do not call Orderable append!/reorder! — those
+          # renumber siblings and may log a "reordered" event / run Orderable's
+          # access check. Membership add matches main: no reorder side effects.
+          assign_next_orderable_position!(list, child)
+        end
+
+        def assign_next_orderable_position!(list, child)
+          child.update!(recording_studio_orderable_position: next_orderable_position(list, excluding: child))
+        end
+
+        def next_orderable_position(list, excluding:)
+          siblings = list_item_recordings(list).reject { |recording| recording.id == excluding.id }
+          positions = siblings.filter_map(&:recording_studio_orderable_position)
           return 1 if positions.empty?
 
           positions.max + 1
