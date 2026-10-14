@@ -42,6 +42,7 @@ class TranslationTest < ActiveSupport::TestCase
   end
 
   test "engine registers lists en.yml into merged shipped english table" do
+    # Assert boot registration only — do not call the initializer block here.
     en_path = File.expand_path("../config/locales/en.yml", __dir__)
     paths = RecordingStudio::Translation.send(:registered_shipped_english_paths)
     assert_includes paths, File.expand_path(en_path)

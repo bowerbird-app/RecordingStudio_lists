@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `recording_studio.load_shipped_english`). Fallback comes from the loaded
   English, host overrides included, then the caller's `default:`, then the
   merged gem-shipped table.
-* Require Recording Studio `>= 4.7.0` (root and dummy GitHub pin `v4.7.0`)
+* Require Recording Studio `~> 4.7` (root and dummy GitHub pin `v4.7.0`)
 
 ### Changed
 
@@ -31,14 +31,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Upgrade notes
 
 - No migration or host code change is required for English.
-- Pin Recording Studio `>= 4.7.0`. Addon engines that ship
+- Pin Recording Studio `~> 4.7`. Addon engines that ship
   `recording_studio.lists.*` English rely on
   `RecordingStudio::Translation.register_shipped_english` so keys remain
   available after the loaded `:en` backend is pruned.
 - Fallback comes from the loaded English, host overrides included.
+- Only this gem's `recording_studio.lists.*` keys use `RecordingStudio.t`;
+  host or other-namespace keys stay on `I18n.t` with main's `default:`.
 - A missing `_html` key with a non-interpolating caller `default:` stays
   unsafe like view `t`; interpolating caller `default:` on a missing `_html`
-  key is stricter (args escaped, result html_safe).
+  key is stricter than main/view `t` (args escaped, result html_safe).
 - See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-070).
 
 ## [0.5.0] - 2026-10-12

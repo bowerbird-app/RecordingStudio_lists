@@ -13,8 +13,10 @@ text, flash notices, and error messages stay byte-identical to 0.5.0 / main.
   `RecordingStudio::Translation.register_shipped_english` at boot so missing
   active-locale keys still show gem English after the loaded `:en` backend is
   pruned.
-- Requires Recording Studio `>= 4.7.0` (dummy pin `v4.7.0`).
+- Requires Recording Studio `~> 4.7` (dummy pin `v4.7.0`).
 - Fallback comes from the loaded English, host overrides included.
+- Only this gem's `recording_studio.lists.*` keys use `RecordingStudio.t`;
+  host or other-namespace keys stay on `I18n.t` with main's `default:`.
 - Interpolating caller `default:` on a missing `_html` key is stricter than
   view `t` (args escaped, result html_safe). Non-interpolating caller defaults
   on a missing `_html` key stay unsafe like view `t`.
@@ -22,7 +24,7 @@ text, flash notices, and error messages stay byte-identical to 0.5.0 / main.
 ### Upgrade Steps
 
 No migration is required. English hosts need no change beyond pinning
-Recording Studio `>= 4.7.0`. Host overrides still belong under
+Recording Studio `~> 4.7`. Host overrides still belong under
 `recording_studio.lists` in the host's `config/locales`.
 
 ## Upgrading To 0.5.0
@@ -96,7 +98,7 @@ another language, set the `recording_studio.lists` keys in the host's
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio `>= 4.7.0` (gemspec; dummy GitHub tag `v4.7.0`)
+- Recording Studio `~> 4.7` (gemspec; dummy GitHub tag `v4.7.0`)
 - Accessible dummy tag `v0.17.0`, Trashable dummy tag `v0.10.0` (`require: false`), Root Switchable dummy tag `v0.9.0`, Metrics dummy tag `v0.2.0`, and Cache dummy tag `v0.5.0`
 - FlatPack dummy tag `v0.1.196`
 - Public RubyGems and GitHub access for dependency installation
