@@ -95,16 +95,16 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal "RecordingStudio::Lists::ListItem", child.recordable_type
     assert_equal first.id, child.recordable.item_recording_id
     assert_equal list.id, child.parent_recording_id
-    assert_equal 0, child.recording_studio_orderable_position
+    assert_equal 1, child.recording_studio_orderable_position
 
     assert_no_difference -> { RecordingStudio::Recording.where(parent_recording_id: list.id).count } do
       assert_equal first, RecordingStudio::Lists.add(list, first)
     end
-    assert_equal 0, list_item_for(list, first).recording_studio_orderable_position
+    assert_equal 1, list_item_for(list, first).recording_studio_orderable_position
 
     RecordingStudio::Lists.add(list, second)
     assert_equal [first, second], RecordingStudio::Lists.items(list)
-    assert_equal [0, 1], item_positions(list)
+    assert_equal [1, 2], item_positions(list)
     ordered_item_ids = list.recording_studio_orderable_children.map { |child| child.recordable.item_recording_id }
     assert_equal [first.id, second.id], ordered_item_ids
 
@@ -112,6 +112,28 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal [first], RecordingStudio::Lists.items(other)
     assert_equal [first, second], RecordingStudio::Lists.items(list)
     assert_equal 3, RecordingStudio::Recording.where(recordable_type: "RecordingStudio::Lists::ListItem").count
+  end
+
+  test "add writes max+1 without renumbering siblings or logging reordered" do
+    root = workspace_root
+    first = page_under(root, "Keep")
+    second = page_under(root, "Next")
+    list = RecordingStudio::Lists.create(parent: root, name: "No Reorder Event")
+
+    RecordingStudio::Lists.add(list, first)
+    existing = list_item_for(list, first)
+    existing.update!(recording_studio_orderable_position: 7)
+    sibling_updated_at = existing.reload.updated_at
+
+    assert_no_difference -> { reorder_event_count(list) } do
+      RecordingStudio::Lists.add(list, second)
+    end
+
+    existing.reload
+    assert_equal 7, existing.recording_studio_orderable_position
+    assert_equal sibling_updated_at.to_i, existing.updated_at.to_i
+    assert_equal 8, list_item_for(list, second).recording_studio_orderable_position
+    assert_equal [first, second], RecordingStudio::Lists.items(list)
   end
 
   test "reorder through orderable keeps Lists.items in the new order" do
@@ -257,6 +279,10 @@ class ListsBehaviorTest < ActiveSupport::TestCase
 
   def item_positions(list)
     list.recording_studio_orderable_children.reload.map(&:recording_studio_orderable_position)
+  end
+
+  def reorder_event_count(list)
+    RecordingStudio::Event.where(recording_id: list.id, action: "reordered").count
   end
 
   def unique_name(prefix)

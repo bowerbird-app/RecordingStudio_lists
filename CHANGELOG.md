@@ -15,8 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   opts into `RecordingStudio::Capabilities::Orderable.to(allows: ["RecordingStudio::Lists::ListItem"])`.
   Membership order is stored on `recording_studio_recordings.recording_studio_orderable_position`
   instead of a lists-owned `position` column on `recording_studio_list_items`.
-* `RecordingStudio::Lists.add` / `items` read and append through Orderable
-  (`recording_studio_orderable_children`, `recording_studio_orderable_append!`).
+* `RecordingStudio::Lists.items` reads through `recording_studio_orderable_children`.
+  `RecordingStudio::Lists.add` writes `max + 1` onto Orderable storage only — it does
+  not call `recording_studio_orderable_append!` / reorder, so it does not renumber
+  siblings, log a `reordered` event, or run Orderable's reorder access check (same
+  as main's membership add).
 * Gemspec depends on `recording_studio_orderable`, `~> 0.3`. Root and dummy Gemfiles
   pin GitHub tag `v0.3.1`.
 
@@ -32,11 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Run `bin/rails generate recording_studio_orderable:migrations` and migrate so
   `recording_studio_orderable_position` exists before the lists data migration.
 - Run `bin/rails generate recording_studio_lists:migrations` then `bin/rails db:migrate`.
-  The data migration copies each list item's `position` onto the child recording's
-  `recording_studio_orderable_position` (same integers, order unchanged), then drops
-  the lists-owned column and check constraint. `down` restores the column and
-  renumbers each list to contiguous 1-based positions from the current Orderable
-  order (so `position >= 1` holds even after 0-based Orderable writes).
+  The data migration backfills each list-item recording with a per-parent
+  `ROW_NUMBER()` ordered by `COALESCE(position, 0), recording id` (main's read
+  order, including ties and nulls), then drops the lists-owned column and check
+  constraint. `down` restores the column and renumbers each list to contiguous
+  1-based positions from the current Orderable order.
 - Public `RecordingStudio::Lists` call sites are unchanged. Hosts that call
   `recordable.position` on list items must switch to Orderable
   (`recording.recording_studio_orderable_position` or

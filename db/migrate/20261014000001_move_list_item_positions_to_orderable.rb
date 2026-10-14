@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# Copies each list item's owned `position` onto Orderable's
-# `recording_studio_orderable_position` on the child recording (same integer,
-# so relative order is unchanged), then drops the lists-owned column and check
-# constraint. Requires the Orderable migration to have run first.
+# Backfills Orderable sibling positions from the lists-owned `position` column
+# using per-parent ROW_NUMBER (ordered like main's read: position, then id),
+# then drops the lists-owned column and check constraint. Requires the
+# Orderable migration to have run first.
 class MoveListItemPositionsToOrderable < ActiveRecord::Migration[8.1]
   POSITION_CHECK = "recording_studio_list_items_position_check"
   LIST_ITEM_TYPE = "RecordingStudio::Lists::ListItem"
@@ -28,6 +28,21 @@ class MoveListItemPositionsToOrderable < ActiveRecord::Migration[8.1]
     UPDATE recording_studio_list_items
     SET position = 1
     WHERE position IS NULL
+  SQL
+  BACKFILL_ORDERABLE_SQL = <<~SQL.squish
+    UPDATE recording_studio_recordings AS recordings
+    SET recording_studio_orderable_position = ordered.position
+    FROM (
+      SELECT recordings.id AS recording_id,
+             ROW_NUMBER() OVER (
+               PARTITION BY recordings.parent_recording_id
+               ORDER BY COALESCE(list_items.position, 0) ASC, recordings.id ASC
+             ) AS position
+      FROM recording_studio_recordings AS recordings
+      JOIN recording_studio_list_items AS list_items ON list_items.id = recordings.recordable_id
+      WHERE recordings.recordable_type = '#{LIST_ITEM_TYPE}'
+    ) AS ordered
+    WHERE recordings.id = ordered.recording_id
   SQL
 
   def up
@@ -63,13 +78,7 @@ class MoveListItemPositionsToOrderable < ActiveRecord::Migration[8.1]
   end
 
   def backfill_orderable_from_position!
-    execute <<~SQL.squish
-      UPDATE recording_studio_recordings AS recordings
-      SET recording_studio_orderable_position = list_items.position
-      FROM recording_studio_list_items AS list_items
-      WHERE recordings.recordable_type = '#{LIST_ITEM_TYPE}'
-        AND recordings.recordable_id = list_items.id
-    SQL
+    execute BACKFILL_ORDERABLE_SQL
   end
 
   def backfill_position_from_orderable!

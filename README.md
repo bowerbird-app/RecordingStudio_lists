@@ -43,6 +43,11 @@ RecordingStudio.enable_capability(:lists, on: Workspace)
 `RecordingStudio::Lists::List` already includes Orderable for its list-item
 children. Hosts do not enable `:orderable` separately for lists.
 
+`RecordingStudio::Lists.add` writes the next Orderable position (`max + 1`) and
+does not call Orderable `append!` / reorder. Membership add therefore does not
+renumber siblings, log a `reordered` event, or run Orderable's reorder access
+check — same as main.
+
 ## Ruby
 
 ```ruby

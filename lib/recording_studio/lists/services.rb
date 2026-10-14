@@ -181,13 +181,9 @@ module RecordingStudio
         end
 
         def place_at_end!(list, child)
-          if list.respond_to?(:recording_studio_orderable_append!)
-            list.recording_studio_orderable_append!(child, actor: @actor)
-          else
-            assign_next_orderable_position!(list, child)
-          end
-        rescue ArgumentError, RecordingStudioOrderable::InvalidChild
-          # Orderable may require edit access; list membership already decided to add.
+          # Write max+1 only. Do not call Orderable append!/reorder! — those
+          # renumber siblings and may log a "reordered" event / run Orderable's
+          # access check. Membership add matches main: no reorder side effects.
           assign_next_orderable_position!(list, child)
         end
 

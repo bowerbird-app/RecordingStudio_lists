@@ -52,13 +52,49 @@ class MoveListItemPositionsToOrderableMigrationTest < ActiveSupport::TestCase
     list.reload
     children_after = list.recording_studio_orderable_children.reload.to_a
     assert_equal children_before.map(&:id), children_after.map(&:id)
-    assert_equal [10, 20, 30], children_after.map(&:recording_studio_orderable_position)
+    # up renumbers with ROW_NUMBER in main's read order (position, id).
+    assert_equal [1, 2, 3], children_after.map(&:recording_studio_orderable_position)
     assert_equal [first, second, third], RecordingStudio::Lists.items(list)
 
     # Existing call sites still append and read in order after the migration.
     fourth = page_under(root, "Fourth")
     RecordingStudio::Lists.add(list, fourth)
     assert_equal [first, second, third, fourth], RecordingStudio::Lists.items(list)
+  end
+
+  test "up preserves main read order for tied and NULL positions" do
+    root = workspace_root
+    first = page_under(root, "Tie A")
+    second = page_under(root, "Tie B")
+    third = page_under(root, "Nullish")
+    list = RecordingStudio::Lists.create(parent: root, name: unique_name("Tied Positions"))
+
+    RecordingStudio::Lists.add(list, first)
+    RecordingStudio::Lists.add(list, second)
+    RecordingStudio::Lists.add(list, third)
+    children = list.recording_studio_orderable_children.to_a
+    # Stable id order among ties: smaller id first.
+    earlier, later = children[0..1].sort_by { |recording| recording.id.to_s }
+    nullish = children[2]
+
+    @migration.down
+    allow_nullable_owned_positions!
+    seed_owned_positions!(earlier => 5, later => 5)
+    set_owned_position_null!(nullish)
+    clear_orderable_positions!(children)
+
+    expected_ids = [nullish, earlier, later].map(&:id)
+    assert_equal expected_ids, main_read_order_ids(list)
+
+    @migration.up
+
+    ordered = list.recording_studio_orderable_children.reload.to_a
+    assert_equal expected_ids, ordered.map(&:id)
+    assert_equal [1, 2, 3], ordered.map(&:recording_studio_orderable_position)
+    assert_equal(
+      [nullish, earlier, later].map { |recording| recording.recordable.item_recording_id },
+      RecordingStudio::Lists.items(list).map(&:id)
+    )
   end
 
   test "down restores the position column from orderable values" do
@@ -95,6 +131,35 @@ class MoveListItemPositionsToOrderableMigrationTest < ActiveSupport::TestCase
         WHERE id = '#{recording.recordable_id}'
       SQL
     end
+  end
+
+  def allow_nullable_owned_positions!
+    if @connection.check_constraint_exists?(:recording_studio_list_items,
+                                            name: "recording_studio_list_items_position_check")
+      @connection.remove_check_constraint :recording_studio_list_items,
+                                          name: "recording_studio_list_items_position_check"
+    end
+    @connection.change_column_null :recording_studio_list_items, :position, true
+  end
+
+  def set_owned_position_null!(recording)
+    @connection.execute(<<~SQL.squish)
+      UPDATE recording_studio_list_items
+      SET position = NULL
+      WHERE id = '#{recording.recordable_id}'
+    SQL
+  end
+
+  def main_read_order_ids(list)
+    @connection.select_values(<<~SQL.squish)
+      SELECT recordings.id
+      FROM recording_studio_recordings AS recordings
+      JOIN recording_studio_list_items AS list_items
+        ON list_items.id = recordings.recordable_id
+      WHERE recordings.parent_recording_id = '#{list.id}'
+        AND recordings.recordable_type = 'RecordingStudio::Lists::ListItem'
+      ORDER BY COALESCE(list_items.position, 0) ASC, recordings.id ASC
+    SQL
   end
 
   def clear_orderable_positions!(recordings)

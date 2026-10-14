@@ -9,9 +9,10 @@ Orderable on the child recording.
 
 - `RecordingStudio::Lists::List` includes
   `RecordingStudio::Capabilities::Orderable.to(allows: ["RecordingStudio::Lists::ListItem"])`.
-- `RecordingStudio::Lists.add` appends with `recording_studio_orderable_append!`
-  (falls back to writing `recording_studio_orderable_position` when Orderable
-  rejects the write, for example Accessible edit denied).
+- `RecordingStudio::Lists.add` writes `max + 1` onto
+  `recording_studio_orderable_position` only. It does not call Orderable
+  `append!` / reorder, so it does not renumber siblings, log `reordered`, or
+  enforce Orderable's reorder access check (same as main).
 - `RecordingStudio::Lists.items` (and internal membership reads) use
   `recording_studio_orderable_children`.
 - `recording_studio_list_items.position` and
@@ -23,17 +24,16 @@ Migration `MoveListItemPositionsToOrderable`:
 
 1. Requires `recording_studio_recordings.recording_studio_orderable_position`
    (install Orderable migrations first).
-2. **up:** `UPDATE` each list-item recording's
-   `recording_studio_orderable_position` from the list item's `position`
-   (same integer values, so relative order is unchanged), then drop the check
-   constraint and `position` column.
+2. **up:** per parent, set `recording_studio_orderable_position` to
+   `ROW_NUMBER()` ordered by `COALESCE(list_items.position, 0), recordings.id`
+   (main's read order for ties and nulls), then drop the check constraint and
+   `position` column.
 3. **down:** re-add `position` (nullable), renumber each list's items to
    contiguous 1-based `position` values from the current Orderable order
    (`ROW_NUMBER` by `recording_studio_orderable_position`, `created_at`, `id`),
    set any remaining nulls to `1`, make the column non-null, and restore
    `recording_studio_list_items_position_check` (`position >= 1`). Exact
-   integers may differ from pre-upgrade values when Orderable used 0-based
-   indexes; relative order is preserved.
+   integers may differ from pre-upgrade values; relative order is preserved.
 
 ### Upgrade Steps
 
