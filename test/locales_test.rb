@@ -199,7 +199,7 @@ class LocalesTest < ActiveSupport::TestCase
     end
     assert_equal "recording_studio.load_shipped_english", initializer.before
 
-    # Boot already ran registration. Do not call initializer.block — this
+    # Boot-time registration only. Do not call initializer.block — this
     # assertion must fail on its own if the path was never registered.
     expected = File.expand_path(
       RecordingStudioLists::Engine.root.join("config/locales/en.yml")
