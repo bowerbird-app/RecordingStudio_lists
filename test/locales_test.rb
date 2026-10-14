@@ -181,9 +181,23 @@ class LocalesTest < ActiveSupport::TestCase
       )
       assert_equal(
         "Le nom ne peut pas être vide.",
-        RecordingStudioLists::Copy.t("errors.blank_name", default: "Name can't be blank.")
+        RecordingStudioLists::Copy.t("errors.blank_name")
+      )
+      assert_equal(
+        "Le nom ne peut pas être vide.",
+        RecordingStudio.t("recording_studio.lists.errors.blank_name")
       )
     end
+  end
+
+  test "engine registers shipped english before recording_studio load" do
+    names = RecordingStudioLists::Engine.initializers.map(&:name)
+    assert_includes names, "recording_studio_lists.register_shipped_english"
+
+    initializer = RecordingStudioLists::Engine.initializers.find do |entry|
+      entry.name == "recording_studio_lists.register_shipped_english"
+    end
+    assert_equal "recording_studio.load_shipped_english", initializer.before
   end
 
   private
@@ -193,6 +207,7 @@ class LocalesTest < ActiveSupport::TestCase
 
     assert_equal english, translation, "#{full_key} should resolve to #{english.inspect}"
     assert_equal english, I18n.t(full_key, raise: true)
+    assert_equal english, RecordingStudio.t(full_key)
   end
 
   def engine_locales_dir

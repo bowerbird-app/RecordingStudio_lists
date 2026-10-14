@@ -11,7 +11,7 @@
   <% end %>
 
   <% trigger_attributes = { type: "button" } %>
-  <% trigger_attributes[:aria] = { label: t("recording_studio.lists.add_to_list.trigger", default: "Add to list") } if text.blank? %>
+  <% trigger_attributes[:aria] = { label: RecordingStudio.t("recording_studio.lists.add_to_list.trigger") } if text.blank? %>
 
   <%= render FlatPack::Button::Dropdown::Component.new(
     text: text,
@@ -39,7 +39,7 @@
       }.compact
     ) %>
     <% dropdown.menu_item(
-      text: t("recording_studio.lists.add_to_list.new_list", default: "List"),
+      text: RecordingStudio.t("recording_studio.lists.add_to_list.new_list"),
       icon: "plus",
       href: new_list_href,
       data: { recording_studio_lists__add_to_list_target: "reveal" }
@@ -51,8 +51,8 @@
         class: "flex flex-col items-start gap-2 px-2 pb-2",
         data: {
           recording_studio_lists__add_to_list_target: "create",
-          blank_name: t("recording_studio.lists.js.blank_name", default: "Name can't be blank."),
-          save_failed: t("recording_studio.lists.js.save_failed", default: "That didn't save. Try again."),
+          blank_name: RecordingStudio.t("recording_studio.lists.js.blank_name"),
+          save_failed: RecordingStudio.t("recording_studio.lists.js.save_failed"),
           turbo: false
         }
       } do %>
@@ -61,12 +61,12 @@
     <%= hidden_field_tag :return_to, return_to if return_to.present? %>
     <%= render FlatPack::TextInput::Component.new(
       name: "list[name]",
-      label: t("recording_studio.lists.add_to_list.name", default: "Name"),
+      label: RecordingStudio.t("recording_studio.lists.add_to_list.name"),
       autocomplete: "off",
       data: { recording_studio_lists__add_to_list_target: "name" }
     ) %>
     <p class="text-sm text-[var(--color-error)]" role="alert" data-recording-studio-lists--add-to-list-target="error"></p>
-    <%= render FlatPack::Button::Component.new(text: t("recording_studio.lists.add_to_list.save", default: "Save"), type: "submit", style: :primary, size: :sm) %>
+    <%= render FlatPack::Button::Component.new(text: RecordingStudio.t("recording_studio.lists.add_to_list.save"), type: "submit", style: :primary, size: :sm) %>
   <% end %>
 
   <template data-recording-studio-lists--add-to-list-target="row">

@@ -56,7 +56,7 @@ RecordingStudio::Lists.delete(list)
 
 The index lists names and member counts. New list asks for a name and an optional description. The list page removes a member or deletes the list.
 
-Static interface copy on these screens (and the add-to-list menu), controller flashes, error messages, and JS client strings use Rails I18n keys under `recording_studio.lists` at the render site. Public model and helper defaults stay English. The gem ships English only in `config/locales/en.yml`. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`.
+Static interface copy on these screens (and the add-to-list menu), controller flashes, error messages, and JS client strings resolve through `RecordingStudio.t` under `recording_studio.lists` at the render site. When the active locale has no value, fallback comes from the loaded English (host overrides included), then a caller `default:`, then the gem-shipped `config/locales/en.yml` registered at boot. Public model defaults stay English. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`. Requires Recording Studio `>= 4.7.0`.
 
 ## Add to a list
 

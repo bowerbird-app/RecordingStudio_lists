@@ -20,7 +20,7 @@ module RecordingStudioLists
       return render json: menu_list_payload(list), status: :created if menu_request?
 
       redirect_to safe_return_path || list_path(list),
-                  notice: Copy.t("flashes.created", default: "List created.")
+                  notice: Copy.t("flashes.created")
     end
 
     def respond_blank_name(error)
@@ -29,7 +29,7 @@ module RecordingStudioLists
       @name = list_params[:name]
       @description = list_params[:description]
       @idempotency_key = params[:idempotency_key].presence || SecureRandom.uuid
-      @name_error = Copy.t("errors.blank_name", default: "Name can't be blank.")
+      @name_error = Copy.t("errors.blank_name")
       assign_add_context
       render :new, status: :unprocessable_entity
     end
@@ -56,7 +56,7 @@ module RecordingStudioLists
     def list_error_copy(error)
       if error.is_a?(RecordingStudio::Lists::ParentNotAllowed) &&
          error.message == CHOOSE_PLACE_MESSAGE
-        return Copy.t("errors.choose_place", default: CHOOSE_PLACE_MESSAGE)
+        return Copy.t("errors.choose_place")
       end
 
       key = ERROR_COPY_KEYS[error.class]
@@ -65,7 +65,7 @@ module RecordingStudioLists
       default_message = error.class.new.message
       return error.message unless error.message == default_message
 
-      Copy.t("errors.#{key}", default: error.message)
+      Copy.t("errors.#{key}")
     end
 
     def menu_list_payload(list)
@@ -124,7 +124,7 @@ module RecordingStudioLists
     def add_item
       list = RecordingStudio::Lists.find(params[:id])
       RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
-      respond_membership(list, Copy.t("flashes.added", default: "Added."))
+      respond_membership(list, Copy.t("flashes.added"))
     rescue RecordingStudio::Lists::Error => e
       respond_membership_error(e)
     end
@@ -132,14 +132,14 @@ module RecordingStudioLists
     def remove_item
       list = RecordingStudio::Lists.find(params[:id])
       RecordingStudio::Lists.remove(list, params[:recording_id])
-      respond_membership(list, Copy.t("flashes.removed", default: "Removed."))
+      respond_membership(list, Copy.t("flashes.removed"))
     rescue RecordingStudio::Lists::Error => e
       respond_membership_error(e)
     end
 
     def destroy
       RecordingStudio::Lists.delete(params[:id])
-      redirect_to lists_path, notice: Copy.t("flashes.deleted", default: "List deleted.")
+      redirect_to lists_path, notice: Copy.t("flashes.deleted")
     rescue RecordingStudio::Lists::InvalidList => e
       redirect_to lists_path, alert: list_error_copy(e)
     end
