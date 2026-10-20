@@ -75,8 +75,9 @@ Static interface copy on these screens (and the add-to-list menu), controller fl
 
 ```erb
 <%= recording_studio_add_to_list(page) %>
+<%= recording_studio_add_to_list(page, icon: "heart", icon_only: true, round: true) %>
 ```
 
 The menu lists names under the current root. A check sits to the right of a name when the recording is already on that list, so the name stays put. Choosing a name without a check adds it and the check appears. Choosing a checked name removes it and the check goes away. The page stays put. List opens a name field in the menu. Saving creates the list, adds the recording, and checks the new name. The lists page still uses the new-list form when a description is needed.
 
-Pass `text:`, `icon:`, `style:`, `size:`, `show_chevron:`, `placement:`, `parent:`, or `return_to:` when the defaults are wrong. `text: ""` leaves the label off. `icon:` is any heroicon name. `show_chevron: false` hides the arrow. `parent:` defaults to the current root.
+Pass `text:`, `icon:`, `icon_only:`, `round:`, `style:`, `size:`, `show_chevron:`, `placement:`, `parent:`, or `return_to:` when the defaults are wrong. `text: ""` leaves the label off a labeled trigger. `icon:` is any heroicon name. Omit `show_chevron:` to keep the arrow on a labeled trigger and hide it on an icon-only trigger. `show_chevron: false` hides the arrow. `icon_only: true` with `show_chevron: true` raises `ArgumentError`. `round: true` draws a circle. `round:` must be `true` or `false`. An icon-only trigger with a blank `text:` uses `recording_studio.lists.add_to_list.icon_only` ("Add to list") as its accessible name. A non-blank `text:` is that name instead. `parent:` defaults to the current root. Hosts that pass `icon_only:` or `round:` need Flatpack >= 0.1.276.

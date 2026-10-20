@@ -1,5 +1,22 @@
 # Migration Notes
 
+## Upgrading To 0.8.0
+
+No migration is needed.
+
+### What Changed
+
+- `recording_studio_add_to_list` accepts `icon_only:` and `round:`.
+- A blank `text:` on an icon-only trigger uses
+  `recording_studio.lists.add_to_list.icon_only`.
+- `show_chevron` is omitted unless the caller sets it. Dropdown then shows the
+  chevron on a labeled trigger and hides it on an icon-only trigger.
+
+### Upgrade Steps
+
+No migration is required. A labeled trigger keeps its markup. Hosts that pass
+`icon_only:` or `round:` need Flatpack >= 0.1.276.
+
 ## Upgrading To 0.7.0
 
 This is a non-breaking upgrade for English hosts. Rendered English interface
@@ -145,10 +162,10 @@ another language, set the `recording_studio.lists` keys in the host's
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio `~> 4.7` (gemspec; dummy GitHub tag `v4.7.0`)
+- Recording Studio `~> 4.7` (gemspec; dummy GitHub tag `v4.7.1`)
 - Orderable `~> 0.3` (dummy GitHub tag `v0.3.1`)
 - Accessible dummy tag `v0.18.0`, Trashable dummy tag `v0.10.0` (`require: false`), Root Switchable dummy tag `v0.9.0`, Metrics dummy tag `v0.2.0`, and Cache dummy tag `v0.5.0`
-- FlatPack dummy tag `v0.1.196`
+- FlatPack dummy tag `v0.1.276`
 - Public RubyGems and GitHub access for dependency installation
 
 ## Verification
