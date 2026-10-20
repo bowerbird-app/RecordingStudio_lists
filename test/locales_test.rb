@@ -32,6 +32,7 @@ class LocalesTest < ActiveSupport::TestCase
 
   ADD_TO_LIST_KEYS = {
     "trigger" => "Add to list",
+    "icon_only" => "Add to list",
     "new_list" => "List",
     "name" => "Name",
     "save" => "Save"

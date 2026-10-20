@@ -10,20 +10,9 @@
     <% end %>
   <% end %>
 
-  <% trigger_attributes = { type: "button" } %>
-  <% trigger_attributes[:aria] = { label: RecordingStudio.t("recording_studio.lists.add_to_list.trigger") } if text.blank? %>
-
-  <%= render FlatPack::Button::Dropdown::Component.new(
-    text: text,
-    icon: icon,
-    style: style,
-    size: size,
-    show_chevron: show_chevron,
-    placement: placement,
-    trigger_attributes: trigger_attributes
-  ) do |dropdown| %>
+  <%= render FlatPack::Button::Dropdown::Component.new(**trigger) do |menu| %>
     <% rows.each do |row| %>
-      <% dropdown.menu_item(
+      <% menu.menu_item(
         text: row[:name],
         icon: ("check" if row[:member]),
         form: row[:form_id],
@@ -32,13 +21,13 @@
         data: { action: "click->recording-studio-lists--add-to-list#toggle" }
       ) %>
     <% end %>
-    <% dropdown.menu_divider(
+    <% menu.menu_divider(
       **{
         class: ("hidden" if rows.empty?),
         data: { recording_studio_lists__add_to_list_target: "divider" }
       }.compact
     ) %>
-    <% dropdown.menu_item(
+    <% menu.menu_item(
       text: RecordingStudio.t("recording_studio.lists.add_to_list.new_list"),
       icon: "plus",
       href: new_list_href,

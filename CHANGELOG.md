@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-20
+
+### Added
+
+* `recording_studio_add_to_list` accepts `icon_only:` and `round:` and passes
+  them to `FlatPack::Button::Dropdown`. Both default to `false`.
+* Shipped English `recording_studio.lists.add_to_list.icon_only` ("Add to list")
+  is the accessible name when an icon-only trigger's `text:` is blank.
+
+### Changed
+
+* `show_chevron` no longer defaults to `true`. When you omit it, Dropdown shows
+  the chevron on a labeled trigger and hides it on an icon-only trigger.
+  `icon_only: true` with `show_chevron: true` raises `ArgumentError`.
+* Development app pins Flatpack `v0.1.276` and Recording Studio `v4.7.1`.
+  Recording Studio 4.7.1 builds page nav with `with_back`, `with_close`, and
+  `with_item`. Flatpack 0.1.274 removed the old PageNav keywords.
+
+### Upgrade notes
+
+- No migration is required. A labeled trigger renders the same markup.
+- Hosts that pass `icon_only:` or `round:` need Flatpack >= 0.1.276.
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-080).
+
 ## [0.7.0] - 2026-10-14
 
 ### Added
@@ -164,7 +188,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Run `bin/rails generate recording_studio_lists:migrations`, then `bin/rails db:migrate`.
 - Mount `RecordingStudioLists::Engine` after the host routes.
 
-## [0.2.2] - 2026-09-11
+## 0.2.2 - 2026-09-11
 
 ### Changed
 - Gemspec `recording_studio` floor `~> 4.1` → `~> 4.2` so copied addons match Accessible 0.7+.
@@ -185,7 +209,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rebuild Tailwind after the FlatPack tag bump: `bin/rails tailwindcss:build`.
 - Align root gem-suite `Gemfile.lock` Rails to `8.1.3.1` if it is still on `8.1.1`.
 
-## [0.2.1] - 2026-09-01
+## 0.2.1 - 2026-09-01
 
 ### Added
 - Full Cloud Agent development environment. `.cursor/install.sh` now provisions the whole stack at Build time on Cursor's default image — Ruby (pinned by `.ruby-version`), PostgreSQL 16, gem dependencies for both the gem and the dummy host app, the seeded dummy database, and compiled Tailwind/FlatPack CSS — then runs the existing `.cursor/fetch-skills.sh`. `snapshot` stays omitted so Builds run `install` as before.
@@ -196,7 +220,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The install script is idempotent; running it against a warm machine reuses the existing Ruby, packages, and gems.
 - No gem runtime code changed. `.cursor/` files are excluded from the packaged gem.
 
-## [0.2.0] - 2026-08-21
+## 0.2.0 - 2026-08-21
 
 New addons copied from this template are born on Recording Studio 4.x.
 
@@ -224,17 +248,17 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Keep recordable declarations; they are required, not a v3-only concern
 - If Accessible is bundled, call `RecordingStudio.enable_capability(:accessible, on: Workspace)` (or your root type)
 
-## [0.1.2] - 2026-07-21
+## 0.1.2 - 2026-07-21
 
 ### Changed
 - Bumped the dummy app FlatPack dependency from `v0.1.33` to `v0.1.129`
 
-## [0.1.1] - 2026-04-28
+## 0.1.1 - 2026-04-28
 
 ### Changed
 - Bumped the dummy app FlatPack dependency from `0.1.2` to `0.1.33` and pinned it by tag in `test/dummy/Gemfile`
 
-## [0.1.0] - 2025-12-04
+## 0.1.0 - 2025-12-04
 
 ### Added
 - Initial release
@@ -247,15 +271,10 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.7.0...HEAD
-[0.7.0]: https://github.com/bowerbird-app/recording_studio_lists/compare/v0.6.0...v0.7.0
-[0.6.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.6.0
-[0.5.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.5.0
-[0.4.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.4.0
-[0.3.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.3.0
-[0.2.2]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.2
-[0.2.1]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.1
-[0.2.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.2.0
-[0.1.2]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.1.2
-[0.1.1]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.1.1
-[0.1.0]: https://github.com/bowerbird-app/recording_studio_lists/releases/tag/v0.1.0
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.6.0...v0.7.0
+[0.6.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/bowerbird-app/RecordingStudio_lists/releases/tag/v0.3.0

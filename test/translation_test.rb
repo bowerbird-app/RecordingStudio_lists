@@ -14,6 +14,7 @@ class TranslationTest < ActiveSupport::TestCase
     "recording_studio.lists.new.title" => "New list",
     "recording_studio.lists.show.empty" => "Nothing here yet.",
     "recording_studio.lists.add_to_list.trigger" => "Add to list",
+    "recording_studio.lists.add_to_list.icon_only" => "Add to list",
     "recording_studio.lists.flashes.created" => "List created.",
     "recording_studio.lists.errors.blank_name" => "Name can't be blank.",
     "recording_studio.lists.js.save_failed" => "That didn't save. Try again."

@@ -24,6 +24,7 @@ en:
           other: "%{count} items"
       add_to_list:
         trigger: "Add to list"
+        icon_only: "Add to list"
         new_list: "List"
         name: "Name"
         save: "Save"

@@ -7,6 +7,10 @@ module RecordingStudioLists
 
     def recording_studio_add_to_list(recording, **)
       options = add_to_list_options(**)
+      if options[:icon_only] && options[:show_chevron] == true
+        raise ArgumentError, "Icon-only dropdowns hide the chevron. Omit show_chevron or pass false."
+      end
+
       target = add_to_list_recording(recording)
       place = add_to_list_parent(options[:parent])
       return if target.nil? || place.nil?
@@ -79,13 +83,13 @@ module RecordingStudioLists
 
     def add_to_list_locals(target, place, options)
       return_path = add_to_list_return_path(options[:return_to])
-      options.slice(:icon, :style, :size, :show_chevron, :placement).merge(
-        text: options[:text].to_s,
+      {
+        trigger: AddToListTrigger.new(options).to_h,
         rows: add_to_list_rows(RecordingStudio::Lists.lists(place), target),
         new_list_href: add_to_list_new_href(target, return_path),
         recording_id: target.id,
         return_to: return_path
-      )
+      }
     end
 
     # Each keyword is a button or menu setting on the public helper.
@@ -94,7 +98,7 @@ module RecordingStudioLists
       icon: nil,
       style: :default,
       size: :md,
-      show_chevron: true,
+      show_chevron: nil, icon_only: false, round: false,
       placement: :bottom_left,
       parent: nil,
       return_to: nil
@@ -104,7 +108,7 @@ module RecordingStudioLists
         icon: icon,
         style: style,
         size: size,
-        show_chevron: show_chevron,
+        show_chevron: show_chevron, icon_only: icon_only, round: round,
         placement: placement,
         parent: parent,
         return_to: return_to

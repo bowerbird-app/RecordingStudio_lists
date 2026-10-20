@@ -191,11 +191,18 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, membership_queries
     assert_select "button", text: "Add to list" do |buttons|
       assert_select buttons.first, "svg[data-flat-pack--icon-name-value='chevron-down']"
+      refute_includes buttons.first["class"], "fp-hit-target"
+      assert_includes buttons.first["class"], "rounded-[var(--button-border-radius)]"
     end
-    assert_select "button[aria-label='Add to list'][data-fp-style='ghost']" do |buttons|
-      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='heart']"
-      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='chevron-down']", count: 0
-      assert_select buttons.first, "span", text: "Add to list", count: 0
+    assert_select "button.fp-hit-target[aria-label='Add to list']" do |buttons|
+      button = buttons.first
+      assert_includes button["class"], "rounded-[var(--button-round-border-radius)]"
+      assert_includes button["class"], "p-[var(--button-icon-only-padding-md)]"
+      assert_includes button["class"], "h-[var(--button-round-size-md)]"
+      assert_includes button["class"], "w-[var(--button-round-size-md)]"
+      assert_select button, "svg[data-flat-pack--icon-name-value='heart']"
+      assert_select button, "svg[data-flat-pack--icon-name-value='chevron-down']", count: 0
+      assert_select button, "span", count: 0
     end
     assert_includes response.body, "controllers/recording_studio_lists/add_to_list_controller"
     assert_select "[role=separator]", count: 2
@@ -236,6 +243,55 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
     get "/lists"
     assert_select "button", text: "Add to list", count: 0
+  end
+
+  test "icon only trigger uses copy or custom text and its menu adds" do
+    list = create_list("Heart Shelf")
+
+    get "/"
+
+    assert_response :success
+    heart = css_select("[data-controller='recording-studio-lists--add-to-list']").find do |node|
+      node.at_css("button.fp-hit-target")
+    end
+    assert heart.at_css("[role=menu]")
+    form = heart.at_css("form[action='/lists/#{list.id}/items']")
+    view = @controller.view_context
+
+    I18n.backend.store_translations(
+      :en,
+      recording_studio: {
+        lists: {
+          add_to_list: {
+            trigger: "HOST Add to list",
+            icon_only: "Saved for later"
+          }
+        }
+      }
+    )
+    blank = view.recording_studio_add_to_list(@page, parent: @root, icon: "heart", icon_only: true, text: "")
+    named = view.recording_studio_add_to_list(@page, parent: @root, icon: "heart", icon_only: true, text: "Keep this")
+    labeled = view.recording_studio_add_to_list(@page, parent: @root)
+
+    assert_includes blank, 'aria-label="Saved for later"'
+    refute_includes blank, "HOST Add to list"
+    assert_includes named, 'aria-label="Keep this"'
+    refute_includes named, "Saved for later"
+    assert_includes labeled, "HOST Add to list"
+    assert_includes labeled, "chevron-down"
+    refute_includes labeled, "fp-hit-target"
+
+    error = assert_raises(ArgumentError) do
+      view.recording_studio_add_to_list(@page, parent: @root, icon: "heart", icon_only: true, show_chevron: true)
+    end
+    assert_match(/chevron/i, error.message)
+
+    post form["action"], params: { recording_id: @page.id, return_to: "/" }
+
+    assert_redirected_to "/"
+    assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+  ensure
+    I18n.reload!
   end
 
   test "adding from the menu stays on the return path" do

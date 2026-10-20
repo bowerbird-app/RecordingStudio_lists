@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.7.0", ::RecordingStudioLists::VERSION
+    assert_equal "0.8.0", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -16,6 +16,7 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.7"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
+    refute_includes gemspec, "flat_pack"
   end
 
   def test_gemspec_excludes_cursor_config
@@ -45,14 +46,14 @@ class RecordingStudioListsTest < Minitest::Test
   def test_dummy_gemfile_pins_verified_4x_github_tags
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
 
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.7.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.7.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.196"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.276"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.133"'
     refute_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.0"'
@@ -235,8 +236,8 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes view_source, "dummy_page_nav"
     assert_includes view_source, "recording_studio_add_to_list(@featured_recording)"
     assert_includes view_source, 'icon: "heart"'
-    assert_includes view_source, "show_chevron: false"
-    assert_includes view_source, "style: :ghost"
+    assert_includes view_source, "icon_only: true"
+    assert_includes view_source, "round: true"
     refute_includes view_source, "Template Demo"
     refute_includes view_source, "FlatPack::Card::Component"
     refute_includes view_source, "FlatPack::Breadcrumb::Component"
