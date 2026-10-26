@@ -7,6 +7,12 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert_respond_to ApplicationController.helpers, :recording_studio_add_to_list
   end
 
+  test "legacy sibling engines include the removed default layout module" do
+    assert_includes RecordingStudioOrderable::ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+    refute_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+    refute_includes RecordingStudioLists::ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+  end
+
   test "dummy app loads root switchable config and controller support" do
     assert_equal [ "all_workspaces" ], RecordingStudioRootSwitchable.configuration.scopes.keys
     assert_equal :application_layout, RecordingStudioRootSwitchable.configuration.layout

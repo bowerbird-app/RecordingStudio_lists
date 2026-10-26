@@ -23,7 +23,7 @@ RecordingStudioLists.configure do |config|
 end
 ```
 
-Published Orderable, Accessible, Trashable, Root Switchable, Metrics, and Cache tags still require Recording Studio below 5. This gem's development Gemfiles widen that requirement while Bundler loads gemspecs. Host apps need addon releases that allow Recording Studio 6.1.0 before they can install this version next to those tags.
+Published Orderable, Accessible, Trashable, Root Switchable, Metrics, and Cache tags still require Recording Studio below 5. This gem's development Gemfiles widen that requirement while Bundler loads gemspecs. The dummy app defines `RecordingStudio::UsesDefaultLayout` so Orderable and Trashable can eager-load. List screens and the host controller do not include it. Host apps need addon releases that allow Recording Studio 6.1.0 before they can install this version next to those tags.
 
 ## Upgrading To 0.8.0
 
