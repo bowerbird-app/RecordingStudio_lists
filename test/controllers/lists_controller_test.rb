@@ -71,8 +71,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "div[class*='md:grid-cols-2']" do
       assert_select "form[action='#{list_url}']", count: 0
     end
-    assert_select "[data-controller='flat-pack--trash-button'][data-fp-expand='left']" do
-      assert_select "button", text: "Delete list"
+    assert_select "[data-controller='flat-pack--trash-button'][data-fp-expand='left'][aria-label='Delete list']" do
+      assert_select "button", text: "Delete list", count: 0
+      assert_select "[data-flat-pack--trash-button-target='arm'][aria-expanded='false']"
       assert_select "form[action='#{list_url}']" do
         assert_select "input[name='_method'][value='delete']"
         assert_select "button", text: "Delete this list?"

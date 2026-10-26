@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * List screens use the Recording Studio 6.1 default layout. The title and subtitle come from `content_for`. Back uses `flat_pack_page_nav`. The index registers the new-list action with `register_page_nav`.
-* Delete list is a Flatpack trash button in `content_for :page_nav_right`. It posts to the list with `method: :delete` and expands left. It is not a page-nav registry action.
+* Delete list is a Flatpack trash button in `content_for :page_nav_right`. At rest it is the trash icon, named Delete list. Armed, it posts to the list with `method: :delete`, expands left, and the confirm button says Delete this list? It is not a page-nav registry action.
 * `RecordingStudioLists.configuration.layout` accepts `nil`, `false`, a layout name, or a callable with the keyword `controller:`. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`.
 * Require Recording Studio `~> 6.1`. The development apps pin tag `v6.1.0`, Flatpack `v0.1.315`, and `view_component` `4.19.0`. Minitest stays below 6 so the suite keeps `stub`.
 * Development Ruby pin is `3.3.13`. The gem still requires Ruby `>= 3.3.0`. GitHub `ubuntu-latest` only installs the latest 3.3 patch.
