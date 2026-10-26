@@ -6,12 +6,20 @@ en:
         home: "Home"
         new_button: "List"
         empty: "No lists yet."
+        menu: "Actions"
+        edit: "Edit list"
       new:
         title: "New list"
         back: "Lists"
         name: "Name"
         description: "Description"
         create: "Create list"
+      edit:
+        title: "Edit list"
+        back: "Lists"
+        name: "Name"
+        description: "Description"
+        save: "Save"
       show:
         back: "Lists"
         empty: "Nothing here yet."
@@ -30,6 +38,7 @@ en:
         save: "Save"
       flashes:
         created: "List created."
+        updated: "List updated."
         added: "Added."
         removed: "Removed."
         deleted: "List deleted."

@@ -1,12 +1,10 @@
-<% dummy_page_nav(title: "Lists", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "Lists",
+  subtitle: "Name a list, then add the pages you want to keep together.",
+  back_url: root_path
+) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Lists",
-    subtitle: "Name a list, then add the pages you want to keep together.",
-    variant: :h1
-  ) %>
-
   <%= render FlatPack::Button::Component.new(
     text: "Open lists",
     href: recording_studio_lists.lists_path,

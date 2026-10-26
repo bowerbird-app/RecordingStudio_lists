@@ -3,13 +3,18 @@
 module RecordingStudioLists
   class Configuration
     attr_accessor :api_key, :enable_feature_x, :timeout
-    attr_reader :hooks
+    attr_reader :hooks, :layout
 
     def initialize
       @api_key = ENV.fetch("RECORDING_STUDIO_LISTS_API_KEY", nil)
       @enable_feature_x = false
       @timeout = 5
       @hooks = RecordingStudio::Hooks.new
+      @layout = nil
+    end
+
+    def layout=(value)
+      @layout = RecordingStudio::Layout.accept(value)
     end
 
     def to_h

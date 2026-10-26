@@ -34,6 +34,11 @@ module RecordingStudioLists
       render :new, status: :unprocessable_entity
     end
 
+    def respond_blank_edit
+      @name_error = Copy.t("errors.blank_name")
+      render :edit, status: :unprocessable_entity
+    end
+
     def respond_list_error(error)
       message = list_error_copy(error)
       return render json: { error: message }, status: :unprocessable_entity if menu_request?
@@ -92,10 +97,8 @@ module RecordingStudioLists
 
     def index
       @lists = RecordingStudio::Lists.lists(parent_recording)
-      @item_counts = item_counts_for(@lists)
     rescue RecordingStudio::Lists::ParentNotAllowed => e
       @lists = []
-      @item_counts = {}
       flash.now[:alert] = list_error_copy(e)
     end
 
@@ -137,6 +140,24 @@ module RecordingStudioLists
       respond_membership_error(e)
     end
 
+    def edit
+      @list = RecordingStudio::Lists.find(params[:id])
+      @name = @list.name
+      @description = @list.recordable.description
+      @return_to = safe_return_path
+    rescue RecordingStudio::Lists::InvalidList
+      head :not_found
+    end
+
+    def update
+      revise_submitted_list
+      redirect_to @return_to || lists_path, notice: Copy.t("flashes.updated")
+    rescue RecordingStudio::Lists::BlankName
+      respond_blank_edit
+    rescue RecordingStudio::Lists::InvalidList => e
+      redirect_to lists_path, alert: list_error_copy(e)
+    end
+
     def destroy
       RecordingStudio::Lists.delete(params[:id])
       redirect_to lists_path, notice: Copy.t("flashes.deleted")
@@ -145,6 +166,14 @@ module RecordingStudioLists
     end
 
     private
+
+    def revise_submitted_list
+      @list = RecordingStudio::Lists.find(params[:id])
+      @name = list_params[:name]
+      @description = list_params[:description]
+      @return_to = safe_return_path
+      RecordingStudio::Lists.update(@list, name: @name, description: @description, actor: current_actor)
+    end
 
     def build_list
       RecordingStudio::Lists.create(
@@ -180,17 +209,6 @@ module RecordingStudioLists
       return if params[:recording_id].blank?
 
       RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
-    end
-
-    def item_counts_for(lists)
-      ids = lists.map(&:id)
-      return {} if ids.empty?
-
-      RecordingStudio::Recording
-        .where(parent_recording_id: ids, recordable_type: RecordingStudio::Lists::ITEM_TYPE)
-        .group(:parent_recording_id)
-        .count
-        .transform_keys(&:to_s)
     end
   end
 end

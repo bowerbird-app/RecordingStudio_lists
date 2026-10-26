@@ -70,4 +70,27 @@ class ConfigurationTest < Minitest::Test
 
     assert_kind_of RecordingStudioLists::Configuration, RecordingStudioLists.configuration
   end
+
+  def test_layout_defaults_to_nil_and_rejects_invalid_values
+    assert_nil @configuration.layout
+
+    @configuration.layout = false
+    assert_equal false, @configuration.layout
+
+    @configuration.layout = "admin"
+    assert_equal "admin", @configuration.layout
+
+    callable = ->(controller:) { controller }
+    @configuration.layout = callable
+    assert_equal callable, @configuration.layout
+
+    assert_raises(ArgumentError) { @configuration.layout = "  " }
+    assert_equal callable, @configuration.layout
+    assert_raises(ArgumentError) { @configuration.layout = ->(_controller) { "admin" } }
+    assert_equal callable, @configuration.layout
+  end
+
+  def test_lists_controllers_do_not_hardcode_a_recording_studio_layout
+    assert_empty RecordingStudio::Layout.hardcoded_layout_paths(RecordingStudioLists::Engine.root)
+  end
 end

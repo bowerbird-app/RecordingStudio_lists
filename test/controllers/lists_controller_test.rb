@@ -33,10 +33,12 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     get "/lists"
 
     assert_response :success
-    assert_select "h1", text: "Lists"
+    assert_select "h1", text: "Lists", count: 1
     assert_select "h3", text: "No lists yet."
     assert_includes response.body, "Home"
-    assert_select "a", text: "List" do
+    assert_equal %w[h1 a], css_select("h1, a[href='/lists/new']").map(&:name)
+    assert_select "nav.flat-pack-page-nav a[href='/lists/new']", count: 0
+    assert_select "a[href='/lists/new']", text: "List", count: 1 do
       assert_select "svg[data-flat-pack--icon-name-value='plus']"
     end
     assert_select "a", text: "New list", count: 0
@@ -44,7 +46,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     get "/lists/new"
 
     assert_response :success
-    assert_select "h1", text: "New list"
+    assert_select "h1", text: "New list", count: 1
     assert_includes response.body, "Lists"
     assert_includes response.body, "Name"
     assert_includes response.body, "Description"
@@ -57,18 +59,49 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[name='idempotency_key']"
   end
 
-  test "empty list show renders empty copy and delete control" do
+  test "empty list show renders empty copy without a delete control" do
     list = create_list("Bare Shelf")
 
     get "/lists/#{list.id}"
 
     assert_response :success
+    assert_select "h1", text: "Bare Shelf", count: 1
     assert_includes response.body, "Bare Shelf"
     assert_includes response.body, "0 items"
-    assert_includes response.body, "Nothing here yet."
-    assert_select "button", text: "Delete list"
-    assert_select "form[data-turbo-confirm='Delete this list?']"
+    assert_select ".fp-empty-state" do
+      assert_select "h3", text: "Nothing here yet."
+    end
+    assert_select "div[class*='md:grid-cols-2']", count: 0
+    assert_select "[data-controller='flat-pack--trash-button']", count: 0
+    assert_select "button", text: "Delete list", count: 0
+    assert_select "button", text: "Delete this list?", count: 0
+    assert_select "form[data-turbo-confirm]", count: 0
     assert_includes response.body, "Lists"
+  end
+
+  test "show links a member the host can route and leaves the rest as text" do
+    list = create_list("Linked")
+    RecordingStudio::Lists.add(list, @page, actor: @user)
+    show_path = "/lists/#{list.id}"
+
+    get show_path
+
+    assert_response :success
+    assert_includes response.body, @page.name
+    assert_select "a", text: @page.name, count: 0
+
+    with_appended_routes(proc { get "/recordings/:id", to: "recordings#show", as: :recording }) do
+      get show_path
+
+      assert_select "a[href=?]", "/recordings/#{@page.id}", text: @page.name
+    end
+
+    with_appended_routes(proc { get "/pages/:id", to: "pages#show", as: :page }) do
+      get show_path
+
+      assert_select "a[href=?]", "/pages/#{@page.recordable.id}", text: @page.name
+      assert_select "a[href=?]", "/recordings/#{@page.id}", text: @page.name, count: 0
+    end
   end
 
   test "show falls back to Missing when a member recording is gone" do
@@ -122,13 +155,39 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Reading"
     assert_select "th", text: "Updated", count: 0
     assert_select "table", count: 0
+    list_id = show_path.split("/").last
+    form_id = "delete-list-#{list_id}"
     assert_select "div[class*='md:grid-cols-2']" do
-      assert_select "div[class*='p-[var(--card-padding-md)]']" do
-        assert_select "ul.flat-pack-list" do
-          assert_select "a", text: "Reading"
+      assert_select card_with_visible_frame do
+        assert_select "div[class*='p-[var(--card-padding-md)]']" do
+          assert_select "ul.flat-pack-list" do |lists|
+            assert_match(/!space-y-0/, lists.first["class"])
+            assert_select "a", text: "Reading"
+            assert_select "li" do |items|
+              assert_match(/!items-center/, items.first["class"])
+              assert_select "button[aria-label='Actions']" do
+                assert_select "svg[data-flat-pack--icon-name-value='ellipsis-vertical']"
+              end
+              assert_select "a[href=?]", "/lists/#{list_id}/edit", text: "Edit list" do |links|
+                assert_select links.first, "svg[data-flat-pack--icon-name-value='pencil']"
+              end
+              assert_select "button[type=submit][form=?]", form_id, text: "Delete list" do |buttons|
+                assert_includes buttons.first["class"], "text-danger-text-color"
+                assert_select buttons.first, "svg[data-flat-pack--icon-name-value='trash']"
+              end
+            end
+          end
         end
       end
     end
+    row = css_select("ul.flat-pack-list li").first
+    assert_operator row.to_html.index("Edit list"), :<, row.to_html.index("Delete list")
+    assert_select "nav.flat-pack-page-nav a[href='/lists/new']", count: 0
+    assert_select "form##{form_id}.hidden[action=?]", show_path do
+      assert_select "input[name=_method][value=delete]"
+    end
+    assert_select "[data-controller='flat-pack--trash-button']", count: 0
+    refute_theme_border_width
     assert_select "nav.flat-pack-page-nav" do
       assert_select "a", text: "Sign out", count: 0
       assert_select "a", text: "Lists", count: 0
@@ -145,10 +204,13 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "1 item"
     assert_includes response.body, "Added."
     assert_select "div[class*='md:grid-cols-2']" do
-      assert_select "div[class*='p-[var(--card-padding-md)]']" do
-        assert_select "ul.flat-pack-list"
+      assert_select card_with_visible_frame do
+        assert_select "div[class*='p-[var(--card-padding-md)]']" do
+          assert_select "ul.flat-pack-list"
+        end
       end
     end
+    refute_theme_border_width
     assert_select "table", count: 0
     assert_select "select[name='recording_id']", count: 0
     assert_select "button", text: "Remove", count: 0
@@ -160,7 +222,10 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", text: /#{Regexp.escape(@page.name)}/ do |items|
       assert_match(/!items-center/, items.first["class"])
       assert_select "button[aria-label='Remove']"
+      assert_select "a", text: @page.name, count: 0
     end
+    assert_select "[data-controller='flat-pack--trash-button']", count: 0
+    assert_select "button", text: "Delete list", count: 0
 
     delete "#{show_path}/items/#{@page.id}"
 
@@ -169,7 +234,6 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_includes response.body, "Removed."
 
-    list_id = show_path.split("/").last
     delete show_path
 
     assert_redirected_to "/lists"
@@ -421,7 +485,149 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Name can't be blank.", JSON.parse(response.body)["error"]
   end
 
+  test "layout falls back to the recording studio default" do
+    with_layouts(lists: nil, core: nil) do
+      get "/lists"
+
+      assert_response :success
+      assert_select "body[data-recording-studio-default-layout='true']", count: 1
+      assert_select "h1", text: "Lists", count: 1
+    end
+  end
+
+  test "core layout applies when the lists layout is nil" do
+    with_layouts(lists: nil, core: "application") do
+      get "/lists"
+
+      assert_response :success
+      assert_includes response.body, "min-h-screen"
+      assert_select "body[data-recording-studio-default-layout]", count: 0
+    end
+  end
+
+  test "a lists layout string overrides the core layout" do
+    with_layouts(lists: "application", core: "recording_studio/default_layout") do
+      get "/lists"
+
+      assert_response :success
+      assert_includes response.body, "min-h-screen"
+      assert_select "body[data-recording-studio-default-layout]", count: 0
+    end
+  end
+
+  test "a keyword layout callable overrides the core layout" do
+    callable = lambda do |controller:|
+      controller.controller_path == "recording_studio_lists/lists" ? "application" : nil
+    end
+
+    with_layouts(lists: callable, core: nil) do
+      get "/lists"
+
+      assert_response :success
+      assert_includes response.body, "min-h-screen"
+      assert_select "body[data-recording-studio-default-layout]", count: 0
+    end
+  end
+
+  test "a false lists layout renders the screen without a layout" do
+    with_layouts(lists: false, core: "recording_studio/default_layout") do
+      get "/lists"
+
+      assert_response :success
+      assert_includes response.body, "No lists yet."
+      refute_includes response.body, "<html"
+      assert_select "body[data-recording-studio-default-layout]", count: 0
+    end
+  end
+
+  test "edit and update revise the list" do
+    list = RecordingStudio::Lists.create(
+      parent: @root,
+      name: "Reading",
+      description: "Magazines",
+      actor: @user
+    )
+
+    get "/lists/#{list.id}/edit", params: { return_to: "https://evil.test/phish" }
+
+    assert_response :success
+    assert_select "input[name=return_to]", count: 0
+
+    get "/lists/#{list.id}/edit", params: { return_to: "/docs/methods" }
+
+    assert_response :success
+    assert_select "h1", text: "Edit list", count: 1
+    assert_select "input[name='list[name]'][value=?]", "Reading"
+    assert_select "textarea[name='list[description]']", text: "Magazines"
+    assert_select "label", text: "Name"
+    assert_select "label", text: "Description"
+    assert_select "form[action=?]", "/lists/#{list.id}" do
+      assert_select "input[name=_method][value=patch]"
+      assert_select "input[name=return_to][value=?]", "/docs/methods"
+    end
+    assert_select "div[class*='md:grid-cols-2']" do
+      assert_select "form.flex.flex-col[class*='gap-(--stack-gap-md)']"
+    end
+    assert_select "button", text: "Save"
+    assert_select "nav.flat-pack-page-nav a[href='/lists']"
+
+    patch "/lists/#{list.id}", params: {
+      list: { name: "  ", description: "Kept" },
+      return_to: "/docs/methods"
+    }
+
+    assert_response :unprocessable_entity
+    assert_select "p", text: "Name can't be blank."
+    assert_select "h1", text: "Edit list"
+    assert_equal "Reading", list.reload.recordable.name
+    assert_equal "Magazines", list.recordable.description
+
+    patch "/lists/#{list.id}", params: {
+      list: { name: "Updated", description: "New notes" },
+      return_to: "/docs/methods"
+    }
+
+    assert_redirected_to "/docs/methods"
+    follow_redirect!
+    assert_includes response.body, "List updated."
+    list.reload
+    assert_equal "Updated", list.name
+    assert_equal "New notes", list.recordable.description
+
+    patch "/lists/#{list.id}", params: {
+      list: { name: "From the index", description: "Still here" },
+      return_to: "https://evil.test/phish"
+    }
+
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "List updated."
+    assert_includes response.body, "From the index"
+
+    get "/lists/#{@page.id}/edit"
+
+    assert_response :not_found
+
+    patch "/lists/#{@page.id}", params: { list: { name: "Nope" } }
+
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "That list is missing."
+    assert_equal "From the index", list.reload.name
+  end
+
   private
+
+  def with_layouts(lists:, core:)
+    previous_lists = RecordingStudioLists.configuration.layout
+    previous_core = RecordingStudio.configuration.layout
+    RecordingStudioLists.configuration.layout = lists
+    RecordingStudio.configuration.layout = core
+    yield
+  ensure
+    RecordingStudioLists.configuration.layout = previous_lists
+    RecordingStudio.configuration.layout = previous_core
+  end
 
   def select_root(root)
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
@@ -433,6 +639,29 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
   def create_list(name)
     RecordingStudio::Lists.create(parent: @root, name: name, actor: @user)
+  end
+
+  def with_appended_routes(definition)
+    routes = Rails.application.routes
+    routes.disable_clear_and_finalize = true
+    routes.draw(&definition)
+    yield
+  ensure
+    Rails.application.reload_routes!
+  end
+
+  def card_with_visible_frame
+    "div.fp-card.border[class*='[background:var(--card-background-default)]']" \
+      "[class*='rounded-[var(--card-radius)]'][class*='border-[var(--card-border-color)]']"
+  end
+
+  def refute_theme_border_width
+    assert_select "div.fp-card" do |cards|
+      assert_operator cards.length, :>, 0
+      cards.each do |card|
+        refute_includes card["class"], "border-[length:var(--card-border-width)]"
+      end
+    end
   end
 
   def sql_during

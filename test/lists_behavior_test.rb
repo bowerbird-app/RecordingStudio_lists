@@ -73,6 +73,49 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal list, RecordingStudio::Lists.find(list.id)
   end
 
+  test "update revises the list and keeps the earlier snapshot" do
+    root = workspace_root
+    user = User.create!(
+      email: "lists-update-#{SecureRandom.hex(4)}@example.com",
+      password: "ListsTestPassword!2026",
+      password_confirmation: "ListsTestPassword!2026"
+    )
+    list = RecordingStudio::Lists.create(parent: root, name: "Shelf", description: "Notes", actor: user)
+    previous = list.recordable
+    page = page_under(root, "Not a list")
+
+    updated = RecordingStudio::Lists.update(list, name: "  Edited  ", description: "  ", actor: user)
+
+    assert_equal list.id, updated.id
+    updated.reload
+    assert_equal "Edited", updated.name
+    assert_nil updated.recordable.description
+    assert_equal "Shelf", previous.reload.name
+    assert_equal "Notes", previous.description
+    refute_equal previous.id, updated.recordable_id
+
+    event = RecordingStudio::Event.where(recording_id: list.id, action: "updated").sole
+    assert_equal user, event.actor
+    assert_equal previous, event.previous_recordable
+    assert_equal updated.recordable, event.recordable
+
+    assert_no_difference -> { RecordingStudio::Lists::List.count } do
+      assert_no_difference -> { RecordingStudio::Event.where(action: "updated").count } do
+        assert_raises(RecordingStudio::Lists::BlankName) do
+          RecordingStudio::Lists.update(list, name: "   ", description: "Ignored")
+        end
+      end
+    end
+    assert_equal "Edited", list.reload.name
+
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.update(page, name: "Nope") }
+    assert_raises(RecordingStudio::Lists::InvalidList) do
+      RecordingStudio::Lists.update(SecureRandom.uuid, name: "Nope")
+    end
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.update(nil, name: "Kept") }
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.update(page, name: "  ") }
+  end
+
   test "blank name is rejected before a list is written" do
     root = workspace_root
 

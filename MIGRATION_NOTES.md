@@ -1,5 +1,34 @@
 # Migration Notes
 
+## Upgrading To 0.9.0
+
+No migration is needed.
+
+### What Changed
+
+- List screens use `recording_studio/default_layout` unless you set a layout.
+- `RecordingStudioLists.configuration.layout` is checked first. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`.
+- Accepted values are `nil`, `false`, a layout name, and a callable that takes `controller:` as a keyword. `false` skips the layout. A blank name or a positional callable raises `ArgumentError`.
+- The lists controller no longer includes `RecordingStudio::UsesDefaultLayout`.
+- Page titles come from `content_for(:title)` and `content_for(:subtitle)`. Do not also render `FlatPack::PageTitle` on these screens.
+- Delete list is an Actions menu on each index row. The menu item says Delete list and posts to the list. Edit list sits above it and opens the edit form. The list page does not render a delete control. Item remove stays on the row. A member name is a link when the host can route that recordable or recording. Otherwise the name is plain text.
+- The new-list button sits in the page body, under the title. The index does not call `register_page_nav` for it.
+- `RecordingStudio::Lists.update(list, name:, description: nil, actor: nil)` revises the list. The recording id stays. A new list snapshot and an `updated` event are stored. A blank name raises `BlankName` and writes nothing. A missing list or another recordable raises `InvalidList`. Omit `description`, or pass a blank one, and the description is cleared.
+- Requires Recording Studio `~> 6.1` (development pin `v6.1.0`) and Flatpack `>= 0.1.315` (development pin `v0.1.315`).
+- Filled list index and show use `FlatPack::Card` with `border: :default`. A host that compiles Tailwind must scan the installed Flatpack gem so `border`, the card background, the card padding, and the card radius utilities are in the built CSS. The rounded theme's theme border width is 0, so leaving the card border unset draws no edge.
+
+### Upgrade Steps
+
+No migration is required. Pin Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`. Set `config.layout` only when the default cascade is wrong.
+
+```ruby
+RecordingStudioLists.configure do |config|
+  config.layout = "application"
+end
+```
+
+Published Orderable, Accessible, Trashable, Root Switchable, Metrics, and Cache tags still require Recording Studio below 5. This gem's development Gemfiles widen that requirement while Bundler loads gemspecs. The dummy app defines `RecordingStudio::UsesDefaultLayout` so Orderable and Trashable can eager-load. List screens and the host controller do not include it. Host apps need addon releases that allow Recording Studio 6.1.0 before they can install this version next to those tags.
+
 ## Upgrading To 0.8.0
 
 No migration is needed.
@@ -162,10 +191,11 @@ another language, set the `recording_studio.lists` keys in the host's
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio `~> 4.7` (gemspec; dummy GitHub tag `v4.7.1`)
+- Recording Studio `~> 6.1` (gemspec; development GitHub tag `v6.1.0`)
 - Orderable `~> 0.3` (dummy GitHub tag `v0.3.1`)
-- Accessible dummy tag `v0.18.0`, Trashable dummy tag `v0.10.0` (`require: false`), Root Switchable dummy tag `v0.9.0`, Metrics dummy tag `v0.2.0`, and Cache dummy tag `v0.5.0`
-- FlatPack dummy tag `v0.1.276`
+- Accessible dummy tag `v0.18.0`, Trashable dummy tag `v0.11.0` (`require: false`), Root Switchable dummy tag `v0.9.0`, Metrics dummy tag `v0.2.0`, and Cache dummy tag `v0.5.0`
+- Flatpack development tag `v0.1.315`
+- Published sibling tags still require Recording Studio below 5. The development Gemfiles widen that requirement at resolve time. Hosts need addon releases that allow 6.1.0.
 - Public RubyGems and GitHub access for dependency installation
 
 ## Verification

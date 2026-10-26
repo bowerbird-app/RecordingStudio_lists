@@ -4,17 +4,17 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.8.0", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.0", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
     assert_kind_of Class, ::RecordingStudioLists::Engine
   end
 
-  def test_gemspec_pins_recording_studio_4_7
+  def test_gemspec_pins_recording_studio_6_1
     gemspec = File.read(File.expand_path("../recording_studio_lists.gemspec", __dir__))
 
-    assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.7"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 6.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     refute_includes gemspec, "flat_pack"
   end
@@ -43,17 +43,26 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes install_script, "fetch-skills.sh"
   end
 
-  def test_dummy_gemfile_pins_verified_4x_github_tags
+  def test_dummy_gemfile_pins_verified_github_tags
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
+    root_gemfile = File.read(File.expand_path("../Gemfile", __dir__))
 
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.7.1"'
+    assert_includes gemfile, "widen_recording_studio_requirement"
+    assert_includes root_gemfile, "widen_recording_studio_requirement"
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.276"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.315"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.315"'
+    assert_includes gemfile, 'gem "view_component", "4.19.0"'
+    assert_includes root_gemfile, 'gem "view_component", "4.19.0"'
+    assert_includes gemfile, 'gem "minitest", ">= 5.26", "< 6"'
+    assert_includes root_gemfile, 'gem "minitest", ">= 5.26", "< 6"'
     refute_includes gemfile, "recording_studio/v3.0.0"
     refute_includes gemfile, 'tag: "v0.1.133"'
     refute_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.0"'
@@ -149,7 +158,7 @@ class RecordingStudioListsTest < Minitest::Test
     application_controller_path = File.expand_path("dummy/app/controllers/application_controller.rb", __dir__)
     controller_source = File.read(application_controller_path)
 
-    assert_includes controller_source, "include RecordingStudio::UsesDefaultLayout"
+    refute_includes controller_source, "UsesDefaultLayout"
     assert_includes controller_source, '"recording_studio/default_layout"'
     assert_includes controller_source, "devise_controller? ? \"application\""
     refute_includes controller_source, "flat_pack_sidebar"
@@ -175,13 +184,39 @@ class RecordingStudioListsTest < Minitest::Test
   def test_dummy_tailwind_keeps_flatpack_theme_selection_in_flatpack
     tailwind_source = File.read(File.expand_path("dummy/app/assets/tailwind/application.css", __dir__))
 
-    assert_includes tailwind_source, "../../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}"
-    assert_includes tailwind_source, "flatpack-*/app/components/**/*.{rb,erb}"
-    assert_includes tailwind_source, "../../../vendor/bundle/**/recording_studio/app/views/**/*.erb"
-    assert_includes tailwind_source, "recordingstudio-*/app/views/**/*.erb"
+    [
+      "../../../vendor/bundle/**/bundler/gems/flatpack-*/app/components",
+      "../../../vendor/bundle/**/bundler/gems/flatpack-*/app/helpers",
+      "../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/views",
+      "../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/helpers",
+      "../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/components",
+      "../../../../../vendor/bundle/**/bundler/gems/flatpack-*/app/components",
+      "../../../../../vendor/bundle/**/bundler/gems/flatpack-*/app/helpers",
+      "../../../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/views",
+      "../../../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/helpers",
+      "../../../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/components",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/helpers",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/RecordingStudio-*/app/views",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/RecordingStudio-*/app/helpers",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/RecordingStudio-*/app/components",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/components",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/helpers",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/views",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/helpers",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/components"
+    ].each do |source|
+      assert_includes tailwind_source, source
+    end
     refute_includes tailwind_source, "@theme"
     refute_includes tailwind_source, ":root {"
     refute_includes tailwind_source, "--color-fp-primary"
+
+    built = File.read(File.expand_path("dummy/app/assets/builds/tailwind.css", __dir__))
+    assert_includes built, ".\\[background\\:var\\(--card-background-default\\)\\]"
+    assert_includes built, ".border-\\[var\\(--card-border-color\\)\\]"
+    assert_includes built, ".p-\\[var\\(--card-padding-md\\)\\]"
+    assert_includes built, ".rounded-\\[var\\(--card-radius\\)\\]"
   end
 
   def test_recording_studio_keeps_strict_recordable_declarations_enabled
@@ -216,11 +251,13 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes readme, "enable_capability(:lists, on: Workspace)"
     assert_includes readme, "generate recording_studio_orderable:migrations"
     assert_includes readme, "RecordingStudio::Lists.create"
+    assert_includes readme, "RecordingStudio::Lists.update"
     assert_includes readme, "RecordingStudio::Lists.add"
     assert_includes readme, "RecordingStudio::Lists.delete"
     assert_includes readme, "/lists"
     assert_includes readme, "/lists/new"
     assert_includes readme, "/lists/:id"
+    assert_includes readme, "/lists/:id/edit"
     assert_includes readme, "recording_studio_add_to_list"
     refute_includes readme, "GemTemplate"
     refute_includes readme, "addon template"
@@ -273,7 +310,7 @@ class RecordingStudioListsTest < Minitest::Test
       view_source = File.read(view_path)
 
       assert_includes view_source, "dummy_page_nav"
-      assert_includes view_source, "FlatPack::PageTitle::Component"
+      refute_includes view_source, "FlatPack::PageTitle::Component"
       refute_includes view_source, "FlatPack::Card::Component"
       refute_includes view_source, "FlatPack::Breadcrumb::Component"
     end

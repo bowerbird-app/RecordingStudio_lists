@@ -1,21 +1,54 @@
-<% recording_studio_page_nav(title: RecordingStudio.t("recording_studio.lists.index.title"), page_nav_back_url: main_app.root_path, page_nav_back_label: RecordingStudio.t("recording_studio.lists.index.home")) %>
+<% content_for :title, RecordingStudio.t("recording_studio.lists.index.title") %>
+<% flat_pack_page_nav(
+     round: true,
+     style: :default,
+     back_href: main_app.root_path,
+     back_tooltip: RecordingStudio.t("recording_studio.lists.index.home")
+   ) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(title: RecordingStudio.t("recording_studio.lists.index.title"), variant: :h1) do |page_title| %>
-    <% page_title.slot do %>
-      <%= render FlatPack::Button::Component.new(text: RecordingStudio.t("recording_studio.lists.index.new_button"), icon: "plus", href: new_list_path, style: :primary) %>
-    <% end %>
-  <% end %>
-
+  <div class="flex items-center">
+    <%= render FlatPack::Button::Component.new(
+          text: RecordingStudio.t("recording_studio.lists.index.new_button"),
+          icon: "plus",
+          href: new_list_path,
+          style: :primary
+        ) %>
+  </div>
   <% if @lists.empty? %>
     <%= render FlatPack::EmptyState::Component.new(title: RecordingStudio.t("recording_studio.lists.index.empty")) %>
   <% else %>
     <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
-      <%= render FlatPack::Card::Component.new do |card| %>
+      <%= render FlatPack::Card::Component.new(border: :default) do |card| %>
         <% card.body do %>
-          <%= render FlatPack::List::Component.new(divider: true) do %>
+          <%= render FlatPack::List::Component.new(divider: true, class: "!space-y-0") do %>
             <% @lists.each do |list| %>
-              <%= render FlatPack::List::Item.new(trailing: @item_counts.fetch(list.id.to_s, 0).to_s) do %>
+              <% form_id = "delete-list-#{list.id}" %>
+              <% trailing = capture do %>
+                <%= form_with url: list_path(list), method: :delete, html: { id: form_id, class: "hidden" } do %>
+                <% end %>
+                <%= render FlatPack::Button::Dropdown::Component.new(
+                      text: RecordingStudio.t("recording_studio.lists.index.menu"),
+                      icon: "ellipsis-vertical",
+                      icon_only: true,
+                      style: :ghost,
+                      size: :sm
+                    ) do |menu| %>
+                  <% menu.menu_item(
+                       text: RecordingStudio.t("recording_studio.lists.index.edit"),
+                       icon: "pencil",
+                       href: edit_list_path(list)
+                     ) %>
+                  <% menu.menu_item(
+                       text: RecordingStudio.t("recording_studio.lists.show.delete"),
+                       icon: "trash",
+                       destructive: true,
+                       form: form_id,
+                       type: "submit"
+                     ) %>
+                <% end %>
+              <% end %>
+              <%= render FlatPack::List::Item.new(trailing: trailing, class: "!items-center") do %>
                 <%= render FlatPack::Link::Component.new(href: list_path(list)) do %>
                   <%= list.name %>
                 <% end %>

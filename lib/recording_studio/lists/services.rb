@@ -284,6 +284,39 @@ module RecordingStudio
         end
       end
 
+      class Update < RecordingStudio::Services::BaseService
+        include Resolve
+
+        def initialize(list:, name:, description: nil, actor: nil)
+          super()
+          @list = list
+          @name = name
+          @description = description
+          @actor = actor
+        end
+
+        def perform
+          list = require_list(@list)
+          return list if list.is_a?(RESULT)
+          return halt(BlankName.new) if @name.to_s.strip.empty?
+
+          success(revise_list(list))
+        end
+
+        private
+
+        def revise_list(list)
+          RecordingStudio::Recording.transaction do
+            lock_list!(list)
+            list.reload
+            list.root_recording_or_self.revise(list, actor: @actor) do |recordable|
+              recordable.name = @name.to_s.strip
+              recordable.description = @description.presence
+            end
+          end
+        end
+      end
+
       class Addable < RecordingStudio::Services::BaseService
         include Resolve
 

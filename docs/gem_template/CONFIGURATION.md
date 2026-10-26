@@ -35,10 +35,11 @@ This will:
 | `api_key`           | String  | `ENV["GEM_TEMPLATE_API_KEY"]`    | API key for external service integration.  |
 | `enable_feature_x`  | Boolean | `false`                          | Toggle optional feature X.                 |
 | `timeout`           | Integer | `5`                              | Timeout (seconds) for external calls.      |
+| `layout`            | nil, false, String, or callable | `nil` | Layout for list screens. `nil` uses the Recording Studio layout, then `"recording_studio/default_layout"`. |
 
 ### RecordingStudio Host-App Declarations
 
-The dummy host app pins RecordingStudio to GitHub tag `v4.7.1` (`~> 4.7` in the gemspec) and keeps strict recordable declarations enabled:
+The dummy host app pins RecordingStudio to GitHub tag `v6.1.0` (`~> 6.1` in the gemspec) and keeps strict recordable declarations enabled:
 
 ```ruby
 RecordingStudio.configure do |config|
