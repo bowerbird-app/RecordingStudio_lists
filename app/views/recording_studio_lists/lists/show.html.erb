@@ -10,6 +10,16 @@
      back_href: lists_path,
      back_tooltip: RecordingStudio.t("recording_studio.lists.show.back")
    ) %>
+<% content_for :page_nav_right do %>
+  <%= render FlatPack::TrashButton::Component.new(
+        url: list_path(@list),
+        method: :delete,
+        expand: :left,
+        size: :sm,
+        text: RecordingStudio.t("recording_studio.lists.show.delete"),
+        confirm_label: RecordingStudio.t("recording_studio.lists.show.delete_confirm")
+      ) %>
+<% end %>
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
@@ -43,10 +53,6 @@
             <% end %>
           <% end %>
         <% end %>
-      <% end %>
-
-      <%= form_with url: list_path(@list), method: :delete, data: { turbo_confirm: RecordingStudio.t("recording_studio.lists.show.delete_confirm") } do %>
-        <%= render FlatPack::Button::Component.new(text: RecordingStudio.t("recording_studio.lists.show.delete"), type: "submit", style: :danger) %>
       <% end %>
     </div>
   <% end %>

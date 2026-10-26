@@ -67,8 +67,18 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Bare Shelf"
     assert_includes response.body, "0 items"
     assert_includes response.body, "Nothing here yet."
-    assert_select "button", text: "Delete list"
-    assert_select "form[data-turbo-confirm='Delete this list?']"
+    list_url = "/lists/#{list.id}"
+    assert_select "div[class*='md:grid-cols-2']" do
+      assert_select "form[action='#{list_url}']", count: 0
+    end
+    assert_select "[data-controller='flat-pack--trash-button'][data-fp-expand='left']" do
+      assert_select "button", text: "Delete list"
+      assert_select "form[action='#{list_url}']" do
+        assert_select "input[name='_method'][value='delete']"
+        assert_select "button", text: "Delete this list?"
+      end
+    end
+    assert_select "form[data-turbo-confirm]", count: 0
     assert_includes response.body, "Lists"
   end
 

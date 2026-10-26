@@ -81,7 +81,7 @@ RecordingStudioLists.configure do |config|
 end
 ```
 
-The default layout draws the title and subtitle from `content_for`. List screens do not render a second page title. The index registers New list in the page nav. Delete list stays on the list page as a confirmed form.
+The default layout draws the title and subtitle from `content_for`. List screens do not render a second page title. The index registers New list in the page nav. Delete list is a trash button in the top-right of the list page. It expands left, then posts the delete. Item remove stays on the row.
 
 ## Add to a list
 
