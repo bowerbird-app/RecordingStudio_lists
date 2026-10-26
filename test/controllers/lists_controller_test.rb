@@ -57,7 +57,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[name='idempotency_key']"
   end
 
-  test "empty list show renders empty copy and delete control" do
+  test "empty list show renders empty copy without a delete control" do
     list = create_list("Bare Shelf")
 
     get "/lists/#{list.id}"
@@ -70,17 +70,36 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_select "h3", text: "Nothing here yet."
     end
     assert_select "div[class*='md:grid-cols-2']", count: 0
-    list_url = "/lists/#{list.id}"
-    assert_select "[data-controller='flat-pack--trash-button'][data-fp-expand='left'][aria-label='Delete list']" do
-      assert_select "button", text: "Delete list", count: 0
-      assert_select "[data-flat-pack--trash-button-target='arm'][aria-expanded='false']"
-      assert_select "form[action='#{list_url}']" do
-        assert_select "input[name='_method'][value='delete']"
-        assert_select "button", text: "Delete this list?"
-      end
-    end
+    assert_select "[data-controller='flat-pack--trash-button']", count: 0
+    assert_select "button", text: "Delete list", count: 0
+    assert_select "button", text: "Delete this list?", count: 0
     assert_select "form[data-turbo-confirm]", count: 0
     assert_includes response.body, "Lists"
+  end
+
+  test "show links a member the host can route and leaves the rest as text" do
+    list = create_list("Linked")
+    RecordingStudio::Lists.add(list, @page, actor: @user)
+    show_path = "/lists/#{list.id}"
+
+    get show_path
+
+    assert_response :success
+    assert_includes response.body, @page.name
+    assert_select "a", text: @page.name, count: 0
+
+    with_appended_routes(proc { get "/recordings/:id", to: "recordings#show", as: :recording }) do
+      get show_path
+
+      assert_select "a[href=?]", "/recordings/#{@page.id}", text: @page.name
+    end
+
+    with_appended_routes(proc { get "/pages/:id", to: "pages#show", as: :page }) do
+      get show_path
+
+      assert_select "a[href=?]", "/pages/#{@page.recordable.id}", text: @page.name
+      assert_select "a[href=?]", "/recordings/#{@page.id}", text: @page.name, count: 0
+    end
   end
 
   test "show falls back to Missing when a member recording is gone" do
@@ -134,15 +153,32 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Reading"
     assert_select "th", text: "Updated", count: 0
     assert_select "table", count: 0
+    list_id = show_path.split("/").last
+    form_id = "delete-list-#{list_id}"
     assert_select "div[class*='md:grid-cols-2']" do
       assert_select card_with_visible_frame do
         assert_select "div[class*='p-[var(--card-padding-md)]']" do
-          assert_select "ul.flat-pack-list" do
+          assert_select "ul.flat-pack-list" do |lists|
+            assert_match(/!space-y-0/, lists.first["class"])
             assert_select "a", text: "Reading"
+            assert_select "li" do |items|
+              assert_match(/!items-center/, items.first["class"])
+              assert_select "button[aria-label='Actions']" do
+                assert_select "svg[data-flat-pack--icon-name-value='ellipsis-vertical']"
+              end
+              assert_select "button[type=submit][form=?]", form_id, text: "Delete list" do |buttons|
+                assert_includes buttons.first["class"], "text-danger-text-color"
+                assert_select buttons.first, "svg[data-flat-pack--icon-name-value='trash']"
+              end
+            end
           end
         end
       end
     end
+    assert_select "form##{form_id}.hidden[action=?]", show_path do
+      assert_select "input[name=_method][value=delete]"
+    end
+    assert_select "[data-controller='flat-pack--trash-button']", count: 0
     refute_theme_border_width
     assert_select "nav.flat-pack-page-nav" do
       assert_select "a", text: "Sign out", count: 0
@@ -178,7 +214,10 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", text: /#{Regexp.escape(@page.name)}/ do |items|
       assert_match(/!items-center/, items.first["class"])
       assert_select "button[aria-label='Remove']"
+      assert_select "a", text: @page.name, count: 0
     end
+    assert_select "[data-controller='flat-pack--trash-button']", count: 0
+    assert_select "button", text: "Delete list", count: 0
 
     delete "#{show_path}/items/#{@page.id}"
 
@@ -187,7 +226,6 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_includes response.body, "Removed."
 
-    list_id = show_path.split("/").last
     delete show_path
 
     assert_redirected_to "/lists"
@@ -517,6 +555,15 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
   def create_list(name)
     RecordingStudio::Lists.create(parent: @root, name: name, actor: @user)
+  end
+
+  def with_appended_routes(definition)
+    routes = Rails.application.routes
+    routes.disable_clear_and_finalize = true
+    routes.draw(&definition)
+    yield
+  ensure
+    Rails.application.reload_routes!
   end
 
   def card_with_visible_frame

@@ -92,10 +92,8 @@ module RecordingStudioLists
 
     def index
       @lists = RecordingStudio::Lists.lists(parent_recording)
-      @item_counts = item_counts_for(@lists)
     rescue RecordingStudio::Lists::ParentNotAllowed => e
       @lists = []
-      @item_counts = {}
       flash.now[:alert] = list_error_copy(e)
     end
 
@@ -180,17 +178,6 @@ module RecordingStudioLists
       return if params[:recording_id].blank?
 
       RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
-    end
-
-    def item_counts_for(lists)
-      ids = lists.map(&:id)
-      return {} if ids.empty?
-
-      RecordingStudio::Recording
-        .where(parent_recording_id: ids, recordable_type: RecordingStudio::Lists::ITEM_TYPE)
-        .group(:parent_recording_id)
-        .count
-        .transform_keys(&:to_s)
     end
   end
 end

@@ -10,16 +10,6 @@
      back_href: lists_path,
      back_tooltip: RecordingStudio.t("recording_studio.lists.show.back")
    ) %>
-<% content_for :page_nav_right do %>
-  <%= render FlatPack::TrashButton::Component.new(
-        url: list_path(@list),
-        method: :delete,
-        expand: :left,
-        size: :sm,
-        confirm_label: RecordingStudio.t("recording_studio.lists.show.delete_confirm"),
-        aria: { label: RecordingStudio.t("recording_studio.lists.show.delete") }
-      ) %>
-<% end %>
 
 <div class="flex w-full flex-col gap-6">
   <% if @items.empty? %>
@@ -45,8 +35,15 @@
                   <% end %>
                 <% end %>
               <% end %>
+              <% href = list_member_href(item) %>
               <%= render FlatPack::List::Item.new(trailing: trailing, class: "!items-center") do %>
-                <%= item&.name.presence || RecordingStudio.t("recording_studio.lists.show.missing") %>
+                <% if href %>
+                  <%= render FlatPack::Link::Component.new(href: href) do %>
+                    <%= item.name %>
+                  <% end %>
+                <% else %>
+                  <%= item&.name.presence || RecordingStudio.t("recording_studio.lists.show.missing") %>
+                <% end %>
               <% end %>
             <% end %>
           <% end %>

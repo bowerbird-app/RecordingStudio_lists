@@ -65,7 +65,7 @@ RecordingStudio::Lists.delete(list)
 
 ## Screens
 
-The index lists names and member counts. New list asks for a name and an optional description. The list page removes a member or deletes the list.
+The index lists names. Each row has an Actions menu that deletes the list. New list asks for a name and an optional description. The list page removes a member. A member name is a link when the host can route that record, and plain text otherwise.
 
 Static interface copy on these screens (and the add-to-list menu), controller flashes, error messages, and JS client strings resolve through `RecordingStudio.t` under `recording_studio.lists` at the render site. When the active locale has no value, fallback comes from the loaded English (host overrides included), then a caller `default:`, then the gem-shipped `config/locales/en.yml` registered at boot. Only this gem’s `recording_studio.lists.*` keys use `RecordingStudio.t`; host or other-namespace keys stay on `I18n.t` with their original `default:`. A plain `default:` with no interpolation is returned as a plain (non-html_safe) String, so views will escape it. Interpolating caller `default:` on a missing `_html` key is stricter than view `t` (args escaped, result html_safe). Public model defaults stay English. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`. Requires Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`.
 
@@ -81,7 +81,7 @@ RecordingStudioLists.configure do |config|
 end
 ```
 
-The default layout draws the title and subtitle from `content_for`. List screens do not render a second page title. The index registers New list in the page nav. Delete list is a trash icon in the top-right of the list page. Its accessible name is Delete list. Armed, it expands left and the confirm button says Delete this list? Item remove stays on the row.
+The default layout draws the title and subtitle from `content_for`. List screens do not render a second page title. The index registers New list in the page nav. Each list row has an Actions menu. Its item says Delete list and posts to the list. The list page does not show a delete control. Item remove stays on the row.
 
 ## Add to a list
 

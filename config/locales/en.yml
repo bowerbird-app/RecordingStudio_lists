@@ -6,6 +6,7 @@ en:
         home: "Home"
         new_button: "List"
         empty: "No lists yet."
+        menu: "Actions"
       new:
         title: "New list"
         back: "Lists"

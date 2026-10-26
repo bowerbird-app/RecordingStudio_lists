@@ -10,7 +10,8 @@ class LocalesTest < ActiveSupport::TestCase
     "title" => "Lists",
     "home" => "Home",
     "new_button" => "List",
-    "empty" => "No lists yet."
+    "empty" => "No lists yet.",
+    "menu" => "Actions"
   }.freeze
 
   NEW_KEYS = {

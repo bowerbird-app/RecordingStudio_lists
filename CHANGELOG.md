@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * List screens use the Recording Studio 6.1 default layout. The title and subtitle come from `content_for`. Back uses `flat_pack_page_nav`. The index registers the new-list action with `register_page_nav`.
-* Delete list is a Flatpack trash button in `content_for :page_nav_right`. At rest it is the trash icon, named Delete list. Armed, it posts to the list with `method: :delete`, expands left, and the confirm button says Delete this list? It is not a page-nav registry action.
+* Delete list is an Actions menu on each index row. The menu item says Delete list, uses the trash icon, and posts `method: :delete`. The list page does not show a delete control. A member name is a link when the host can route the recordable or the recording, and plain text otherwise.
 * An empty list show page uses `FlatPack::EmptyState`. The item card sits in the two-column grid only when the list has items.
 * A filled list index and show pass `border: :default` on `FlatPack::Card`. Flatpack's nil border uses the theme width, and the rounded theme sets that width to 0.
 * The dummy Tailwind build scans installed `flatpack-<rev>` and `RecordingStudio-<rev>` checkouts (`app/components`, `app/helpers`, and Recording Studio `app/views`) under `vendor/bundle`, `/usr/local/bundle`, and the system gem home.
@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No migration is required.
 - Pin Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`.
 - Set `RecordingStudioLists.configuration.layout` when list screens should not use the core layout. See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-090).
-- Delete list is the trash button in the top-right of the list page. It is not a form in the page body.
+- Delete list is the Actions menu on the lists index. The list page no longer shows a delete control in the top-right.
 - Filled list cards use `border: :default`. Rebuild Tailwind so the Flatpack card border, background, padding, and radius utilities are in the host CSS.
 - Published Orderable, Accessible, Trashable, Root Switchable, Metrics, and Cache tags still require Recording Studio below 5. An app that uses those tags cannot resolve this gem until those addons allow 6.1.0.
 

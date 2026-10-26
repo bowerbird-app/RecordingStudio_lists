@@ -19,9 +19,29 @@
     <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
       <%= render FlatPack::Card::Component.new(border: :default) do |card| %>
         <% card.body do %>
-          <%= render FlatPack::List::Component.new(divider: true) do %>
+          <%= render FlatPack::List::Component.new(divider: true, class: "!space-y-0") do %>
             <% @lists.each do |list| %>
-              <%= render FlatPack::List::Item.new(trailing: @item_counts.fetch(list.id.to_s, 0).to_s) do %>
+              <% form_id = "delete-list-#{list.id}" %>
+              <% trailing = capture do %>
+                <%= form_with url: list_path(list), method: :delete, html: { id: form_id, class: "hidden" } do %>
+                <% end %>
+                <%= render FlatPack::Button::Dropdown::Component.new(
+                      text: RecordingStudio.t("recording_studio.lists.index.menu"),
+                      icon: "ellipsis-vertical",
+                      icon_only: true,
+                      style: :ghost,
+                      size: :sm
+                    ) do |menu| %>
+                  <% menu.menu_item(
+                       text: RecordingStudio.t("recording_studio.lists.show.delete"),
+                       icon: "trash",
+                       destructive: true,
+                       form: form_id,
+                       type: "submit"
+                     ) %>
+                <% end %>
+              <% end %>
+              <%= render FlatPack::List::Item.new(trailing: trailing, class: "!items-center") do %>
                 <%= render FlatPack::Link::Component.new(href: list_path(list)) do %>
                   <%= list.name %>
                 <% end %>
