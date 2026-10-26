@@ -33,7 +33,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     get "/lists"
 
     assert_response :success
-    assert_select "h1", text: "Lists"
+    assert_select "h1", text: "Lists", count: 1
     assert_select "h3", text: "No lists yet."
     assert_includes response.body, "Home"
     assert_select "a", text: "List" do
@@ -44,7 +44,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     get "/lists/new"
 
     assert_response :success
-    assert_select "h1", text: "New list"
+    assert_select "h1", text: "New list", count: 1
     assert_includes response.body, "Lists"
     assert_includes response.body, "Name"
     assert_includes response.body, "Description"
@@ -63,6 +63,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     get "/lists/#{list.id}"
 
     assert_response :success
+    assert_select "h1", text: "Bare Shelf", count: 1
     assert_includes response.body, "Bare Shelf"
     assert_includes response.body, "0 items"
     assert_includes response.body, "Nothing here yet."
@@ -421,7 +422,73 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Name can't be blank.", JSON.parse(response.body)["error"]
   end
 
+  test "layout falls back to the recording studio default" do
+    with_layouts(lists: nil, core: nil) do
+      get "/lists"
+
+      assert_response :success
+      assert_select "body[data-recording-studio-default-layout='true']", count: 1
+      assert_select "h1", text: "Lists", count: 1
+    end
+  end
+
+  test "core layout applies when the lists layout is nil" do
+    with_layouts(lists: nil, core: "application") do
+      get "/lists"
+
+      assert_response :success
+      assert_includes response.body, "min-h-screen"
+      assert_select "body[data-recording-studio-default-layout]", count: 0
+    end
+  end
+
+  test "a lists layout string overrides the core layout" do
+    with_layouts(lists: "application", core: "recording_studio/default_layout") do
+      get "/lists"
+
+      assert_response :success
+      assert_includes response.body, "min-h-screen"
+      assert_select "body[data-recording-studio-default-layout]", count: 0
+    end
+  end
+
+  test "a keyword layout callable overrides the core layout" do
+    callable = lambda do |controller:|
+      controller.controller_path == "recording_studio_lists/lists" ? "application" : nil
+    end
+
+    with_layouts(lists: callable, core: nil) do
+      get "/lists"
+
+      assert_response :success
+      assert_includes response.body, "min-h-screen"
+      assert_select "body[data-recording-studio-default-layout]", count: 0
+    end
+  end
+
+  test "a false lists layout renders the screen without a layout" do
+    with_layouts(lists: false, core: "recording_studio/default_layout") do
+      get "/lists"
+
+      assert_response :success
+      assert_includes response.body, "No lists yet."
+      refute_includes response.body, "<html"
+      assert_select "body[data-recording-studio-default-layout]", count: 0
+    end
+  end
+
   private
+
+  def with_layouts(lists:, core:)
+    previous_lists = RecordingStudioLists.configuration.layout
+    previous_core = RecordingStudio.configuration.layout
+    RecordingStudioLists.configuration.layout = lists
+    RecordingStudio.configuration.layout = core
+    yield
+  ensure
+    RecordingStudioLists.configuration.layout = previous_lists
+    RecordingStudio.configuration.layout = previous_core
+  end
 
   def select_root(root)
     patch "/recording_studio_root_switchable/v1/root_switch", params: {

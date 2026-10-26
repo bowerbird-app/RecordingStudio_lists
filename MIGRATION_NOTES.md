@@ -1,5 +1,30 @@
 # Migration Notes
 
+## Upgrading To 0.9.0
+
+No migration is needed.
+
+### What Changed
+
+- List screens use `recording_studio/default_layout` unless you set a layout.
+- `RecordingStudioLists.configuration.layout` is checked first. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`.
+- Accepted values are `nil`, `false`, a layout name, and a callable that takes `controller:` as a keyword. `false` skips the layout. A blank name or a positional callable raises `ArgumentError`.
+- The lists controller no longer includes `RecordingStudio::UsesDefaultLayout`.
+- Page titles come from `content_for(:title)` and `content_for(:subtitle)`. Do not also render `FlatPack::PageTitle` on these screens.
+- Requires Recording Studio `~> 6.1` (development pin `v6.1.0`) and Flatpack `>= 0.1.315` (development pin `v0.1.315`).
+
+### Upgrade Steps
+
+No migration is required. Pin Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`. Set `config.layout` only when the default cascade is wrong.
+
+```ruby
+RecordingStudioLists.configure do |config|
+  config.layout = "application"
+end
+```
+
+Published Orderable, Accessible, Trashable, Root Switchable, Metrics, and Cache tags still require Recording Studio below 5. This gem's development Gemfiles widen that requirement while Bundler loads gemspecs. Host apps need addon releases that allow Recording Studio 6.1.0 before they can install this version next to those tags.
+
 ## Upgrading To 0.8.0
 
 No migration is needed.

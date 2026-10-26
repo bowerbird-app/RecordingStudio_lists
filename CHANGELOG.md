@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-26
+
+### Changed
+
+* List screens use the Recording Studio 6.1 default layout. The title and subtitle come from `content_for`. Back uses `flat_pack_page_nav`. The index registers the new-list action with `register_page_nav`.
+* `RecordingStudioLists.configuration.layout` accepts `nil`, `false`, a layout name, or a callable with the keyword `controller:`. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`.
+* Require Recording Studio `~> 6.1`. The development apps pin tag `v6.1.0`, Flatpack `v0.1.315`, and `view_component` `4.19.0`. Minitest stays below 6 so the suite keeps `stub`.
+
+### Removed
+
+* `RecordingStudio::UsesDefaultLayout` on the lists controller. Recording Studio 5.0 removed that module.
+* Inline `FlatPack::PageTitle` on the list index, show, and new screens, so the layout renders the only `h1`.
+
+### Upgrade notes
+
+- No migration is required.
+- Pin Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`.
+- Set `RecordingStudioLists.configuration.layout` when list screens should not use the core layout. See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-090).
+- Delete list stays a confirmed form on the list page.
+- Published Orderable, Accessible, Trashable, Root Switchable, Metrics, and Cache tags still require Recording Studio below 5. An app that uses those tags cannot resolve this gem until those addons allow 6.1.0.
+
 ## [0.8.0] - 2026-10-20
 
 ### Added
@@ -271,7 +292,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.5.0...v0.6.0

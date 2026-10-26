@@ -1,10 +1,12 @@
 source "https://rubygems.org"
 
+require_relative "../support/widen_recording_studio_requirement"
+
 # Use the recording_studio_lists engine
 gem "recording_studio_lists", path: "../.."
 
 # RecordingStudio engine
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.7.1"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"
 # Required by accessible >= 0.17.0 (query-only; not on RubyGems)
@@ -41,7 +43,9 @@ gem "jbuilder"
 gem "tailwindcss-rails"
 
 # FlatPack UI component library [https://github.com/bowerbird-app/flatpack]
-gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.276"
+gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.315"
+gem "minitest", ">= 5.26", "< 6"
+gem "view_component", "4.19.0"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"

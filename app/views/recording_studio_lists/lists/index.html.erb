@@ -1,12 +1,18 @@
-<% recording_studio_page_nav(title: RecordingStudio.t("recording_studio.lists.index.title"), page_nav_back_url: main_app.root_path, page_nav_back_label: RecordingStudio.t("recording_studio.lists.index.home")) %>
+<% content_for :title, RecordingStudio.t("recording_studio.lists.index.title") %>
+<% flat_pack_page_nav(
+     round: true,
+     style: :default,
+     back_href: main_app.root_path,
+     back_tooltip: RecordingStudio.t("recording_studio.lists.index.home")
+   ) %>
+<% register_page_nav(
+     RecordingStudio.t("recording_studio.lists.index.new_button"),
+     new_list_path,
+     role: :primary,
+     icon: "plus"
+   ) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(title: RecordingStudio.t("recording_studio.lists.index.title"), variant: :h1) do |page_title| %>
-    <% page_title.slot do %>
-      <%= render FlatPack::Button::Component.new(text: RecordingStudio.t("recording_studio.lists.index.new_button"), icon: "plus", href: new_list_path, style: :primary) %>
-    <% end %>
-  <% end %>
-
   <% if @lists.empty? %>
     <%= render FlatPack::EmptyState::Component.new(title: RecordingStudio.t("recording_studio.lists.index.empty")) %>
   <% else %>
