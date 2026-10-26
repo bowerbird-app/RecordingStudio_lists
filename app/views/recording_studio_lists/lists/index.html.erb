@@ -5,14 +5,16 @@
      back_href: main_app.root_path,
      back_tooltip: RecordingStudio.t("recording_studio.lists.index.home")
    ) %>
-<% register_page_nav(
-     RecordingStudio.t("recording_studio.lists.index.new_button"),
-     new_list_path,
-     role: :primary,
-     icon: "plus"
-   ) %>
 
 <div class="flex w-full flex-col gap-6">
+  <div class="flex items-center">
+    <%= render FlatPack::Button::Component.new(
+          text: RecordingStudio.t("recording_studio.lists.index.new_button"),
+          icon: "plus",
+          href: new_list_path,
+          style: :primary
+        ) %>
+  </div>
   <% if @lists.empty? %>
     <%= render FlatPack::EmptyState::Component.new(title: RecordingStudio.t("recording_studio.lists.index.empty")) %>
   <% else %>
@@ -32,6 +34,11 @@
                       style: :ghost,
                       size: :sm
                     ) do |menu| %>
+                  <% menu.menu_item(
+                       text: RecordingStudio.t("recording_studio.lists.index.edit"),
+                       icon: "pencil",
+                       href: edit_list_path(list)
+                     ) %>
                   <% menu.menu_item(
                        text: RecordingStudio.t("recording_studio.lists.show.delete"),
                        icon: "trash",

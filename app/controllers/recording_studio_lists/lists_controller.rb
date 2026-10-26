@@ -34,6 +34,11 @@ module RecordingStudioLists
       render :new, status: :unprocessable_entity
     end
 
+    def respond_blank_edit
+      @name_error = Copy.t("errors.blank_name")
+      render :edit, status: :unprocessable_entity
+    end
+
     def respond_list_error(error)
       message = list_error_copy(error)
       return render json: { error: message }, status: :unprocessable_entity if menu_request?
@@ -135,6 +140,24 @@ module RecordingStudioLists
       respond_membership_error(e)
     end
 
+    def edit
+      @list = RecordingStudio::Lists.find(params[:id])
+      @name = @list.name
+      @description = @list.recordable.description
+      @return_to = safe_return_path
+    rescue RecordingStudio::Lists::InvalidList
+      head :not_found
+    end
+
+    def update
+      revise_submitted_list
+      redirect_to @return_to || lists_path, notice: Copy.t("flashes.updated")
+    rescue RecordingStudio::Lists::BlankName
+      respond_blank_edit
+    rescue RecordingStudio::Lists::InvalidList => e
+      redirect_to lists_path, alert: list_error_copy(e)
+    end
+
     def destroy
       RecordingStudio::Lists.delete(params[:id])
       redirect_to lists_path, notice: Copy.t("flashes.deleted")
@@ -143,6 +166,14 @@ module RecordingStudioLists
     end
 
     private
+
+    def revise_submitted_list
+      @list = RecordingStudio::Lists.find(params[:id])
+      @name = list_params[:name]
+      @description = list_params[:description]
+      @return_to = safe_return_path
+      RecordingStudio::Lists.update(@list, name: @name, description: @description, actor: current_actor)
+    end
 
     def build_list
       RecordingStudio::Lists.create(

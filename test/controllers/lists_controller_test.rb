@@ -36,7 +36,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Lists", count: 1
     assert_select "h3", text: "No lists yet."
     assert_includes response.body, "Home"
-    assert_select "a", text: "List" do
+    assert_equal %w[h1 a], css_select("h1, a[href='/lists/new']").map(&:name)
+    assert_select "nav.flat-pack-page-nav a[href='/lists/new']", count: 0
+    assert_select "a[href='/lists/new']", text: "List", count: 1 do
       assert_select "svg[data-flat-pack--icon-name-value='plus']"
     end
     assert_select "a", text: "New list", count: 0
@@ -166,6 +168,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
               assert_select "button[aria-label='Actions']" do
                 assert_select "svg[data-flat-pack--icon-name-value='ellipsis-vertical']"
               end
+              assert_select "a[href=?]", "/lists/#{list_id}/edit", text: "Edit list" do |links|
+                assert_select links.first, "svg[data-flat-pack--icon-name-value='pencil']"
+              end
               assert_select "button[type=submit][form=?]", form_id, text: "Delete list" do |buttons|
                 assert_includes buttons.first["class"], "text-danger-text-color"
                 assert_select buttons.first, "svg[data-flat-pack--icon-name-value='trash']"
@@ -175,6 +180,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
         end
       end
     end
+    row = css_select("ul.flat-pack-list li").first
+    assert_operator row.to_html.index("Edit list"), :<, row.to_html.index("Delete list")
+    assert_select "nav.flat-pack-page-nav a[href='/lists/new']", count: 0
     assert_select "form##{form_id}.hidden[action=?]", show_path do
       assert_select "input[name=_method][value=delete]"
     end
@@ -530,6 +538,82 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       refute_includes response.body, "<html"
       assert_select "body[data-recording-studio-default-layout]", count: 0
     end
+  end
+
+  test "edit and update revise the list" do
+    list = RecordingStudio::Lists.create(
+      parent: @root,
+      name: "Reading",
+      description: "Magazines",
+      actor: @user
+    )
+
+    get "/lists/#{list.id}/edit", params: { return_to: "https://evil.test/phish" }
+
+    assert_response :success
+    assert_select "input[name=return_to]", count: 0
+
+    get "/lists/#{list.id}/edit", params: { return_to: "/docs/methods" }
+
+    assert_response :success
+    assert_select "h1", text: "Edit list", count: 1
+    assert_select "input[name='list[name]'][value=?]", "Reading"
+    assert_select "textarea[name='list[description]']", text: "Magazines"
+    assert_select "label", text: "Name"
+    assert_select "label", text: "Description"
+    assert_select "form[action=?]", "/lists/#{list.id}" do
+      assert_select "input[name=_method][value=patch]"
+      assert_select "input[name=return_to][value=?]", "/docs/methods"
+    end
+    assert_select "div[class*='md:grid-cols-2']" do
+      assert_select "form.flex.flex-col[class*='gap-(--stack-gap-md)']"
+    end
+    assert_select "button", text: "Save"
+    assert_select "nav.flat-pack-page-nav a[href='/lists']"
+
+    patch "/lists/#{list.id}", params: {
+      list: { name: "  ", description: "Kept" },
+      return_to: "/docs/methods"
+    }
+
+    assert_response :unprocessable_entity
+    assert_select "p", text: "Name can't be blank."
+    assert_select "h1", text: "Edit list"
+    assert_equal "Reading", list.reload.recordable.name
+    assert_equal "Magazines", list.recordable.description
+
+    patch "/lists/#{list.id}", params: {
+      list: { name: "Updated", description: "New notes" },
+      return_to: "/docs/methods"
+    }
+
+    assert_redirected_to "/docs/methods"
+    follow_redirect!
+    assert_includes response.body, "List updated."
+    list.reload
+    assert_equal "Updated", list.name
+    assert_equal "New notes", list.recordable.description
+
+    patch "/lists/#{list.id}", params: {
+      list: { name: "From the index", description: "Still here" },
+      return_to: "https://evil.test/phish"
+    }
+
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "List updated."
+    assert_includes response.body, "From the index"
+
+    get "/lists/#{@page.id}/edit"
+
+    assert_response :not_found
+
+    patch "/lists/#{@page.id}", params: { list: { name: "Nope" } }
+
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "That list is missing."
+    assert_equal "From the index", list.reload.name
   end
 
   private

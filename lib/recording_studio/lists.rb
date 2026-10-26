@@ -53,6 +53,10 @@ module RecordingStudio
       Services::Create.call(parent:, name:, description:, idempotency_key:, actor:).value!
     end
 
+    def self.update(list, name:, description: nil, actor: nil)
+      Services::Update.call(list:, name:, description:, actor:).value!
+    end
+
     def self.add(list, target, actor: nil)
       Services::Add.call(list:, target:, actor:).value!
     end

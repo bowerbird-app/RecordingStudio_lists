@@ -1,0 +1,31 @@
+<% content_for :title, RecordingStudio.t("recording_studio.lists.edit.title") %>
+<% flat_pack_page_nav(
+     round: true,
+     style: :default,
+     back_href: lists_path,
+     back_tooltip: RecordingStudio.t("recording_studio.lists.edit.back")
+   ) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
+    <%= form_with url: list_path(@list), method: :patch, class: "flex flex-col gap-(--stack-gap-md)" do %>
+      <%= hidden_field_tag :return_to, @return_to if @return_to.present? %>
+
+      <%= render FlatPack::TextInput::Component.new(
+        name: "list[name]",
+        label: RecordingStudio.t("recording_studio.lists.edit.name"),
+        value: @name,
+        required: true,
+        error: @name_error
+      ) %>
+
+      <%= render FlatPack::TextArea::Component.new(
+        name: "list[description]",
+        label: RecordingStudio.t("recording_studio.lists.edit.description"),
+        value: @description
+      ) %>
+
+      <%= render FlatPack::Button::Component.new(text: RecordingStudio.t("recording_studio.lists.edit.save"), type: "submit", style: :primary) %>
+    <% end %>
+  <% end %>
+</div>

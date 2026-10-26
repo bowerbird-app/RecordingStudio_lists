@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0] - 2026-10-26
 
+### Added
+
+* `RecordingStudio::Lists.update` revises a list name and description. The recording id stays, a new list snapshot is stored, and Recording Studio records an `updated` event. A blank name raises `BlankName`. A missing list or another recordable raises `InvalidList`.
+* The lists index Actions menu includes Edit list. The edit screen patches the list.
+
 ### Changed
 
-* List screens use the Recording Studio 6.1 default layout. The title and subtitle come from `content_for`. Back uses `flat_pack_page_nav`. The index registers the new-list action with `register_page_nav`.
+* List screens use the Recording Studio 6.1 default layout. The title and subtitle come from `content_for`. Back uses `flat_pack_page_nav`. The new-list button sits in the page body under the title. It is not registered in the page nav.
 * Delete list is an Actions menu on each index row. The menu item says Delete list, uses the trash icon, and posts `method: :delete`. The list page does not show a delete control. A member name is a link when the host can route the recordable or the recording, and plain text otherwise.
 * An empty list show page uses `FlatPack::EmptyState`. The item card sits in the two-column grid only when the list has items.
 * A filled list index and show pass `border: :default` on `FlatPack::Card`. Flatpack's nil border uses the theme width, and the rounded theme sets that width to 0.
@@ -30,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No migration is required.
 - Pin Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`.
 - Set `RecordingStudioLists.configuration.layout` when list screens should not use the core layout. See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-090).
-- Delete list is the Actions menu on the lists index. The list page no longer shows a delete control in the top-right.
+- Delete list is the Actions menu on the lists index. Edit list is the item above it. The list page no longer shows a delete control in the top-right.
+- The new-list button is in the page body, under the title. It is no longer registered with `register_page_nav`.
 - Filled list cards use `border: :default`. Rebuild Tailwind so the Flatpack card border, background, padding, and radius utilities are in the host CSS.
 - Published Orderable, Accessible, Trashable, Root Switchable, Metrics, and Cache tags still require Recording Studio below 5. An app that uses those tags cannot resolve this gem until those addons allow 6.1.0.
 

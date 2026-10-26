@@ -11,7 +11,9 @@ No migration is needed.
 - Accepted values are `nil`, `false`, a layout name, and a callable that takes `controller:` as a keyword. `false` skips the layout. A blank name or a positional callable raises `ArgumentError`.
 - The lists controller no longer includes `RecordingStudio::UsesDefaultLayout`.
 - Page titles come from `content_for(:title)` and `content_for(:subtitle)`. Do not also render `FlatPack::PageTitle` on these screens.
-- Delete list is an Actions menu on each index row. The menu item says Delete list and posts to the list. The list page does not render a delete control. Item remove stays on the row. A member name is a link when the host can route that recordable or recording. Otherwise the name is plain text.
+- Delete list is an Actions menu on each index row. The menu item says Delete list and posts to the list. Edit list sits above it and opens the edit form. The list page does not render a delete control. Item remove stays on the row. A member name is a link when the host can route that recordable or recording. Otherwise the name is plain text.
+- The new-list button sits in the page body, under the title. The index does not call `register_page_nav` for it.
+- `RecordingStudio::Lists.update(list, name:, description: nil, actor: nil)` revises the list. The recording id stays. A new list snapshot and an `updated` event are stored. A blank name raises `BlankName` and writes nothing. A missing list or another recordable raises `InvalidList`. Omit `description`, or pass a blank one, and the description is cleared.
 - Requires Recording Studio `~> 6.1` (development pin `v6.1.0`) and Flatpack `>= 0.1.315` (development pin `v0.1.315`).
 - Filled list index and show use `FlatPack::Card` with `border: :default`. A host that compiles Tailwind must scan the installed Flatpack gem so `border`, the card background, the card padding, and the card radius utilities are in the built CSS. The rounded theme's theme border width is 0, so leaving the card border unset draws no edge.
 

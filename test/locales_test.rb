@@ -11,7 +11,8 @@ class LocalesTest < ActiveSupport::TestCase
     "home" => "Home",
     "new_button" => "List",
     "empty" => "No lists yet.",
-    "menu" => "Actions"
+    "menu" => "Actions",
+    "edit" => "Edit list"
   }.freeze
 
   NEW_KEYS = {
@@ -20,6 +21,14 @@ class LocalesTest < ActiveSupport::TestCase
     "name" => "Name",
     "description" => "Description",
     "create" => "Create list"
+  }.freeze
+
+  EDIT_KEYS = {
+    "title" => "Edit list",
+    "back" => "Lists",
+    "name" => "Name",
+    "description" => "Description",
+    "save" => "Save"
   }.freeze
 
   SHOW_KEYS = {
@@ -41,6 +50,7 @@ class LocalesTest < ActiveSupport::TestCase
 
   FLASH_KEYS = {
     "created" => "List created.",
+    "updated" => "List updated.",
     "added" => "Added.",
     "removed" => "Removed.",
     "deleted" => "List deleted."
@@ -94,6 +104,7 @@ class LocalesTest < ActiveSupport::TestCase
       end
       assert_equal "HOST Home", I18n.t("recording_studio.lists.index.home", raise: true)
       NEW_KEYS.each { |key, english| assert_key("recording_studio.lists.new.#{key}", english) }
+      EDIT_KEYS.each { |key, english| assert_key("recording_studio.lists.edit.#{key}", english) }
       SHOW_KEYS.each { |key, english| assert_key("recording_studio.lists.show.#{key}", english) }
       ADD_TO_LIST_KEYS.each { |key, english| assert_key("recording_studio.lists.add_to_list.#{key}", english) }
       FLASH_KEYS.each { |key, english| assert_key("recording_studio.lists.flashes.#{key}", english) }
@@ -117,6 +128,7 @@ class LocalesTest < ActiveSupport::TestCase
 
     assert_equal INDEX_KEYS, tree.fetch("index").transform_keys(&:to_s)
     assert_equal NEW_KEYS, tree.fetch("new").transform_keys(&:to_s)
+    assert_equal EDIT_KEYS, tree.fetch("edit").transform_keys(&:to_s)
     assert_equal ADD_TO_LIST_KEYS, tree.fetch("add_to_list").transform_keys(&:to_s)
     assert_equal FLASH_KEYS, tree.fetch("flashes").transform_keys(&:to_s)
     assert_equal ERROR_KEYS, tree.fetch("errors").transform_keys(&:to_s)

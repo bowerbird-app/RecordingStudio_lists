@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = "https://github.com/bowerbird-app/RecordingStudio_lists"
   spec.summary     = "Named lists of recordings for Recording Studio"
   spec.description = "List and list item recordables, a Ruby API, and screens " \
-                     "for creating lists and adding or removing members."
+                     "for creating and editing lists and for adding or removing members."
   spec.license     = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
 
