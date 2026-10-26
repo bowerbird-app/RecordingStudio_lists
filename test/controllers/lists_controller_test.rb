@@ -135,12 +135,15 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "th", text: "Updated", count: 0
     assert_select "table", count: 0
     assert_select "div[class*='md:grid-cols-2']" do
-      assert_select "div[class*='p-[var(--card-padding-md)]']" do
-        assert_select "ul.flat-pack-list" do
-          assert_select "a", text: "Reading"
+      assert_select card_with_visible_frame do
+        assert_select "div[class*='p-[var(--card-padding-md)]']" do
+          assert_select "ul.flat-pack-list" do
+            assert_select "a", text: "Reading"
+          end
         end
       end
     end
+    refute_theme_border_width
     assert_select "nav.flat-pack-page-nav" do
       assert_select "a", text: "Sign out", count: 0
       assert_select "a", text: "Lists", count: 0
@@ -157,10 +160,13 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "1 item"
     assert_includes response.body, "Added."
     assert_select "div[class*='md:grid-cols-2']" do
-      assert_select "div[class*='p-[var(--card-padding-md)]']" do
-        assert_select "ul.flat-pack-list"
+      assert_select card_with_visible_frame do
+        assert_select "div[class*='p-[var(--card-padding-md)]']" do
+          assert_select "ul.flat-pack-list"
+        end
       end
     end
+    refute_theme_border_width
     assert_select "table", count: 0
     assert_select "select[name='recording_id']", count: 0
     assert_select "button", text: "Remove", count: 0
@@ -511,6 +517,20 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
   def create_list(name)
     RecordingStudio::Lists.create(parent: @root, name: name, actor: @user)
+  end
+
+  def card_with_visible_frame
+    "div.fp-card.border[class*='[background:var(--card-background-default)]']" \
+      "[class*='rounded-[var(--card-radius)]'][class*='border-[var(--card-border-color)]']"
+  end
+
+  def refute_theme_border_width
+    assert_select "div.fp-card" do |cards|
+      assert_operator cards.length, :>, 0
+      cards.each do |card|
+        refute_includes card["class"], "border-[length:var(--card-border-width)]"
+      end
+    end
   end
 
   def sql_during

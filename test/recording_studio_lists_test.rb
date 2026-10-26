@@ -184,13 +184,39 @@ class RecordingStudioListsTest < Minitest::Test
   def test_dummy_tailwind_keeps_flatpack_theme_selection_in_flatpack
     tailwind_source = File.read(File.expand_path("dummy/app/assets/tailwind/application.css", __dir__))
 
-    assert_includes tailwind_source, "../../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}"
-    assert_includes tailwind_source, "flatpack-*/app/components/**/*.{rb,erb}"
-    assert_includes tailwind_source, "../../../vendor/bundle/**/recording_studio/app/views/**/*.erb"
-    assert_includes tailwind_source, "recordingstudio-*/app/views/**/*.erb"
+    [
+      "../../../vendor/bundle/**/bundler/gems/flatpack-*/app/components",
+      "../../../vendor/bundle/**/bundler/gems/flatpack-*/app/helpers",
+      "../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/views",
+      "../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/helpers",
+      "../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/components",
+      "../../../../../vendor/bundle/**/bundler/gems/flatpack-*/app/components",
+      "../../../../../vendor/bundle/**/bundler/gems/flatpack-*/app/helpers",
+      "../../../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/views",
+      "../../../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/helpers",
+      "../../../../../vendor/bundle/**/bundler/gems/RecordingStudio-*/app/components",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/helpers",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/RecordingStudio-*/app/views",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/RecordingStudio-*/app/helpers",
+      "../../../../../../usr/local/bundle/ruby/**/bundler/gems/RecordingStudio-*/app/components",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/components",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/helpers",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/views",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/helpers",
+      "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/components"
+    ].each do |source|
+      assert_includes tailwind_source, source
+    end
     refute_includes tailwind_source, "@theme"
     refute_includes tailwind_source, ":root {"
     refute_includes tailwind_source, "--color-fp-primary"
+
+    built = File.read(File.expand_path("dummy/app/assets/builds/tailwind.css", __dir__))
+    assert_includes built, ".\\[background\\:var\\(--card-background-default\\)\\]"
+    assert_includes built, ".border-\\[var\\(--card-border-color\\)\\]"
+    assert_includes built, ".p-\\[var\\(--card-padding-md\\)\\]"
+    assert_includes built, ".rounded-\\[var\\(--card-radius\\)\\]"
   end
 
   def test_recording_studio_keeps_strict_recordable_declarations_enabled
