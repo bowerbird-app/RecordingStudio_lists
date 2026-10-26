@@ -66,11 +66,11 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Bare Shelf", count: 1
     assert_includes response.body, "Bare Shelf"
     assert_includes response.body, "0 items"
-    assert_includes response.body, "Nothing here yet."
-    list_url = "/lists/#{list.id}"
-    assert_select "div[class*='md:grid-cols-2']" do
-      assert_select "form[action='#{list_url}']", count: 0
+    assert_select ".fp-empty-state" do
+      assert_select "h3", text: "Nothing here yet."
     end
+    assert_select "div[class*='md:grid-cols-2']", count: 0
+    list_url = "/lists/#{list.id}"
     assert_select "[data-controller='flat-pack--trash-button'][data-fp-expand='left'][aria-label='Delete list']" do
       assert_select "button", text: "Delete list", count: 0
       assert_select "[data-flat-pack--trash-button-target='arm'][aria-expanded='false']"
