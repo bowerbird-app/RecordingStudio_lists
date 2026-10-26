@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * List screens use the Recording Studio 6.1 default layout. The title and subtitle come from `content_for`. Back uses `flat_pack_page_nav`. The index registers the new-list action with `register_page_nav`.
 * Delete list is a Flatpack trash button in `content_for :page_nav_right`. At rest it is the trash icon, named Delete list. Armed, it posts to the list with `method: :delete`, expands left, and the confirm button says Delete this list? It is not a page-nav registry action.
 * An empty list show page uses `FlatPack::EmptyState`. The item card sits in the two-column grid only when the list has items.
+* A filled list index and show pass `border: :default` on `FlatPack::Card`. Flatpack's nil border uses the theme width, and the rounded theme sets that width to 0.
+* The dummy Tailwind build scans installed `flatpack-<rev>` and `RecordingStudio-<rev>` checkouts (`app/components`, `app/helpers`, and Recording Studio `app/views`) under `vendor/bundle`, `/usr/local/bundle`, and the system gem home.
 * `RecordingStudioLists.configuration.layout` accepts `nil`, `false`, a layout name, or a callable with the keyword `controller:`. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`.
 * Require Recording Studio `~> 6.1`. The development apps pin tag `v6.1.0`, Flatpack `v0.1.315`, and `view_component` `4.19.0`. Minitest stays below 6 so the suite keeps `stub`.
 * Development Ruby pin is `3.3.13`. The gem still requires Ruby `>= 3.3.0`. GitHub `ubuntu-latest` only installs the latest 3.3 patch.
@@ -29,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pin Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`.
 - Set `RecordingStudioLists.configuration.layout` when list screens should not use the core layout. See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-090).
 - Delete list is the trash button in the top-right of the list page. It is not a form in the page body.
+- Filled list cards use `border: :default`. Rebuild Tailwind so the Flatpack card border, background, padding, and radius utilities are in the host CSS.
 - Published Orderable, Accessible, Trashable, Root Switchable, Metrics, and Cache tags still require Recording Studio below 5. An app that uses those tags cannot resolve this gem until those addons allow 6.1.0.
 
 ## [0.8.0] - 2026-10-20

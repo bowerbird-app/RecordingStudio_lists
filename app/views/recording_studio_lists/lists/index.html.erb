@@ -17,7 +17,7 @@
     <%= render FlatPack::EmptyState::Component.new(title: RecordingStudio.t("recording_studio.lists.index.empty")) %>
   <% else %>
     <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
-      <%= render FlatPack::Card::Component.new do |card| %>
+      <%= render FlatPack::Card::Component.new(border: :default) do |card| %>
         <% card.body do %>
           <%= render FlatPack::List::Component.new(divider: true) do %>
             <% @lists.each do |list| %>

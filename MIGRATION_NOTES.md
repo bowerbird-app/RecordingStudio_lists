@@ -13,6 +13,7 @@ No migration is needed.
 - Page titles come from `content_for(:title)` and `content_for(:subtitle)`. Do not also render `FlatPack::PageTitle` on these screens.
 - Delete list is `FlatPack::TrashButton` in `content_for :page_nav_right`. At rest it is the trash icon, named Delete list. Armed, it expands left and the confirm button says Delete this list? It posts to the list. It is not registered with `register_page_nav`, and it is not a form in the page body. Item remove stays on the row.
 - Requires Recording Studio `~> 6.1` (development pin `v6.1.0`) and Flatpack `>= 0.1.315` (development pin `v0.1.315`).
+- Filled list index and show use `FlatPack::Card` with `border: :default`. A host that compiles Tailwind must scan the installed Flatpack gem so `border`, the card background, the card padding, and the card radius utilities are in the built CSS. The rounded theme's theme border width is 0, so leaving the card border unset draws no edge.
 
 ### Upgrade Steps
 
