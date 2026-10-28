@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.0", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.1", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -52,13 +52,13 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.315"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.315"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.21.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.10.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.6.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.329"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.329"'
     assert_includes gemfile, 'gem "view_component", "4.19.0"'
     assert_includes root_gemfile, 'gem "view_component", "4.19.0"'
     assert_includes gemfile, 'gem "minitest", ">= 5.26", "< 6"'
@@ -286,6 +286,38 @@ class RecordingStudioListsTest < Minitest::Test
     refute_includes helper, "recording_studio_page_nav_right"
     refute_includes helper, "recording_studio_root_switch_dropdown"
     refute_includes helper, "destroy_user_session_path"
+  end
+
+  def test_dummy_does_not_shim_flatpack_page_nav_or_card
+    refute File.exist?(File.expand_path("dummy/config/initializers/page_nav_close.rb", __dir__))
+
+    rejected = %w[show_back right_slot back_label anchor_label secondary_anchor]
+    callers = Dir[
+      File.expand_path("../app/views/recording_studio_lists/lists/{edit,new,index,show}.html.erb", __dir__),
+      File.expand_path("dummy/app/helpers/application_helper.rb", __dir__)
+    ]
+    callers.each do |path|
+      source = File.read(path)
+      nav_calls = source.scan(/(?:flat_pack_page_nav|recording_studio_page_nav)\([\s\S]*?\)/)
+      refute_empty nav_calls, "#{path} should call flat_pack_page_nav"
+      nav_calls.each do |call|
+        rejected.each do |keyword|
+          refute_match(/\b#{keyword}:/, call, "#{path} must not pass #{keyword}: to PageNav")
+        end
+      end
+    end
+
+    card_callers = Dir[
+      File.expand_path("../app/**/*.{rb,erb}", __dir__),
+      File.expand_path("../lib/**/*.{rb,erb}", __dir__),
+      File.expand_path("./**/*.{rb,erb}", __dir__)
+    ]
+    card_callers.each do |path|
+      source = File.read(path)
+      next unless source.include?("FlatPack::Card")
+
+      refute_match(/FlatPack::Card::Component\.new\([^)]*\bstyle:/m, source, "#{path} Card must not pass style:")
+    end
   end
 
   def test_lists_implementation_does_not_name_the_dummy_root_type
