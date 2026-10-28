@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-10-28
+
+### Changed
+
+* Development apps pin Flatpack `v0.1.329`. The dummy app no longer prepends PageNav or Card shims. Native PageNav is `with_link`, `with_back`, `with_close`, `with_action`, and `with_item`. Card takes `background`, `border`, `shadow`, `hover`, `padding`, `inset`, and `radius`, not `style:`. List screens already used `flat_pack_page_nav(back_href:, back_tooltip:)` and `border: :default` on filled cards.
+
+### Upgrade notes
+
+- No migration is required.
+- Dummy and development Gemfiles pin Flatpack tag `v0.1.329`. Delete dummy PageNav and Card prepends that mapped `anchor_url` / `anchor_label` and dropped `style:`. Hosts that still compile against Flatpack `0.1.315` can keep that pin; this gem still has no `flat_pack` gemspec dependency.
+
 ## [0.9.0] - 2026-10-26
 
 ### Added
@@ -304,7 +315,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.6.0...v0.7.0
