@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.1", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.2", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -247,7 +247,7 @@ class RecordingStudioListsTest < Minitest::Test
   def test_product_readme_explains_lists
     readme = File.read(File.expand_path("../README.md", __dir__))
 
-    assert_includes readme, "mount RecordingStudioLists::Engine, at: \"/\""
+    assert_includes readme, "mount RecordingStudioLists::Engine, at: \"/recording_studio_lists\""
     assert_includes readme, "enable_capability(:lists, on: Workspace)"
     assert_includes readme, "generate recording_studio_orderable:migrations"
     assert_includes readme, "RecordingStudio::Lists.create"
