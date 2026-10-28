@@ -14,13 +14,13 @@ bin/rails generate recording_studio_lists:migrations
 bin/rails db:migrate
 ```
 
-Mount the engine after the host routes so `/` stays the host home.
+The install generator mounts the engine at `/recording_studio_lists` so `/` stays the host home. Pass `--mount-path` to change that prefix.
 
 ```ruby
-mount RecordingStudioLists::Engine, at: "/"
+mount RecordingStudioLists::Engine, at: "/recording_studio_lists"
 ```
 
-The screens are `/lists`, `/lists/new`, `/lists/:id`, and `/lists/:id/edit`.
+The screens are `/recording_studio_lists/lists`, `/recording_studio_lists/lists/new`, `/recording_studio_lists/lists/:id`, and `/recording_studio_lists/lists/:id/edit`. The dummy app mounts at `/` for its own screens.
 
 ## Enable
 
@@ -70,7 +70,7 @@ RecordingStudio::Lists.delete(list)
 
 The index lists names. A List button under the title opens the new-list form. Each row has an Actions menu. Edit list opens the edit form. Delete list deletes the list. New list and edit list ask for a name and an optional description. The list page removes a member. A member name is a link when the host can route that record, and plain text otherwise.
 
-Static interface copy on these screens (and the add-to-list menu), controller flashes, error messages, and JS client strings resolve through `RecordingStudio.t` under `recording_studio.lists` at the render site. When the active locale has no value, fallback comes from the loaded English (host overrides included), then a caller `default:`, then the gem-shipped `config/locales/en.yml` registered at boot. Only this gem’s `recording_studio.lists.*` keys use `RecordingStudio.t`; host or other-namespace keys stay on `I18n.t` with their original `default:`. A plain `default:` with no interpolation is returned as a plain (non-html_safe) String, so views will escape it. Interpolating caller `default:` on a missing `_html` key is stricter than view `t` (args escaped, result html_safe). Public model defaults stay English. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`. Requires Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`.
+Static interface copy on these screens (and the add-to-list menu), controller flashes, error messages, and JS client strings resolve through `RecordingStudio.t` under `recording_studio.lists` at the render site. When the active locale has no value, fallback comes from the loaded English (host overrides included), then a caller `default:`, then the gem-shipped `config/locales/en.yml` registered at boot. Only this gem’s `recording_studio.lists.*` keys use `RecordingStudio.t`; host or other-namespace keys stay on `I18n.t` with their original `default:`. A plain `default:` with no interpolation is returned as a plain (non-html_safe) String, so views will escape it. Interpolating caller `default:` on a missing `_html` key is stricter than view `t` (args escaped, result html_safe). Public model defaults stay English. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`. Requires Recording Studio `~> 6.1`. This gem has no `flat_pack` gemspec dependency. Development apps pin Flatpack `v0.1.329`. Recording Studio 6.1 itself requires `flat_pack >= 0.1.315`.
 
 ## Layout
 
@@ -97,4 +97,4 @@ The default layout draws the title and subtitle from `content_for`. List screens
 
 The menu lists names under the current root. A check sits to the right of a name when the recording is already on that list, so the name stays put. Choosing a name without a check adds it and the check appears. Choosing a checked name removes it and the check goes away. The page stays put. List opens a name field in the menu. Saving creates the list, adds the recording, and checks the new name. The lists page still uses the new-list form when a description is needed.
 
-Pass `text:`, `icon:`, `icon_only:`, `round:`, `style:`, `size:`, `show_chevron:`, `placement:`, `parent:`, or `return_to:` when the defaults are wrong. `text: ""` leaves the label off a labeled trigger. `icon:` is any heroicon name. Omit `show_chevron:` to keep the arrow on a labeled trigger and hide it on an icon-only trigger. `show_chevron: false` hides the arrow. `icon_only: true` with `show_chevron: true` raises `ArgumentError`. `round: true` draws a circle. `round:` must be `true` or `false`. An icon-only trigger with a blank `text:` uses `recording_studio.lists.add_to_list.icon_only` ("Add to list") as its accessible name. A non-blank `text:` is that name instead. `parent:` defaults to the current root. Hosts need Flatpack >= 0.1.315.
+Pass `text:`, `icon:`, `icon_only:`, `round:`, `style:`, `size:`, `show_chevron:`, `placement:`, `parent:`, or `return_to:` when the defaults are wrong. `text: ""` leaves the label off a labeled trigger. `icon:` is any heroicon name. Omit `show_chevron:` to keep the arrow on a labeled trigger and hide it on an icon-only trigger. `show_chevron: false` hides the arrow. `icon_only: true` with `show_chevron: true` raises `ArgumentError`. `round: true` draws a circle. `round:` must be `true` or `false`. An icon-only trigger with a blank `text:` uses `recording_studio.lists.add_to_list.icon_only` ("Add to list") as its accessible name. A non-blank `text:` is that name instead. `parent:` defaults to the current root. Hosts using the add-to-list menu need a Flatpack that ships `FlatPack::Button::Dropdown` with `icon_only:` and `round:` (development pin `v0.1.329`).
