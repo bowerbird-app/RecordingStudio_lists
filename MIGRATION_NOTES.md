@@ -1,5 +1,32 @@
 # Migration Notes
 
+## Upgrading To 0.9.2
+
+No migration is needed.
+
+### What Changed
+
+- SimpleCov output under `coverage/` and `test/dummy/coverage/` is no longer tracked. Both paths are gitignored.
+- README and these notes match the install generator default mount (`/recording_studio_lists`) and the development Flatpack pin (`v0.1.329`). This gem still has no `flat_pack` gemspec dependency.
+
+### Upgrade Steps
+
+No migration is required. No host code change is required.
+
+## Upgrading To 0.9.1
+
+No migration is needed.
+
+### What Changed
+
+- Development apps pin Flatpack `v0.1.329`. The dummy app no longer prepends PageNav or Card shims.
+- Dummy/dev sibling pins: Root Switchable `v0.10.0`, Cache `v0.5.1`, Accessible `v0.21.0`, Metrics `v0.6.1`, Trashable `v0.11.3` (`require: false`). Recording Studio stays `v6.1.0`.
+- This gem still has no `flat_pack` gemspec dependency. Recording Studio 6.1 requires `flat_pack >= 0.1.315`.
+
+### Upgrade Steps
+
+No migration is required. Dummy and development Gemfiles pin Flatpack tag `v0.1.329`. Delete dummy PageNav and Card prepends that mapped `anchor_url` / `anchor_label` and dropped `style:`. Hosts that still compile against Flatpack `0.1.315` can keep that pin.
+
 ## Upgrading To 0.9.0
 
 No migration is needed.
@@ -14,12 +41,12 @@ No migration is needed.
 - Delete list is an Actions menu on each index row. The menu item says Delete list and posts to the list. Edit list sits above it and opens the edit form. The list page does not render a delete control. Item remove stays on the row. A member name is a link when the host can route that recordable or recording. Otherwise the name is plain text.
 - The new-list button sits in the page body, under the title. The index does not call `register_page_nav` for it.
 - `RecordingStudio::Lists.update(list, name:, description: nil, actor: nil)` revises the list. The recording id stays. A new list snapshot and an `updated` event are stored. A blank name raises `BlankName` and writes nothing. A missing list or another recordable raises `InvalidList`. Omit `description`, or pass a blank one, and the description is cleared.
-- Requires Recording Studio `~> 6.1` (development pin `v6.1.0`) and Flatpack `>= 0.1.315` (development pin `v0.1.315`).
+- Requires Recording Studio `~> 6.1` (development pin `v6.1.0`). Development Flatpack pin is `v0.1.329`. This gem has no `flat_pack` gemspec dependency; Recording Studio 6.1 requires `flat_pack >= 0.1.315`.
 - Filled list index and show use `FlatPack::Card` with `border: :default`. A host that compiles Tailwind must scan the installed Flatpack gem so `border`, the card background, the card padding, and the card radius utilities are in the built CSS. The rounded theme's theme border width is 0, so leaving the card border unset draws no edge.
 
 ### Upgrade Steps
 
-No migration is required. Pin Recording Studio `~> 6.1` and Flatpack `>= 0.1.315`. Set `config.layout` only when the default cascade is wrong.
+No migration is required. Pin Recording Studio `~> 6.1`. Development Flatpack is `v0.1.329`. Set `config.layout` only when the default cascade is wrong.
 
 ```ruby
 RecordingStudioLists.configure do |config|
@@ -193,8 +220,8 @@ another language, set the `recording_studio.lists` keys in the host's
 - Rails 8.1 or newer
 - Recording Studio `~> 6.1` (gemspec; development GitHub tag `v6.1.0`)
 - Orderable `~> 0.3` (dummy GitHub tag `v0.3.1`)
-- Accessible dummy tag `v0.18.0`, Trashable dummy tag `v0.11.0` (`require: false`), Root Switchable dummy tag `v0.9.0`, Metrics dummy tag `v0.2.0`, and Cache dummy tag `v0.5.0`
-- Flatpack development tag `v0.1.315`
+- Accessible dummy tag `v0.21.0`, Trashable dummy tag `v0.11.3` (`require: false`), Root Switchable dummy tag `v0.10.0`, Metrics dummy tag `v0.6.1`, and Cache dummy tag `v0.5.1`
+- Flatpack development tag `v0.1.329` (this gem has no `flat_pack` gemspec dependency)
 - Published sibling tags still require Recording Studio below 5. The development Gemfiles widen that requirement at resolve time. Hosts need addon releases that allow 6.1.0.
 - Public RubyGems and GitHub access for dependency installation
 

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-10-28
+
+### Changed
+
+* Stop tracking SimpleCov output under `coverage/` and `test/dummy/coverage/`; both directories are gitignored.
+* Docs match the current pins and install generator: development Flatpack tag `v0.1.329`, no `flat_pack` gemspec dependency, default engine mount `/recording_studio_lists`.
+
+### Upgrade notes
+
+- No migration is required.
+- No host code change is required. Ignore SimpleCov HTML under `coverage/` if it was checked out from an older tree.
+
 ## [0.9.1] - 2026-10-28
 
 ### Changed
@@ -317,7 +329,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.7.0...v0.8.0
