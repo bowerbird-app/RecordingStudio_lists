@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.2", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.3", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -16,7 +16,7 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 6.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
-    refute_includes gemspec, "flat_pack"
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.331"'
   end
 
   def test_gemspec_excludes_cursor_config
@@ -57,8 +57,8 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.10.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.6.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.329"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.329"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.331"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.331"'
     assert_includes gemfile, 'gem "view_component", "4.19.0"'
     assert_includes root_gemfile, 'gem "view_component", "4.19.0"'
     assert_includes gemfile, 'gem "minitest", ">= 5.26", "< 6"'
@@ -259,6 +259,7 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes readme, "/lists/:id"
     assert_includes readme, "/lists/:id/edit"
     assert_includes readme, "recording_studio_add_to_list"
+    assert_includes readme, "v0.1.331"
     refute_includes readme, "GemTemplate"
     refute_includes readme, "addon template"
     refute_includes readme, "this is a template"

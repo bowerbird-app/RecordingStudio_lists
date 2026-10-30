@@ -1,6 +1,6 @@
 <div data-controller="recording-studio-lists--add-to-list">
   <template data-recording-studio-lists--add-to-list-target="check">
-    <%= render FlatPack::Shared::IconComponent.new(name: "check", size: :sm) %>
+    <%= render FlatPack::Shared::IconComponent.new(name: "check", size: :sm, class: "ms-auto") %>
   </template>
 
   <% rows.each do |row| %>
@@ -10,15 +10,21 @@
     <% end %>
   <% end %>
 
-  <%= render FlatPack::Button::Dropdown::Component.new(**trigger) do |menu| %>
+  <%= render FlatPack::Button::Dropdown::Component.new(
+        **trigger,
+        menu_class: "min-w-[18rem]",
+        menu_attributes: {
+          data: { recording_studio_lists__add_to_list_target: "menu" }
+        }
+      ) do |menu| %>
     <% rows.each do |row| %>
       <% menu.menu_item(
         text: row[:name],
         icon: ("check" if row[:member]),
+        icon_position: :end,
+        keep_open: true,
         form: row[:form_id],
-        type: "submit",
-        class: "[&>svg]:order-last",
-        data: { action: "click->recording-studio-lists--add-to-list#toggle" }
+        type: "button"
       ) %>
     <% end %>
     <% menu.menu_divider(
@@ -30,32 +36,36 @@
     <% menu.menu_item(
       text: RecordingStudio.t("recording_studio.lists.add_to_list.new_list"),
       icon: "plus",
+      keep_open: true,
       href: new_list_href,
       data: { recording_studio_lists__add_to_list_target: "reveal" }
     ) %>
-  <% end %>
-
-  <%= form_with url: recording_studio_lists.lists_path, method: :post, html: {
-        hidden: true,
-        class: "flex flex-col items-start gap-2 px-2 pb-2",
-        data: {
-          recording_studio_lists__add_to_list_target: "create",
-          blank_name: RecordingStudio.t("recording_studio.lists.js.blank_name"),
-          save_failed: RecordingStudio.t("recording_studio.lists.js.save_failed"),
-          turbo: false
-        }
-      } do %>
-    <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
-    <%= hidden_field_tag :recording_id, recording_id %>
-    <%= hidden_field_tag :return_to, return_to if return_to.present? %>
-    <%= render FlatPack::TextInput::Component.new(
-      name: "list[name]",
-      label: RecordingStudio.t("recording_studio.lists.add_to_list.name"),
-      autocomplete: "off",
-      data: { recording_studio_lists__add_to_list_target: "name" }
-    ) %>
-    <p class="text-sm text-[var(--color-error)]" role="alert" data-recording-studio-lists--add-to-list-target="error"></p>
-    <%= render FlatPack::Button::Component.new(text: RecordingStudio.t("recording_studio.lists.add_to_list.save"), type: "submit", style: :primary, size: :sm) %>
+    <% menu.menu_form(
+         hidden: true,
+         data: { recording_studio_lists__add_to_list_target: "create-panel" }
+       ) do %>
+      <%= form_with url: recording_studio_lists.lists_path, method: :post, html: {
+            class: "flex flex-col items-start gap-2",
+            data: {
+              recording_studio_lists__add_to_list_target: "create",
+              blank_name: RecordingStudio.t("recording_studio.lists.js.blank_name"),
+              save_failed: RecordingStudio.t("recording_studio.lists.js.save_failed"),
+              turbo: false
+            }
+          } do %>
+        <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
+        <%= hidden_field_tag :recording_id, recording_id %>
+        <%= hidden_field_tag :return_to, return_to if return_to.present? %>
+        <%= render FlatPack::TextInput::Component.new(
+          name: "list[name]",
+          label: RecordingStudio.t("recording_studio.lists.add_to_list.name"),
+          autocomplete: "off",
+          data: { recording_studio_lists__add_to_list_target: "name" }
+        ) %>
+        <p class="text-sm text-[var(--color-error)]" role="alert" data-recording-studio-lists--add-to-list-target="error"></p>
+        <%= render FlatPack::Button::Component.new(text: RecordingStudio.t("recording_studio.lists.add_to_list.save"), type: "submit", style: :primary, size: :sm) %>
+      <% end %>
+    <% end %>
   <% end %>
 
   <template data-recording-studio-lists--add-to-list-target="row">
@@ -66,10 +76,10 @@
     <%= render FlatPack::Button::DropdownItem::Component.new(
       text: "Name",
       icon: "check",
-      type: "submit",
-      form: "add-to-list-new-row",
-      class: "[&>svg]:order-last",
-      data: { action: "click->recording-studio-lists--add-to-list#toggle" }
+      icon_position: :end,
+      keep_open: true,
+      type: "button",
+      form: "add-to-list-new-row"
     ) %>
   </template>
 </div>

@@ -1,5 +1,20 @@
 # Migration Notes
 
+## Upgrading To 0.9.3
+
+No migration is needed.
+
+### What Changed
+
+- The add-to-list menu uses Flatpack 0.1.331 Dropdown host hooks: `menu_class`, `menu_attributes`, `icon_position: :end`, `keep_open: true`, and `menu_form` for the name field.
+- The panel is `role="dialog"` because it contains a form. List names stay open after a click. The check still sits on the trailing edge of the name.
+- Development apps pin Flatpack `v0.1.331`. The gemspec requires `flat_pack >= 0.1.331`.
+- The add-to-list panel is now `role=dialog` instead of `role=menu` (accessibility change from the FlatPack kit).
+
+### Upgrade Steps
+
+No migration is required. Hosts that render `recording_studio_add_to_list` need Flatpack `>= 0.1.331`. Dummy and development Gemfiles pin tag `v0.1.331`. If you replaced `_add_to_list.html.erb`, stop moving the create form into `[role=menu]` and stop using `[&>svg]:order-last`. Rebuild host Tailwind so `min-w-[18rem]` and `ms-auto` exist if the host did not already use them. Reload kit JavaScript.
+
 ## Upgrading To 0.9.2
 
 No migration is needed.
@@ -221,7 +236,7 @@ another language, set the `recording_studio.lists` keys in the host's
 - Recording Studio `~> 6.1` (gemspec; development GitHub tag `v6.1.0`)
 - Orderable `~> 0.3` (dummy GitHub tag `v0.3.1`)
 - Accessible dummy tag `v0.21.0`, Trashable dummy tag `v0.11.3` (`require: false`), Root Switchable dummy tag `v0.10.0`, Metrics dummy tag `v0.6.1`, and Cache dummy tag `v0.5.1`
-- Flatpack development tag `v0.1.329` (this gem has no `flat_pack` gemspec dependency)
+- Flatpack `>= 0.1.331` (gemspec; development GitHub tag `v0.1.331`)
 - Published sibling tags still require Recording Studio below 5. The development Gemfiles widen that requirement at resolve time. Hosts need addon releases that allow 6.1.0.
 - Public RubyGems and GitHub access for dependency installation
 
