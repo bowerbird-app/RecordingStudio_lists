@@ -267,7 +267,9 @@ class RecordingStudioListsTest < Minitest::Test
 
   def test_add_to_list_uses_flatpack_dropdown_host_hooks
     partial = File.read(File.expand_path("../app/views/recording_studio_lists/_add_to_list.html.erb", __dir__))
-    script = File.read(File.expand_path("../app/javascript/recording_studio_lists/controllers/add_to_list_controller.js", __dir__))
+    script = File.read(
+      File.expand_path("../app/javascript/recording_studio_lists/controllers/add_to_list_controller.js", __dir__)
+    )
 
     assert_includes partial, "menu_class: \"min-w-[18rem]\""
     assert_includes partial, "menu_attributes:"

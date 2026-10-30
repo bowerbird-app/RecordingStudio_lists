@@ -302,7 +302,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @page.id.to_s, query["recording_id"]
     assert_equal "/", query["return_to"]
     assert_select "a[href='#{new_list['href']}'] svg[data-flat-pack--icon-name-value='plus']"
-    assert_select ".fp-button-dropdown__form[hidden][data-recording-studio-lists--add-to-list-target=create-panel]", count: 2 do
+    assert_select ".fp-button-dropdown__form[hidden][data-recording-studio-lists--add-to-list-target=create-panel]",
+                  count: 2 do
       assert_select "form[data-recording-studio-lists--add-to-list-target=create]" do
         assert_select "input[name='list[name]']"
         assert_select "input[name=recording_id][value=?]", @page.id
