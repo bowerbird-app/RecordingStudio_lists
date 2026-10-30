@@ -275,6 +275,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[role=dialog][aria-modal=false]"
     assert_select "button[aria-haspopup=dialog]", text: "Add to list"
     assert_select "[data-flat-pack--button-dropdown-target=menu][class*='min-w-[18rem]']"
+    assert_select "[data-recording-studio-lists--add-to-list-target=menu]"
     assert_select ".fp-button-dropdown__form[hidden][data-recording-studio-lists--add-to-list-target=create-panel]"
     assert_select "button[type=button][form=?]", "add-to-list-1-#{alpha.id}", text: "Alpha" do |buttons|
       refute_includes buttons.first["class"], "[&>svg]:order-last"

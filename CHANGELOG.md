@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * The add-to-list menu uses Flatpack 0.1.331 Dropdown host hooks. The check sits on the trailing edge with `icon_position: :end`. The name field lives in `menu_form`, so the panel is a dialog and stays open while you type. List names stay open after a click (`keep_open: true`). Rows are `type: "button"` so a teleported menu does not POST the page. The menu is `min-w-[18rem]`. Clicks bind on the menu node, which Flatpack moves to `document.body`.
-* Development apps pin Flatpack `v0.1.331`. This gem still has no `flat_pack` gemspec dependency.
+* The add-to-list panel is now `role=dialog` instead of `role=menu` (accessibility change from the FlatPack kit).
+* Development apps pin Flatpack `v0.1.331`. The gemspec requires `flat_pack >= 0.1.331`.
 
 ### Upgrade notes
 

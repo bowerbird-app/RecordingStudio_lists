@@ -84,6 +84,7 @@ PATH
   remote: ../..
   specs:
     recording_studio_lists (0.9.3)
+      flat_pack (>= 0.1.331)
       rails (~> 8.1.0)
       recording_studio (~> 6.1)
       recording_studio_orderable (~> 0.3)

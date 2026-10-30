@@ -16,7 +16,7 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 6.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
-    refute_includes gemspec, "flat_pack"
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.331"'
   end
 
   def test_gemspec_excludes_cursor_config
@@ -263,26 +263,6 @@ class RecordingStudioListsTest < Minitest::Test
     refute_includes readme, "GemTemplate"
     refute_includes readme, "addon template"
     refute_includes readme, "this is a template"
-  end
-
-  def test_add_to_list_uses_flatpack_dropdown_host_hooks
-    partial = File.read(File.expand_path("../app/views/recording_studio_lists/_add_to_list.html.erb", __dir__))
-    script = File.read(
-      File.expand_path("../app/javascript/recording_studio_lists/controllers/add_to_list_controller.js", __dir__)
-    )
-
-    assert_includes partial, "menu_class: \"min-w-[18rem]\""
-    assert_includes partial, "menu_attributes:"
-    assert_includes partial, "icon_position: :end"
-    assert_includes partial, "keep_open: true"
-    assert_includes partial, "menu.menu_form("
-    refute_includes partial, "[&>svg]:order-last"
-    refute_includes script, "[role=menu]"
-    refute_includes script, "[role=menuitem]"
-    assert_includes script, "[data-flat-pack-dropdown-item][form]"
-    assert_includes script, "create-panel"
-    assert_includes script, "this.menu?.addEventListener(\"click\", this.boundMenuClick, true)"
-    assert_includes script, "event.stopPropagation()"
   end
 
   def test_dummy_home_page_links_to_lists

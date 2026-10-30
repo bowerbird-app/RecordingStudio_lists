@@ -4,7 +4,9 @@ export default class extends Controller {
   static targets = ["check", "row"]
 
   connect() {
-    this.menu = this.element.querySelector("[data-recording-studio-lists--add-to-list-target='menu']")
+    const menuSelector = "[data-recording-studio-lists--add-to-list-target='menu']"
+    this.menu = this.element.querySelector(menuSelector) || document.querySelector(menuSelector)
+    if (!this.menu) return
     this.revealButton = this.element.querySelector("[data-recording-studio-lists--add-to-list-target='reveal']")
     this.createPanel = this.element.querySelector("[data-recording-studio-lists--add-to-list-target='create-panel']")
     this.createForm = this.element.querySelector("[data-recording-studio-lists--add-to-list-target='create']")
