@@ -272,9 +272,14 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[role=separator]", count: 2
     assert_select "[data-controller='recording-studio-lists--add-to-list']"
     assert_select "button[disabled]", text: "Alpha", count: 0
-    assert_select "button[type=submit][form=?]", "add-to-list-1-#{alpha.id}", text: "Alpha" do |buttons|
-      assert_includes buttons.first["class"], "[&>svg]:order-last"
-      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check']"
+    assert_select "[role=dialog][aria-modal=false]"
+    assert_select "button[aria-haspopup=dialog]", text: "Add to list"
+    assert_select "[data-flat-pack--button-dropdown-target=menu][class*='min-w-[18rem]']"
+    assert_select ".fp-button-dropdown__form[hidden][data-recording-studio-lists--add-to-list-target=create-panel]"
+    assert_select "button[type=button][form=?]", "add-to-list-1-#{alpha.id}", text: "Alpha" do |buttons|
+      refute_includes buttons.first["class"], "[&>svg]:order-last"
+      assert_equal "true", buttons.first["data-flat-pack-dropdown-keep-open"]
+      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check'][class*='ms-auto']"
     end
     assert_select "form#add-to-list-1-#{alpha.id}[action=?]", "/lists/#{alpha.id}/items/#{@page.id}" do
       assert_select "input[name=_method][value=delete]"
@@ -286,8 +291,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_select "input[name=return_to][value=?]", "/"
       assert_select "input[name=_method]", count: 0
     end
-    assert_select "button[type=submit][form=?]", "add-to-list-1-#{zebra.id}", text: "Zebra" do |buttons|
-      assert_includes buttons.first["class"], "[&>svg]:order-last"
+    assert_select "button[type=button][form=?]", "add-to-list-1-#{zebra.id}", text: "Zebra" do |buttons|
+      refute_includes buttons.first["class"], "[&>svg]:order-last"
+      assert_equal "true", buttons.first["data-flat-pack-dropdown-keep-open"]
       assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check']", count: 0
     end
     assert_select "[data-recording-studio-lists--add-to-list-target=reveal]", text: "List"
@@ -296,11 +302,13 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @page.id.to_s, query["recording_id"]
     assert_equal "/", query["return_to"]
     assert_select "a[href='#{new_list['href']}'] svg[data-flat-pack--icon-name-value='plus']"
-    assert_select "form[data-recording-studio-lists--add-to-list-target=create][hidden]", count: 2 do
-      assert_select "input[name='list[name]']"
-      assert_select "input[name=recording_id][value=?]", @page.id
-      assert_select "button", text: "Save"
-      assert_select "label", text: "Name"
+    assert_select ".fp-button-dropdown__form[hidden][data-recording-studio-lists--add-to-list-target=create-panel]", count: 2 do
+      assert_select "form[data-recording-studio-lists--add-to-list-target=create]" do
+        assert_select "input[name='list[name]']"
+        assert_select "input[name=recording_id][value=?]", @page.id
+        assert_select "button", text: "Save"
+        assert_select "label", text: "Name"
+      end
     end
     assert_includes response.body, 'data-blank-name="Name can&#39;t be blank."'
     assert_match(/data-save-failed="/, response.body)
@@ -318,7 +326,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     heart = css_select("[data-controller='recording-studio-lists--add-to-list']").find do |node|
       node.at_css("button.fp-hit-target")
     end
-    assert heart.at_css("[role=menu]")
+    assert heart.at_css("[role=dialog]")
     form = heart.at_css("form[action='/lists/#{list.id}/items']")
     view = @controller.view_context
 

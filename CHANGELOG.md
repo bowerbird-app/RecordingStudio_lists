@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-10-30
+
+### Changed
+
+* The add-to-list menu uses Flatpack 0.1.331 Dropdown host hooks. The check sits on the trailing edge with `icon_position: :end`. The name field lives in `menu_form`, so the panel is a dialog and stays open while you type. List names stay open after a click (`keep_open: true`). Rows are `type: "button"` so a teleported menu does not POST the page. The menu is `min-w-[18rem]`. Clicks bind on the menu node, which Flatpack moves to `document.body`.
+* Development apps pin Flatpack `v0.1.331`. This gem still has no `flat_pack` gemspec dependency.
+
+### Upgrade notes
+
+- No migration is required.
+- Hosts that render `recording_studio_add_to_list` need Flatpack `>= 0.1.331`. Pin the development tag `v0.1.331`.
+- If you replaced `_add_to_list.html.erb`, drop `[&>svg]:order-last`, stop moving the create form into `[role=menu]`, and use `icon_position: :end`, `keep_open: true`, `menu_class:`, `menu_attributes:`, and `menu_form` instead.
+- Rebuild host Tailwind so `min-w-[18rem]` and `ms-auto` exist if the host did not already use them. Reload kit JavaScript.
+
 ## [0.9.2] - 2026-10-28
 
 ### Changed
@@ -329,7 +343,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...HEAD
+[0.9.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.8.0...v0.9.0

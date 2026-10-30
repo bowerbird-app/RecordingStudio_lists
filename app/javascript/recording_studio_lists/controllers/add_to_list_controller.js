@@ -4,8 +4,9 @@ export default class extends Controller {
   static targets = ["check", "row"]
 
   connect() {
-    this.menu = this.element.querySelector("[role=menu]")
+    this.menu = this.element.querySelector("[data-recording-studio-lists--add-to-list-target='menu']")
     this.revealButton = this.element.querySelector("[data-recording-studio-lists--add-to-list-target='reveal']")
+    this.createPanel = this.element.querySelector("[data-recording-studio-lists--add-to-list-target='create-panel']")
     this.createForm = this.element.querySelector("[data-recording-studio-lists--add-to-list-target='create']")
     this.nameInput = this.createForm?.querySelector("[data-recording-studio-lists--add-to-list-target='name']")
     this.errorMessage = this.createForm?.querySelector("[data-recording-studio-lists--add-to-list-target='error']")
@@ -13,22 +14,19 @@ export default class extends Controller {
     this.boundReveal = (event) => this.reveal(event)
     this.boundCreate = (event) => this.create(event)
     this.boundClearError = () => this.clearError()
+    this.boundMenuClick = (event) => this.onMenuClick(event)
 
-    if (this.menu && this.createForm && this.createForm.parentElement !== this.menu) {
-      this.menu.append(this.createForm)
-    }
-
-    // A menu row dismisses the menu. This one only opens the name field.
-    this.revealButton?.removeAttribute("role")
     this.revealButton?.addEventListener("click", this.boundReveal)
     this.createForm?.addEventListener("submit", this.boundCreate)
     this.nameInput?.addEventListener("input", this.boundClearError)
+    this.menu?.addEventListener("click", this.boundMenuClick, true)
   }
 
   disconnect() {
     this.revealButton?.removeEventListener("click", this.boundReveal)
     this.createForm?.removeEventListener("submit", this.boundCreate)
     this.nameInput?.removeEventListener("input", this.boundClearError)
+    this.menu?.removeEventListener("click", this.boundMenuClick, true)
   }
 
   blankNameMessage() {
@@ -47,12 +45,12 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
     this.clearError()
-    if (!this.createForm.hidden) {
-      this.createForm.hidden = true
+    if (!this.createPanel.hidden) {
+      this.createPanel.hidden = true
       return
     }
 
-    this.createForm.hidden = false
+    this.createPanel.hidden = false
     this.nameInput?.focus()
   }
 
@@ -92,7 +90,7 @@ export default class extends Controller {
       this.errorMessage.textContent = ""
       const key = this.createForm.querySelector("[name='idempotency_key']")
       if (key) key.value = crypto.randomUUID()
-      this.createForm.hidden = true
+      this.createPanel.hidden = true
     } finally {
       delete this.createForm.dataset.pending
     }
@@ -101,21 +99,31 @@ export default class extends Controller {
   insertList(list) {
     const fragment = this.rowTarget.content.cloneNode(true)
     const form = fragment.querySelector("form")
-    const button = fragment.querySelector("[role=menuitem]")
+    const button = fragment.querySelector("[data-flat-pack-dropdown-item]")
     const formId = `add-to-list-new-${list.id}`
     form.id = formId
     form.action = list.remove_url
     form.dataset.addUrl = list.add_url
     form.dataset.removeUrl = list.remove_url
     button.setAttribute("form", formId)
+    button.removeAttribute("role")
     button.querySelector("span").textContent = list.name
+    this.element.append(form)
     const anchor = this.divider || this.revealButton
-    anchor.parentElement.insertBefore(fragment, anchor)
+    anchor.parentElement.insertBefore(button, anchor)
     this.divider?.classList.remove("hidden")
   }
 
-  async toggle(event) {
-    const item = event.currentTarget
+  onMenuClick(event) {
+    const item = event.target.closest("[data-flat-pack-dropdown-item][form]")
+    if (!item || !this.menu.contains(item)) return
+
+    event.preventDefault()
+    event.stopPropagation()
+    this.toggle(event, item)
+  }
+
+  async toggle(event, item) {
     const form = document.getElementById(item?.getAttribute("form") || "")
     if (!form || item.dataset.pending === "true") return
 
