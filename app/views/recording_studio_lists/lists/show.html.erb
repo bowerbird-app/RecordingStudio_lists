@@ -11,14 +11,14 @@
      back_tooltip: RecordingStudio.t("recording_studio.lists.show.back")
    ) %>
 
-<div class="flex w-full flex-col gap-6">
+<%= render FlatPack::Stack::Component.new(gap: :lg) do %>
   <% if @items.empty? %>
     <%= render FlatPack::EmptyState::Component.new(title: RecordingStudio.t("recording_studio.lists.show.empty")) %>
   <% else %>
     <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
       <%= render FlatPack::Card::Component.new(border: :default) do |card| %>
         <% card.body do %>
-          <%= render FlatPack::List::Component.new(divider: true, class: "!space-y-0") do %>
+          <%= render FlatPack::List::Component.new(divider: true, align: :center, class: "!space-y-0") do %>
             <% @items.each do |item| %>
               <% trailing = nil %>
               <% if item %>
@@ -36,7 +36,7 @@
                 <% end %>
               <% end %>
               <% href = list_member_href(item) %>
-              <%= render FlatPack::List::Item.new(trailing: trailing, class: "!items-center") do %>
+              <%= render FlatPack::List::Item.new(trailing: trailing) do %>
                 <% if href %>
                   <%= render FlatPack::Link::Component.new(href: href) do %>
                     <%= item.name %>
@@ -51,4 +51,4 @@
       <% end %>
     <% end %>
   <% end %>
-</div>
+<% end %>

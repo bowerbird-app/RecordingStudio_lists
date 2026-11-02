@@ -1,5 +1,18 @@
 # Migration Notes
 
+## Upgrading To 0.9.4
+
+No migration is needed.
+
+### What Changed
+
+- Index, new, edit, and show use `FlatPack::Stack` with `gap: :lg` for the page body.
+- Index and show list rows use List `align: :center` instead of a Tailwind important `items-center` class.
+
+### Upgrade Steps
+
+No migration is required. If you replaced those templates, switch the outer wrapper to Stack and set `align: :center` on the List.
+
 ## Upgrading To 0.9.3
 
 No migration is needed.

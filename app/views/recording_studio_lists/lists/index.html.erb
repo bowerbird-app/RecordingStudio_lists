@@ -6,7 +6,7 @@
      back_tooltip: RecordingStudio.t("recording_studio.lists.index.home")
    ) %>
 
-<div class="flex w-full flex-col gap-6">
+<%= render FlatPack::Stack::Component.new(gap: :lg) do %>
   <div class="flex items-center">
     <%= render FlatPack::Button::Component.new(
           text: RecordingStudio.t("recording_studio.lists.index.new_button"),
@@ -21,7 +21,7 @@
     <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
       <%= render FlatPack::Card::Component.new(border: :default) do |card| %>
         <% card.body do %>
-          <%= render FlatPack::List::Component.new(divider: true, class: "!space-y-0") do %>
+          <%= render FlatPack::List::Component.new(divider: true, align: :center, class: "!space-y-0") do %>
             <% @lists.each do |list| %>
               <% form_id = "delete-list-#{list.id}" %>
               <% trailing = capture do %>
@@ -48,7 +48,7 @@
                      ) %>
                 <% end %>
               <% end %>
-              <%= render FlatPack::List::Item.new(trailing: trailing, class: "!items-center") do %>
+              <%= render FlatPack::List::Item.new(trailing: trailing) do %>
                 <%= render FlatPack::Link::Component.new(href: list_path(list)) do %>
                   <%= list.name %>
                 <% end %>
@@ -59,4 +59,4 @@
       <% end %>
     <% end %>
   <% end %>
-</div>
+<% end %>

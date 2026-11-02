@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.4] - 2026-11-02
+
+### Changed
+
+* List index, new, edit, and show wrap their page body in `FlatPack::Stack` (`gap: :lg`) instead of a `flex w-full flex-col gap-6` div. Spacing stays 1.5rem.
+* List rows on index and show use List `align: :center` instead of `class: "!items-center"`.
+
+### Upgrade notes
+
+- No migration is required.
+- Hosts that copied the list templates should render `FlatPack::Stack::Component.new(gap: :lg)` and pass `align: :center` on `FlatPack::List::Component`.
+
 ## [0.9.3] - 2026-10-30
 
 ### Changed
@@ -344,7 +356,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...HEAD
+[0.9.4]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.0...v0.9.1
