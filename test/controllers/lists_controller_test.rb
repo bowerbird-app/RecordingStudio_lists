@@ -164,7 +164,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
             assert_match(/!space-y-0/, lists.first["class"])
             assert_select "a", text: "Reading"
             assert_select "li" do |items|
-              assert_match(/!items-center/, items.first["class"])
+              assert_includes items.first["class"], "items-center"
+              refute_includes items.first["class"], "!items-center"
               assert_select "button[aria-label='Actions']" do
                 assert_select "svg[data-flat-pack--icon-name-value='ellipsis-vertical']"
               end
@@ -220,7 +221,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_select "[data-controller='recording-studio-root-switchable--root-switch-dropdown']", count: 0
     end
     assert_select "li", text: /#{Regexp.escape(@page.name)}/ do |items|
-      assert_match(/!items-center/, items.first["class"])
+      assert_includes items.first["class"], "items-center"
+      refute_includes items.first["class"], "!items-center"
       assert_select "button[aria-label='Remove']"
       assert_select "a", text: @page.name, count: 0
     end

@@ -6,7 +6,7 @@
      back_tooltip: RecordingStudio.t("recording_studio.lists.new.back")
    ) %>
 
-<div class="flex w-full flex-col gap-6">
+<%= render FlatPack::Stack::Component.new(gap: :lg) do %>
   <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
     <%= form_with url: lists_path, method: :post, class: "flex flex-col gap-(--stack-gap-md)" do %>
       <%= hidden_field_tag :idempotency_key, @idempotency_key %>
@@ -30,4 +30,4 @@
       <%= render FlatPack::Button::Component.new(text: RecordingStudio.t("recording_studio.lists.new.create"), type: "submit", style: :primary) %>
     <% end %>
   <% end %>
-</div>
+<% end %>
