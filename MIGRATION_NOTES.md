@@ -8,11 +8,11 @@ No migration is needed.
 
 - Index and show lists use FlatPack List `spacing: :none` instead of a Tailwind important `space-y-0` class.
 - Development apps pin Flatpack `v0.1.341`. The gemspec requires `flat_pack >= 0.1.341`.
-- Dummy lockfile updates `nokogiri` to `>= 1.19.5` and `rails-html-sanitizer` to `>= 1.7.2`.
+- Root and dummy lockfiles update `nokogiri` to `1.19.7` and `rails-html-sanitizer` to `>= 1.7.2`.
 
 ### Upgrade Steps
 
-No migration is required. If you replaced those templates, pass `spacing: :none` on the List and drop `class: "!space-y-0"`. Hosts need Flatpack `>= 0.1.341`. Dummy and development Gemfiles pin tag `v0.1.341`.
+No migration is required. If you replaced those templates, pass `spacing: :none` on the List and drop `class: "!space-y-0"`. Hosts need Flatpack `>= 0.1.341` (List `spacing: :none` first tagged in v0.1.341). Dummy and development Gemfiles pin tag `v0.1.341`. Root and dummy lockfiles pin `nokogiri` `1.19.7` and `rails-html-sanitizer` `>= 1.7.2`.
 
 ## Upgrading To 0.9.4
 

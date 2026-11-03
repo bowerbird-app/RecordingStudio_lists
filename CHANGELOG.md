@@ -11,14 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Index and show lists pass FlatPack List `spacing: :none` instead of `class: "!space-y-0"`. Rows stay flush. FlatPack 0.1.339 emits no gap class for `:none`.
+* Index and show lists pass FlatPack List `spacing: :none` instead of `class: "!space-y-0"`. The old pin applied `flex` `gap-3` that `!space-y-0` never removed, so rows no longer get that default gap and sit tighter. FlatPack emits no gap class for `:none` (first tagged in v0.1.341).
 * Development apps pin Flatpack `v0.1.341`. The gemspec requires `flat_pack >= 0.1.341`.
-* Dummy lockfile updates `nokogiri` to `>= 1.19.5` and `rails-html-sanitizer` to `>= 1.7.2` for Bundler Audit.
+* Root and dummy lockfiles update `nokogiri` to `1.19.7` and `rails-html-sanitizer` to `>= 1.7.2` for Bundler Audit.
 
 ### Upgrade notes
 
 - No migration is required.
-- Hosts that copied the list templates should pass `spacing: :none` on `FlatPack::List::Component` and drop the `!space-y-0` class. Need Flatpack `>= 0.1.341` (List `spacing: :none` shipped in 0.1.339). Pin the development tag `v0.1.341`.
+- Hosts that copied the list templates should pass `spacing: :none` on `FlatPack::List::Component` and drop the `!space-y-0` class. Need Flatpack `>= 0.1.341` (List `spacing: :none` first tagged in v0.1.341). Pin the development tag `v0.1.341`.
+- Root and dummy lockfiles pin `nokogiri` `1.19.7` and `rails-html-sanitizer` `>= 1.7.2`.
 
 ## [0.9.4] - 2026-11-02
 
