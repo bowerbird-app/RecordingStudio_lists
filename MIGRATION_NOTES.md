@@ -1,5 +1,18 @@
 # Migration Notes
 
+## Upgrading To 0.9.5
+
+No migration is needed.
+
+### What Changed
+
+- Index and show lists use FlatPack List `spacing: :none` instead of a Tailwind important `space-y-0` class.
+- Development apps pin Flatpack `v0.1.341`. The gemspec requires `flat_pack >= 0.1.341`.
+
+### Upgrade Steps
+
+No migration is required. If you replaced those templates, pass `spacing: :none` on the List and drop `class: "!space-y-0"`. Hosts need Flatpack `>= 0.1.341`. Dummy and development Gemfiles pin tag `v0.1.341`.
+
 ## Upgrading To 0.9.4
 
 No migration is needed.
@@ -249,7 +262,7 @@ another language, set the `recording_studio.lists` keys in the host's
 - Recording Studio `~> 6.1` (gemspec; development GitHub tag `v6.1.0`)
 - Orderable `~> 0.3` (dummy GitHub tag `v0.3.1`)
 - Accessible dummy tag `v0.21.0`, Trashable dummy tag `v0.11.3` (`require: false`), Root Switchable dummy tag `v0.10.0`, Metrics dummy tag `v0.6.1`, and Cache dummy tag `v0.5.1`
-- Flatpack `>= 0.1.331` (gemspec; development GitHub tag `v0.1.331`)
+- Flatpack `>= 0.1.341` (gemspec; development GitHub tag `v0.1.341`)
 - Published sibling tags still require Recording Studio below 5. The development Gemfiles widen that requirement at resolve time. Hosts need addon releases that allow 6.1.0.
 - Public RubyGems and GitHub access for dependency installation
 

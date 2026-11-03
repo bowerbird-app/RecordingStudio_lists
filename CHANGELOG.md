@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.5] - 2026-11-03
+
+### Changed
+
+* Index and show lists pass FlatPack List `spacing: :none` instead of `class: "!space-y-0"`. Rows stay flush. FlatPack 0.1.339 emits no gap class for `:none`.
+* Development apps pin Flatpack `v0.1.341`. The gemspec requires `flat_pack >= 0.1.341`.
+
+### Upgrade notes
+
+- No migration is required.
+- Hosts that copied the list templates should pass `spacing: :none` on `FlatPack::List::Component` and drop the `!space-y-0` class. Need Flatpack `>= 0.1.341` (List `spacing: :none` shipped in 0.1.339). Pin the development tag `v0.1.341`.
+
 ## [0.9.4] - 2026-11-02
 
 ### Changed
@@ -356,7 +368,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...HEAD
+[0.9.5]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.1...v0.9.2
