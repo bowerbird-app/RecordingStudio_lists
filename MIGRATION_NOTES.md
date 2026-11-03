@@ -8,6 +8,7 @@ No migration is needed.
 
 - Index and show lists use FlatPack List `spacing: :none` instead of a Tailwind important `space-y-0` class.
 - Development apps pin Flatpack `v0.1.341`. The gemspec requires `flat_pack >= 0.1.341`.
+- Dummy lockfile updates `nokogiri` to `>= 1.19.5` and `rails-html-sanitizer` to `>= 1.7.2`.
 
 ### Upgrade Steps
 

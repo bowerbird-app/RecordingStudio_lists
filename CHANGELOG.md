@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Index and show lists pass FlatPack List `spacing: :none` instead of `class: "!space-y-0"`. Rows stay flush. FlatPack 0.1.339 emits no gap class for `:none`.
 * Development apps pin Flatpack `v0.1.341`. The gemspec requires `flat_pack >= 0.1.341`.
+* Dummy lockfile updates `nokogiri` to `>= 1.19.5` and `rails-html-sanitizer` to `>= 1.7.2` for Bundler Audit.
 
 ### Upgrade notes
 
