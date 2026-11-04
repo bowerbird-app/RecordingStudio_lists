@@ -21,7 +21,7 @@
     <%= render FlatPack::Grid::Component.new(cols: 2, align: :start) do %>
       <%= render FlatPack::Card::Component.new(border: :default) do |card| %>
         <% card.body do %>
-          <%= render FlatPack::List::Component.new(divider: true, align: :center, class: "!space-y-0") do %>
+          <%= render FlatPack::List::Component.new(divider: true, align: :center, spacing: :none) do %>
             <% @lists.each do |list| %>
               <% form_id = "delete-list-#{list.id}" %>
               <% trailing = capture do %>

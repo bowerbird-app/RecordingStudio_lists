@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.4", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.5", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -16,7 +16,7 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 6.1"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.331"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.341"'
   end
 
   def test_gemspec_excludes_cursor_config
@@ -57,8 +57,8 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.10.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.6.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.331"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.331"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     assert_includes gemfile, 'gem "view_component", "4.19.0"'
     assert_includes root_gemfile, 'gem "view_component", "4.19.0"'
     assert_includes gemfile, 'gem "minitest", ">= 5.26", "< 6"'
@@ -259,7 +259,7 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes readme, "/lists/:id"
     assert_includes readme, "/lists/:id/edit"
     assert_includes readme, "recording_studio_add_to_list"
-    assert_includes readme, "v0.1.331"
+    assert_includes readme, "v0.1.341"
     refute_includes readme, "GemTemplate"
     refute_includes readme, "addon template"
     refute_includes readme, "this is a template"
@@ -318,6 +318,15 @@ class RecordingStudioListsTest < Minitest::Test
       next unless source.include?("FlatPack::Card")
 
       refute_match(/FlatPack::Card::Component\.new\([^)]*\bstyle:/m, source, "#{path} Card must not pass style:")
+    end
+  end
+
+  def test_index_and_show_lists_use_flatpack_spacing_none
+    %w[index show].each do |name|
+      source = File.read(File.expand_path("../app/views/recording_studio_lists/lists/#{name}.html.erb", __dir__))
+
+      assert_includes source, "spacing: :none"
+      refute_includes source, "!space-y-0"
     end
   end
 

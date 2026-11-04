@@ -161,7 +161,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_select card_with_visible_frame do
         assert_select "div[class*='p-[var(--card-padding-md)]']" do
           assert_select "ul.flat-pack-list" do |lists|
-            assert_match(/!space-y-0/, lists.first["class"])
+            assert_flatpack_list_has_no_row_gap(lists.first)
             assert_select "a", text: "Reading"
             assert_select "li" do |items|
               assert_includes items.first["class"], "items-center"
@@ -207,7 +207,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "div[class*='md:grid-cols-2']" do
       assert_select card_with_visible_frame do
         assert_select "div[class*='p-[var(--card-padding-md)]']" do
-          assert_select "ul.flat-pack-list"
+          assert_select "ul.flat-pack-list" do |lists|
+            assert_flatpack_list_has_no_row_gap(lists.first)
+          end
         end
       end
     end
@@ -665,6 +667,13 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
   def card_with_visible_frame
     "div.fp-card.border[class*='[background:var(--card-background-default)]']" \
       "[class*='rounded-[var(--card-radius)]'][class*='border-[var(--card-border-color)]']"
+  end
+
+  def assert_flatpack_list_has_no_row_gap(list)
+    class_name = list["class"].to_s
+    refute_includes class_name, "!space-y-0"
+    refute_match(/(?:^|\s)gap-(?:1|3)(?:\s|$)/, class_name)
+    refute_match(/(?:^|\s)gap-y-(?:1|3)(?:\s|$)/, class_name)
   end
 
   def refute_theme_border_width
