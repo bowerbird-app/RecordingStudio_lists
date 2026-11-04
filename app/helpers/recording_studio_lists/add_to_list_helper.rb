@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RecordingStudioLists
-  module AddToListHelper
+  module AddToListHelper # rubocop:disable Metrics/ModuleLength
     MEMBERSHIP_JOIN = "INNER JOIN recording_studio_list_items " \
                       "ON recording_studio_list_items.id = recording_studio_recordings.recordable_id"
 
@@ -37,8 +37,11 @@ module RecordingStudioLists
     end
 
     def add_to_list_accessible_lists(place)
-      actor = (defined?(Current) && Current.try(:actor)) || try(:current_user)
-      AccessibleLists.for(actor: actor, parent: place, minimum_role: :edit)
+      AccessibleLists.for(actor: current_actor, parent: place, minimum_role: :edit)
+    end
+
+    def current_actor
+      Current.actor if defined?(Current)
     end
 
     def add_to_list_return_path(return_to)
@@ -62,6 +65,7 @@ module RecordingStudioLists
       }
     end
 
+    # One lookup for every list under this parent that already holds the recording.
     def add_to_list_member_ids(lists, recording)
       ids = lists.map(&:id)
       return Set.new if ids.empty?
@@ -96,6 +100,7 @@ module RecordingStudioLists
       }
     end
 
+    # Each keyword is a button or menu setting on the public helper.
     def add_to_list_options( # rubocop:disable Metrics/ParameterLists
       text: RecordingStudio.t("recording_studio.lists.add_to_list.trigger"),
       icon: nil,

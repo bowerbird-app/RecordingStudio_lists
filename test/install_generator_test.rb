@@ -142,7 +142,13 @@ class InstallGeneratorTest < Minitest::Test
     assert_includes install_guide, "bin/rails db:migrate"
     assert_includes install_guide, "auth, layout, and current actor integration"
     assert_includes install_guide, "recording_studio_recordable"
+    assert_includes install_guide, "authorize_recording!"
+    assert_includes install_guide, "Show needs `:view`"
+    assert_includes install_guide, "need `:edit` on the current root"
+    assert_match(/`:edit` on the\s+list/, install_guide)
+    refute_includes install_guide, "`:view` for show and edit"
     refute_includes install_guide, "RecordingStudio v3"
+    assert_equal "\n", install_guide[-1]
   end
 
   private

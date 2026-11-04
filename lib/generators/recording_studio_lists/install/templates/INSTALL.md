@@ -5,8 +5,9 @@ Next steps:
 1. Review config/initializers/recording_studio_lists.rb and set any required options.
 2. If you use environment-specific settings, create config/recording_studio_lists.yml.
 3. Ensure `recording_studio_accessible` and `recording_studio_orderable` are in the Gemfile.
-   List screens call `RecordingStudioAccessible.authorized?` on the list recording (`:view` for
-   show and edit, `:edit` for update, destroy, add, and remove). Install Accessible migrations
+   List screens check access through `authorize_recording!`. Show needs `:view`. New and create
+   need `:edit` on the current root. Edit, update, destroy, add, and remove need `:edit` on the
+   list. Install Accessible migrations
    with `bin/rails generate recording_studio_accessible:migrations`, then Orderable with
    `bin/rails generate recording_studio_orderable:migrations` (lists stores member order there).
 4. Install the lists migrations with `bin/rails generate recording_studio_lists:migrations`.

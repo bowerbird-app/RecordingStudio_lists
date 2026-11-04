@@ -92,7 +92,7 @@ module RecordingStudioLists
     end
   end
 
-  class ListsController < ApplicationController
+  class ListsController < ApplicationController # rubocop:disable Metrics/ClassLength
     include ListAccess
     include MenuResponses
 
@@ -133,7 +133,7 @@ module RecordingStudioLists
 
     def add_item
       run_membership do |list|
-        RecordingStudio::Lists.add(list, params[:recording_id], actor: lists_actor)
+        RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
         respond_membership(list, Copy.t("flashes.added"))
       end
     end
@@ -168,6 +168,52 @@ module RecordingStudioLists
       redirect_to lists_path, notice: Copy.t("flashes.deleted")
     rescue RecordingStudio::Lists::InvalidList => e
       redirect_to lists_path, alert: list_error_copy(e)
+    end
+
+    private
+
+    def revise_submitted_list
+      @list = load_list!(role: :edit)
+      @name = list_params[:name]
+      @description = list_params[:description]
+      @return_to = safe_return_path
+      RecordingStudio::Lists.update(@list, name: @name, description: @description, actor: current_actor)
+    end
+
+    def build_list
+      RecordingStudio::Lists.create(
+        parent: parent_recording,
+        name: list_params[:name],
+        description: list_params[:description],
+        idempotency_key: params[:idempotency_key],
+        actor: current_actor
+      )
+    end
+
+    def parent_recording
+      recording = current_root_recording if respond_to?(:current_root_recording)
+      raise RecordingStudio::Lists::ParentNotAllowed, "Choose a place for this list first." if recording.blank?
+
+      recording
+    end
+
+    def list_params
+      params.fetch(:list, ActionController::Parameters.new).permit(:name, :description)
+    end
+
+    def current_actor
+      Current.actor if defined?(Current)
+    end
+
+    def assign_add_context
+      @recording_id = params[:recording_id].presence
+      @return_to = safe_return_path
+    end
+
+    def attach_recording(list)
+      return if params[:recording_id].blank?
+
+      RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
     end
   end
 end
