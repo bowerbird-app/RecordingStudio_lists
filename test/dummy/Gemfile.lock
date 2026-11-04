@@ -37,11 +37,11 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_orderable.git
-  revision: a2fba594b250aa81d2d302da5c19cf30a08821a8
-  tag: v0.3.1
+  revision: f4f18c54cdb3f11d3db870fe4a523736c40bcc79
+  tag: v0.4.8
   specs:
-    recording_studio_orderable (0.3.0)
-      flat_pack (>= 0.1.74)
+    recording_studio_orderable (0.4.8)
+      flat_pack (>= 0.1.315)
       rails (~> 8.1.0)
       recording_studio (>= 6.1.0)
 
@@ -84,12 +84,12 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_lists (0.9.7)
+    recording_studio_lists (0.9.6)
       flat_pack (>= 0.1.341)
       rails (~> 8.1.0)
       recording_studio (~> 6.1)
-      recording_studio_accessible (~> 0.18)
-      recording_studio_orderable (~> 0.3)
+      recording_studio_accessible (~> 0.24)
+      recording_studio_orderable (~> 0.4)
 
 GEM
   remote: https://rubygems.org/
@@ -646,9 +646,9 @@ CHECKSUMS
   recording_studio (6.3.0)
   recording_studio_accessible (0.24.0)
   recording_studio_cache (0.6.2)
-  recording_studio_lists (0.9.7)
+  recording_studio_lists (0.9.6)
   recording_studio_metrics (0.7.2)
-  recording_studio_orderable (0.3.0)
+  recording_studio_orderable (0.4.8)
   recording_studio_root_switchable (0.11.4)
   recording_studio_trashable (0.12.2)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4

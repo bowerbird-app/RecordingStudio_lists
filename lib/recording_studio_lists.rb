@@ -2,7 +2,9 @@
 
 require "recording_studio"
 require "recording_studio_orderable"
+require "recording_studio_accessible"
 require "recording_studio_lists/version"
+require "recording_studio_lists/accessible_lists"
 require "recording_studio_lists/engine"
 require "recording_studio_lists/configuration"
 require "recording_studio_lists/copy"

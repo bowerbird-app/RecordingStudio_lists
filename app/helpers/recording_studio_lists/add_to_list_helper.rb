@@ -36,6 +36,11 @@ module RecordingStudioLists
       nil
     end
 
+    def add_to_list_accessible_lists(place)
+      actor = (defined?(Current) && Current.try(:actor)) || try(:current_user)
+      AccessibleLists.for(actor: actor, parent: place, minimum_role: :edit)
+    end
+
     def add_to_list_return_path(return_to)
       candidate = return_to.presence || request&.fullpath
       RecordingStudio::Lists::InternalPath.sanitize(candidate)
@@ -57,7 +62,6 @@ module RecordingStudioLists
       }
     end
 
-    # One lookup for every list under this parent that already holds the recording.
     def add_to_list_member_ids(lists, recording)
       ids = lists.map(&:id)
       return Set.new if ids.empty?
@@ -85,14 +89,13 @@ module RecordingStudioLists
       return_path = add_to_list_return_path(options[:return_to])
       {
         trigger: AddToListTrigger.new(options).to_h,
-        rows: add_to_list_rows(RecordingStudio::Lists.lists(place), target),
+        rows: add_to_list_rows(add_to_list_accessible_lists(place), target),
         new_list_href: add_to_list_new_href(target, return_path),
         recording_id: target.id,
         return_to: return_path
       }
     end
 
-    # Each keyword is a button or menu setting on the public helper.
     def add_to_list_options( # rubocop:disable Metrics/ParameterLists
       text: RecordingStudio.t("recording_studio.lists.add_to_list.trigger"),
       icon: nil,

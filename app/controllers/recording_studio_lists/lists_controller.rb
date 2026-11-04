@@ -90,54 +90,42 @@ module RecordingStudioLists
     def menu_request?
       request.headers["X-Lists-Menu"] == "1"
     end
-
-    def list_in_current_root(role: :view)
-      list = RecordingStudio::Lists.find(params[:id], root: parent_recording)
-      raise RecordingStudio::Lists::InvalidList unless list_access?(list, role)
-
-      list
-    end
-
-    def list_access?(list, role)
-      RecordingStudioAccessible.authorized?(actor: current_actor, recording: list, role: role)
-    end
-
-    def run_membership
-      yield list_in_current_root(role: :edit)
-    rescue RecordingStudio::Lists::InvalidList
-      head :not_found
-    rescue RecordingStudio::Lists::Error => e
-      respond_membership_error(e)
-    end
   end
 
   class ListsController < ApplicationController
+    include ListAccess
     include MenuResponses
 
     def index
-      @lists = RecordingStudio::Lists.lists(parent_recording).select { |list| list_access?(list, :view) }
+      @lists = lists_for(parent_recording, minimum_role: :view)
     rescue RecordingStudio::Lists::ParentNotAllowed => e
       @lists = []
       flash.now[:alert] = list_error_copy(e)
     end
 
     def new
+      require_parent_edit!
       @idempotency_key = SecureRandom.uuid
       assign_add_context
+    rescue RecordingStudio::Lists::InvalidList
+      head :not_found
     end
 
     def create
+      require_parent_edit!
       list = build_list
       attach_recording(list)
       respond_created(list)
     rescue RecordingStudio::Lists::BlankName => e
       respond_blank_name(e)
+    rescue RecordingStudio::Lists::InvalidList
+      head :not_found
     rescue RecordingStudio::Lists::Error => e
       respond_list_error(e)
     end
 
     def show
-      @list = list_in_current_root
+      @list = load_list!(role: :view)
       @items = RecordingStudio::Lists.items(@list)
     rescue RecordingStudio::Lists::InvalidList
       head :not_found
@@ -145,7 +133,7 @@ module RecordingStudioLists
 
     def add_item
       run_membership do |list|
-        RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
+        RecordingStudio::Lists.add(list, params[:recording_id], actor: lists_actor)
         respond_membership(list, Copy.t("flashes.added"))
       end
     end
@@ -158,7 +146,7 @@ module RecordingStudioLists
     end
 
     def edit
-      @list = list_in_current_root
+      @list = load_list!(role: :edit)
       @name = @list.name
       @description = @list.recordable.description
       @return_to = safe_return_path
@@ -176,57 +164,10 @@ module RecordingStudioLists
     end
 
     def destroy
-      list_in_current_root(role: :edit)
-      RecordingStudio::Lists.delete(params[:id], root: parent_recording)
+      RecordingStudio::Lists.delete(load_list!(role: :edit))
       redirect_to lists_path, notice: Copy.t("flashes.deleted")
     rescue RecordingStudio::Lists::InvalidList => e
       redirect_to lists_path, alert: list_error_copy(e)
-    end
-
-    private
-
-    def revise_submitted_list
-      @list = list_in_current_root(role: :edit)
-      @name = list_params[:name]
-      @description = list_params[:description]
-      @return_to = safe_return_path
-      RecordingStudio::Lists.update(@list, name: @name, description: @description, actor: current_actor)
-    end
-
-    def build_list
-      RecordingStudio::Lists.create(
-        parent: parent_recording,
-        name: list_params[:name],
-        description: list_params[:description],
-        idempotency_key: params[:idempotency_key],
-        actor: current_actor
-      )
-    end
-
-    def parent_recording
-      recording = current_root_recording if respond_to?(:current_root_recording)
-      raise RecordingStudio::Lists::ParentNotAllowed, "Choose a place for this list first." if recording.blank?
-
-      recording
-    end
-
-    def list_params
-      params.fetch(:list, ActionController::Parameters.new).permit(:name, :description)
-    end
-
-    def current_actor
-      Current.actor if defined?(Current)
-    end
-
-    def assign_add_context
-      @recording_id = params[:recording_id].presence
-      @return_to = safe_return_path
-    end
-
-    def attach_recording(list)
-      return if params[:recording_id].blank?
-
-      RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
     end
   end
 end

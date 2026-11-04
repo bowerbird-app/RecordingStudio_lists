@@ -25,23 +25,6 @@ module RecordingStudio
           halt(InvalidList.new)
         end
 
-        def list_in_root?(list, root)
-          return true if root.nil?
-
-          expected = recording_for(root)&.root_recording_or_self
-          return false unless expected&.persisted?
-
-          list.root_recording_id == expected.id || list.id == expected.id
-        end
-
-        def require_list_in_root(recording_or_id, root)
-          list = require_list(recording_or_id)
-          return list if list.is_a?(RESULT)
-          return halt(InvalidList.new) unless list_in_root?(list, root)
-
-          list
-        end
-
         def require_target(recording_or_id)
           recording = recording_for(recording_or_id)
           return recording if recording&.persisted?
@@ -288,14 +271,13 @@ module RecordingStudio
       class Find < RecordingStudio::Services::BaseService
         include Resolve
 
-        def initialize(id:, root: nil)
+        def initialize(id:)
           super()
           @id = id
-          @root = root
         end
 
         def perform
-          list = require_list_in_root(@id, @root)
+          list = require_list(@id)
           return list if list.is_a?(RESULT)
 
           success(list)
@@ -370,17 +352,15 @@ module RecordingStudio
       class Delete < RecordingStudio::Services::BaseService
         include Resolve
 
-        def initialize(list:, root: nil)
+        def initialize(list:)
           super()
           @list = list
-          @root = root
         end
 
         def perform
           recording = recording_for(@list)
-          return success(nil) if recording.nil? && @root.nil?
-          return halt(InvalidList.new) unless recording&.recordable_type == LIST_TYPE
-          return halt(InvalidList.new) unless list_in_root?(recording, @root)
+          return success(nil) if recording.nil?
+          return halt(InvalidList.new) unless recording.recordable_type == LIST_TYPE
 
           destroy_list(recording)
           success(recording)

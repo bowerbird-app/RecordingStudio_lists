@@ -73,16 +73,16 @@ module RecordingStudio
       Services::Lists.call(parent:).value!
     end
 
-    def self.find(id, root: nil)
-      Services::Find.call(id:, root:).value!
+    def self.find(id)
+      Services::Find.call(id:).value!
     end
 
     def self.addable(list)
       Services::Addable.call(list:).value!
     end
 
-    def self.delete(list, root: nil)
-      Services::Delete.call(list:, root:).value!
+    def self.delete(list)
+      Services::Delete.call(list:).value!
     end
   end
 end

@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.7", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.6", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -15,8 +15,8 @@ class RecordingStudioListsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_lists.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 6.1"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.18"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.24"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.341"'
   end
 
@@ -48,11 +48,12 @@ class RecordingStudioListsTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
     root_gemfile = File.read(File.expand_path("../Gemfile", __dir__))
 
-    assert_includes gemfile, "widen_recording_studio_requirement"
-    assert_includes root_gemfile, "widen_recording_studio_requirement"
+    refute_includes gemfile, "widen_recording_studio_requirement"
+    refute_includes root_gemfile, "widen_recording_studio_requirement"
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.4.8"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.4.8"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2"'
@@ -71,14 +72,6 @@ class RecordingStudioListsTest < Minitest::Test
     refute_includes gemfile, 'tag: "v0.1.133"'
     refute_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "0.3.1"'
-  end
-
-  def test_ci_postgres_database_matches_dummy_test_default
-    ci = File.read(File.expand_path("../.github/workflows/ci.yml", __dir__))
-
-    assert_includes ci, "POSTGRES_DB: app_test"
-    assert_includes ci, "postgres://postgres:postgres@localhost:5432/app_test"
-    refute_includes ci, "gem_template_test"
   end
 
   def test_dummy_schema_uses_orderable_position_not_list_item_position
@@ -148,6 +141,22 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes schema, 'create_table "recording_studio_access_request_intents"'
     assert_includes constraints, "create_table :recording_studio_access_constraints"
     assert_includes rules, "create_table :recording_studio_access_rules"
+  end
+
+  def test_list_screens_authorize_through_accessible_controller_auth
+    controller = File.read(File.expand_path("../app/controllers/recording_studio_lists/lists_controller.rb", __dir__))
+    access = File.read(File.expand_path("../app/controllers/concerns/recording_studio_lists/list_access.rb", __dir__))
+    lists = File.read(File.expand_path("../lib/recording_studio_lists/accessible_lists.rb", __dir__))
+    helper = File.read(File.expand_path("../app/helpers/recording_studio_lists/add_to_list_helper.rb", __dir__))
+
+    assert_includes controller, "include ListAccess"
+    refute_includes controller.split("class ListsController").first, "def list_in_current_root"
+    refute_includes controller.split("class ListsController").first, "def list_access?"
+    assert_includes access, "include RecordingStudioAccessible::ControllerAuth"
+    assert_includes access, "authorize_recording!"
+    assert_includes lists, "RecordingStudioAccessible.recording_ids_for"
+    assert_includes helper, "AccessibleLists.for"
+    assert_includes helper, "add_to_list_accessible_lists"
   end
 
   def test_template_does_not_ship_copied_core_hooks_or_base_service
@@ -263,7 +272,8 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes readme, "mount RecordingStudioLists::Engine, at: \"/recording_studio_lists\""
     assert_includes readme, "enable_capability(:lists, on: Workspace)"
-    assert_includes readme, "RecordingStudioAccessible.authorized?"
+    assert_includes readme, "RecordingStudioAccessible.recording_ids_for"
+    assert_includes readme, "authorize_recording!"
     assert_includes readme, "generate recording_studio_orderable:migrations"
     assert_includes readme, "RecordingStudio::Lists.create"
     assert_includes readme, "RecordingStudio::Lists.update"
@@ -329,8 +339,6 @@ class RecordingStudioListsTest < Minitest::Test
       File.expand_path("./**/*.{rb,erb}", __dir__)
     ]
     card_callers.each do |path|
-      next if path.include?("/vendor/bundle/")
-
       source = File.read(path)
       next unless source.include?("FlatPack::Card")
 

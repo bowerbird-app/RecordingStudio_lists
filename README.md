@@ -5,7 +5,7 @@ A list is a child recording under a parent you choose. Each member is a list ite
 ## Mount
 
 Add `recording_studio_lists`, `recording_studio_accessible`, and `recording_studio_orderable` to the host Gemfile.
-The gemspec requires Accessible `~> 0.18`. List screens check access on the list recording.
+The gemspec requires Accessible `~> 0.24` and Orderable `~> 0.4`. List screens check access on the list recording.
 Orderable owns sibling position on recordings; lists opts `List` into that capability
 for `ListItem` children. Copy Accessible and Orderable migrations, then lists, and migrate Orderable first.
 
@@ -60,14 +60,12 @@ RecordingStudio::Lists.remove(list, page)
 RecordingStudio::Lists.lists(parent)
 RecordingStudio::Lists.addable(list)
 RecordingStudio::Lists.find(list.id)
-RecordingStudio::Lists.find(list.id, root: parent)
 RecordingStudio::Lists.delete(list)
-RecordingStudio::Lists.delete(list.id, root: parent)
 ```
 
-`create` accepts `idempotency_key` and `actor`. `add` and `update` accept `actor`. Pass a recording or its id. `find` and `delete` accept `root:` so a lookup stays inside that tree. The list screens always pass the current root.
+`create` accepts `idempotency_key` and `actor`. `add` and `update` accept `actor`. Pass a recording or its id.
 
-List screens then check Accessible on that list recording (`RecordingStudioAccessible.authorized?`). Show and the edit form need `:view`. Update, destroy, add, and remove need `:edit`. Index only includes current-root lists the actor can view. A denial uses the same 404 or missing-list redirect as an unknown id. Grant on the root covers lists through inheritance. The Ruby helpers do not check access. The add-to-list menu still lists names under the current root; adding or removing still needs `:edit`.
+List screens check Accessible on that list recording through `authorize_recording!`. Show needs `:view`. New and create need `:edit` on the current root. Edit, update, destroy, add, and remove need `:edit` on the list. Index and the add-to-list menu use `RecordingStudioAccessible.recording_ids_for` (`:view` on index, `:edit` on the menu). A denial uses the same 404 or missing-list redirect as an unknown id, not 403. Grant on the root covers lists through inheritance. The Ruby helpers do not check access.
 
 `update` requires a list recording. A missing list, or any other recordable, raises `InvalidList`. A blank name raises `BlankName` and writes nothing. Surrounding spaces are removed from the name. A blank `description` is stored as `nil`. If you omit `description`, the description is cleared. The recording id stays the same. Recording Studio stores a new list snapshot and an `updated` event.
 
@@ -100,6 +98,6 @@ The default layout draws the title and subtitle from `content_for`. List screens
 <%= recording_studio_add_to_list(page, icon: "heart", icon_only: true, round: true) %>
 ```
 
-The menu lists names under the current root. A check sits to the right of a name when the recording is already on that list, so the name stays put. Choosing a name without a check adds it and the check appears. Choosing a checked name removes it and the check goes away. The page stays put. List opens a name field in the menu. Saving creates the list, adds the recording, and checks the new name. The lists page still uses the new-list form when a description is needed.
+The menu lists names under the current root that the actor can edit. A check sits to the right of a name when the recording is already on that list, so the name stays put. Choosing a name without a check adds it and the check appears. Choosing a checked name removes it and the check goes away. The page stays put. List opens a name field in the menu. Saving creates the list, adds the recording, and checks the new name. The lists page still uses the new-list form when a description is needed.
 
 Pass `text:`, `icon:`, `icon_only:`, `round:`, `style:`, `size:`, `show_chevron:`, `placement:`, `parent:`, or `return_to:` when the defaults are wrong. `text: ""` leaves the label off a labeled trigger. `icon:` is any heroicon name. Omit `show_chevron:` to keep the arrow on a labeled trigger and hide it on an icon-only trigger. `show_chevron: false` hides the arrow. `icon_only: true` with `show_chevron: true` raises `ArgumentError`. `round: true` draws a circle. `round:` must be `true` or `false`. An icon-only trigger with a blank `text:` uses `recording_studio.lists.add_to_list.icon_only` ("Add to list") as its accessible name. A non-blank `text:` is that name instead. `parent:` defaults to the current root. Hosts using the add-to-list menu need a Flatpack that ships `FlatPack::Button::Dropdown` host hooks (`menu_class:`, `menu_attributes:`, `icon_position:`, `keep_open:`, `menu_form`) plus `icon_only:` and `round:` (development pin `v0.1.341`).

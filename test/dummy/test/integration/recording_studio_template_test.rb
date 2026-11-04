@@ -7,10 +7,12 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert_respond_to ApplicationController.helpers, :recording_studio_add_to_list
   end
 
-  test "legacy sibling engines include the removed default layout module" do
-    assert_includes RecordingStudioOrderable::ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
-    refute_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
-    refute_includes RecordingStudioLists::ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+  test "orderable no longer ships the removed default layout module" do
+    refute_includes RecordingStudioOrderable::ApplicationController.ancestors.map(&:name),
+                    "RecordingStudio::UsesDefaultLayout"
+    refute_includes ApplicationController.ancestors.map(&:name), "RecordingStudio::UsesDefaultLayout"
+    refute_includes RecordingStudioLists::ApplicationController.ancestors.map(&:name),
+                    "RecordingStudio::UsesDefaultLayout"
   end
 
   test "dummy app loads root switchable config and controller support" do
@@ -60,9 +62,9 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
 
     assert_nil Current.actor
     user = User.find_by!(email: "admin@admin.com")
-    assert RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
-    assert RecordingStudioAccessible.authorized?(actor: user, recording: accessible_root_recording, role: :admin)
-    assert RecordingStudioAccessible.authorized?(actor: user, recording: private_root_recording, role: :admin)
+    refute RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
+    refute RecordingStudioAccessible.authorized?(actor: user, recording: accessible_root_recording, role: :admin)
+    refute RecordingStudioAccessible.authorized?(actor: user, recording: private_root_recording, role: :admin)
     assert_nil root_recording.parent_recording_id
     assert_nil accessible_root_recording.parent_recording_id
     assert_nil private_root_recording.parent_recording_id

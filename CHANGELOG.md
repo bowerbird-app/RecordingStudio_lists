@@ -7,40 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.7] - 2026-11-04
-
-### Security
-
-* List screens now enforce Recording Studio Accessible access on the list's own recording. This is a behavior change. Show and edit need `:view`. Update, destroy, add, and remove need `:edit`. A signed-in actor who can select the current root but has no grant on that list (or an ancestor) gets the existing missing-list denial (404 or the "That list is missing." redirect), not a 500. Index only shows current-root lists the actor can view. Grant on the root still covers lists through Accessible inheritance. The add-to-list menu still lists names under the current root; membership posts still hit the edit check.
-
-### Changed
-
-* The gemspec requires `recording_studio_accessible ~> 0.18` (same two-segment pin as Root Switchable). Development apps keep Accessible tag `v0.24.0` (latest git tag; `0.24.1` is on Accessible main and is not tagged).
-* Dummy seeds grant the seeded admin `:admin` on Studio, Client, and Private workspace roots so dummy screens and tests can load lists.
-
-### Upgrade notes
-
-- This is a behavior change. Hosts must grant Accessible access on the list recording or an ancestor (usually the root). Without `:view`, show/edit/index hide the list. Without `:edit`, updates, deletes, and membership changes are denied as a missing list.
-- Add `recording_studio_accessible` if the host does not already bundle it. Copy Accessible migrations if they are not already installed. No lists migration is required.
-- Call `RecordingStudioAccessible.authorized?(actor:, recording: list, role: :view|:edit)` is what the list screens use. Ruby `RecordingStudio::Lists` helpers still do not check access.
-
 ## [0.9.6] - 2026-11-04
 
 ### Security
 
-* List member actions (show, edit, update, delete, add, remove) look up the list under the current root. A signed-in user who knows another workspace's list id gets 404 or the existing missing-list denial. `RecordingStudio::Lists.find` and `delete` take optional `root:`.
+* List screens now enforce Recording Studio Accessible access on the list recording. This is a behavior change. Show needs `:view`. New, create, edit, update, destroy, add, and remove need `:edit` (`:edit` on the current root for new/create). A signed-in actor who can select the current root but has no grant gets the existing missing-list denial (404 or the "That list is missing." redirect), not a 500. Index and the add-to-list menu filter with `RecordingStudioAccessible.recording_ids_for`. Grant on the root still covers lists through Accessible inheritance.
 
 ### Changed
 
-* Development apps pin Recording Studio `v6.3.0`, Flatpack `v0.1.341`, Accessible `v0.24.0`, Metrics `v0.7.2`, Trashable `v0.12.2`, Cache `v0.6.2`, and Root Switchable `v0.11.4`. The gemspec still requires `recording_studio ~> 6.1`.
-* Dummy copies Accessible 0.24 access-request migrations. Root Switchable `config.layout` is `nil` so those screens use core Default Layout.
-* CI Postgres uses `app_test`, matching the dummy `database.yml` default.
+* The gemspec requires `recording_studio_accessible ~> 0.24` and `recording_studio_orderable ~> 0.4`. Development apps pin Accessible `v0.24.0` and Orderable `v0.4.8` so Recording Studio 6 resolves without a Bundler shim.
+* Dummy copies Accessible 0.24 access-request migrations. Tests that need a grant call `bootstrap_owner_access!` or `grant_access` themselves.
 
 ### Upgrade notes
 
-- No migration is required.
-- Call `RecordingStudio::Lists.find(id, root: current_root)` and `delete(id, root: current_root)` from host screens that previously looked up by id alone. Omitting `root:` keeps the old Ruby lookup.
-- Dummy and development Gemfiles pin Recording Studio `v6.3.0` and the sibling tags above. Rebuild lockfiles. The gemspec floor stays `~> 6.1`.
+- This is a behavior change. Hosts must grant Accessible access on the list recording or an ancestor (usually the root). Without `:view`, show and index hide the list. Without `:edit` on the root, new and create are denied. Without `:edit` on the list, the edit form, updates, deletes, and membership changes are denied as a missing list. Denied screens use 404 or the missing-list redirect on purpose, not Accessible's 403.
+- Add `recording_studio_accessible ~> 0.24` if the host does not already bundle it. Copy Accessible migrations if they are not already installed. No lists migration is required.
+- List screens authorize through Accessible `ControllerAuth#authorize_recording!`. Ruby `RecordingStudio::Lists` helpers still do not check access. Pin Orderable to a tag that allows Recording Studio 6 (`v0.4.8`).
 
 ## [0.9.5] - 2026-11-03
 
@@ -405,8 +387,7 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.7...HEAD
-[0.9.7]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...v0.9.7
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...HEAD
 [0.9.6]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...v0.9.4

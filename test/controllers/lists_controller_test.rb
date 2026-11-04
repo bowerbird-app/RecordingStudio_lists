@@ -721,7 +721,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert RecordingStudio::Recording.exists?(other_id)
   end
 
-  test "view access can show and open edit but cannot change the list" do
+  test "view access can show and cannot open edit or change the list" do
     list = create_list("Reading")
     RecordingStudio::Lists.add(list, @page, actor: @user)
     viewer = create_user("viewer")
@@ -733,9 +733,18 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Reading"
 
+    get "/lists/new"
+    assert_response :not_found
+
+    post "/lists", params: {
+      list: { name: "Viewer Shelf" },
+      idempotency_key: "viewer-#{SecureRandom.hex(4)}"
+    }
+    assert_response :not_found
+    refute(RecordingStudio::Lists.lists(@root).any? { |item| item.name == "Viewer Shelf" })
+
     get "/lists/#{list.id}/edit"
-    assert_response :success
-    assert_select "h1", text: "Edit list"
+    assert_response :not_found
 
     patch "/lists/#{list.id}", params: { list: { name: "Taken", description: "Nope" } }
     assert_redirected_to "/lists"
@@ -787,6 +796,32 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     delete "/lists/#{list.id}"
     assert_redirected_to "/lists"
     refute RecordingStudio::Recording.exists?(list.id)
+  end
+
+  test "add to list menu only names lists the actor can edit" do
+    visible = create_list("Visible Shelf")
+    hidden = create_list("Hidden Shelf")
+    viewer = create_user("menu-viewer")
+    editor = create_user("menu-editor")
+    grant_access!(actor: viewer, recording: @root, role: :view, manager: @user)
+    grant_access!(actor: editor, recording: @root, role: :edit, manager: @user)
+
+    sign_in viewer
+    select_root(@root)
+    get "/"
+
+    assert_response :success
+    refute_includes response.body, "Visible Shelf"
+    refute_includes response.body, "Hidden Shelf"
+
+    sign_in editor
+    select_root(@root)
+    get "/"
+
+    assert_response :success
+    assert_includes response.body, "Visible Shelf"
+    assert_includes response.body, hidden.name
+    assert_select "form[action=?]", "/lists/#{visible.id}/items"
   end
 
   private
