@@ -122,6 +122,22 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     RecordingStudio::Lists.define_singleton_method(:items, original_items)
   end
 
+  test "create with no current root keeps the choose-place response" do
+    RecordingStudio::RootSwitchable.stub(:current_root_recording, nil) do
+      post "/lists", params: {
+        list: { name: "Homeless Shelf" },
+        idempotency_key: "no-root-#{SecureRandom.hex(4)}"
+      }
+    end
+
+    assert_response :redirect
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "Choose a place for this list first."
+    refute(RecordingStudio::Lists.lists(@root).any? { |item| item.name == "Homeless Shelf" })
+  end
+
   test "create show add remove and delete" do
     post "/lists", params: { list: { name: "  " }, idempotency_key: "blank-#{SecureRandom.hex(4)}" }
 

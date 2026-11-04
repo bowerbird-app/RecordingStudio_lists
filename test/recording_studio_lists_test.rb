@@ -178,6 +178,7 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes access, "authorize_recording!"
     assert_includes access, "actor: current_actor"
     assert_includes access, "before_action :require_parent_edit!, only: %i[new create]"
+    assert_includes access, "rescue_from RecordingStudio::Lists::ParentNotAllowed, with: :respond_list_error"
     assert_includes access, "rescue_from RecordingStudio::Lists::InvalidList, with: :missing_list"
     assert_includes lists, "RecordingStudioAccessible.recording_ids_for"
     assert_includes helper, "include AddToListAccess"

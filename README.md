@@ -65,7 +65,7 @@ RecordingStudio::Lists.delete(list)
 
 `create` accepts `idempotency_key` and `actor`. `add` and `update` accept `actor`. Pass a recording or its id.
 
-List screens check Accessible on that list recording through `authorize_recording!`. Show needs `:view`. New and create need `:edit` on the current root. Edit, update, destroy, add, and remove need `:edit` on the list. Index and the add-to-list menu use `RecordingStudioAccessible.recording_ids_for` (`:view` on index, `:edit` on the menu). A denial uses the same 404 or missing-list redirect as an unknown id, not 403. Grant on the root covers lists through inheritance. The Ruby helpers do not check access.
+List screens check Accessible on that list recording through `authorize_recording!`. Show needs `:view`. New and create need `:edit` on the current root. Edit, update, destroy, add, and remove need `:edit` on the list. Index and the add-to-list menu use `RecordingStudioAccessible.recording_ids_for` (`:view` on index, `:edit` on the menu). A denial uses the same 404 or missing-list redirect as an unknown id, not 403. `InvalidList` is rescued controller-wide (index included) as 404. Create with no current root still redirects with "Choose a place for this list first." New with no current root still renders the form. Grant on the root covers lists through inheritance. The Ruby helpers do not check access.
 
 `update` requires a list recording. A missing list, or any other recordable, raises `InvalidList`. A blank name raises `BlankName` and writes nothing. Surrounding spaces are removed from the name. A blank `description` is stored as `nil`. If you omit `description`, the description is cleared. The recording id stays the same. Recording Studio stores a new list snapshot and an `updated` event.
 

@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-* List screens now enforce Recording Studio Accessible access on the list recording. This is a behavior change. Show needs `:view`. New, create, edit, update, destroy, add, and remove need `:edit` (`:edit` on the current root for new/create). A signed-in actor who can select the current root but has no grant gets the existing missing-list denial (404 or the "That list is missing." redirect), not a 500. Index and the add-to-list menu filter with `RecordingStudioAccessible.recording_ids_for`. Grant on the root still covers lists through Accessible inheritance.
+* List screens now enforce Recording Studio Accessible access on the list recording. This is a behavior change. Show needs `:view`. New, create, edit, update, destroy, add, and remove need `:edit` (`:edit` on the current root for new/create). A signed-in actor who can select the current root but has no grant gets the existing missing-list denial (404 or the "That list is missing." redirect), not a 500. Index and the add-to-list menu filter with `RecordingStudioAccessible.recording_ids_for`. Grant on the root still covers lists through Accessible inheritance. Create with no current root still redirects with the choose-place alert (`ListAccess` `rescue_from` `ParentNotAllowed`).
+* `rescue_from` `InvalidList` is controller-wide, so a missing list on index (and every other action) returns 404.
 
 ### Changed
 

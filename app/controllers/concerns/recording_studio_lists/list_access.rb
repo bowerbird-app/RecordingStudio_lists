@@ -18,6 +18,7 @@ module RecordingStudioLists
         }
       )
       before_action :require_parent_edit!, only: %i[new create]
+      rescue_from RecordingStudio::Lists::ParentNotAllowed, with: :respond_list_error
       rescue_from RecordingStudio::Lists::InvalidList, with: :missing_list
     end
 
@@ -40,6 +41,9 @@ module RecordingStudioLists
     end
 
     def require_parent_edit!
+      parent = current_root_recording if respond_to?(:current_root_recording)
+      return if action_name == "new" && parent.blank?
+
       authorize_recording!(parent_recording, role: :edit)
     end
 
