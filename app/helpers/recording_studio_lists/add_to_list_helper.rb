@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module RecordingStudioLists
-  module AddToListHelper # rubocop:disable Metrics/ModuleLength
+  module AddToListHelper
+    include AddToListAccess
+
     MEMBERSHIP_JOIN = "INNER JOIN recording_studio_list_items " \
                       "ON recording_studio_list_items.id = recording_studio_recordings.recordable_id"
 
@@ -34,14 +36,6 @@ module RecordingStudioLists
       return current_root_recording if respond_to?(:current_root_recording)
 
       nil
-    end
-
-    def add_to_list_accessible_lists(place)
-      AccessibleLists.for(actor: current_actor, parent: place, minimum_role: :edit)
-    end
-
-    def current_actor
-      Current.actor if defined?(Current)
     end
 
     def add_to_list_return_path(return_to)

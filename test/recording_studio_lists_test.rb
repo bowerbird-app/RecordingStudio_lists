@@ -148,8 +148,13 @@ class RecordingStudioListsTest < Minitest::Test
     access = File.read(File.expand_path("../app/controllers/concerns/recording_studio_lists/list_access.rb", __dir__))
     lists = File.read(File.expand_path("../lib/recording_studio_lists/accessible_lists.rb", __dir__))
     helper = File.read(File.expand_path("../app/helpers/recording_studio_lists/add_to_list_helper.rb", __dir__))
+    helper_access = File.read(
+      File.expand_path("../app/helpers/recording_studio_lists/add_to_list_access.rb", __dir__)
+    )
 
     assert_includes controller, "include ListAccess"
+    refute_includes controller, "Metrics/ClassLength"
+    refute_includes controller, "require_parent_edit!"
     refute_includes controller.split("class ListsController").first, "def list_in_current_root"
     refute_includes controller.split("class ListsController").first, "def list_access?"
     assert_includes controller, "def revise_submitted_list"
@@ -172,16 +177,27 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes access, "include RecordingStudioAccessible::ControllerAuth"
     assert_includes access, "authorize_recording!"
     assert_includes access, "actor: current_actor"
+    assert_includes access, "before_action :require_parent_edit!, only: %i[new create]"
+    assert_includes access, "rescue_from RecordingStudio::Lists::InvalidList, with: :missing_list"
     assert_includes lists, "RecordingStudioAccessible.recording_ids_for"
-    assert_includes helper, "AccessibleLists.for"
+    assert_includes helper, "include AddToListAccess"
+    refute_includes helper, "Metrics/ModuleLength"
+    refute_includes helper, "def add_to_list_accessible_lists"
+    refute_includes helper, "def current_actor"
+    refute_includes helper, "def add_to_list_actor"
     assert_includes helper, "add_to_list_accessible_lists"
-    assert_includes helper, "actor: current_actor"
-    assert_includes helper, "def current_actor"
-    assert_includes helper, "Current.actor if defined?(Current)"
     refute_includes helper, "current_user"
     refute_includes helper, "lists_actor"
     assert_includes helper, "# One lookup for every list under this parent that already holds the recording."
     assert_includes helper, "# Each keyword is a button or menu setting on the public helper."
+    assert_includes helper_access, "def add_to_list_accessible_lists"
+    assert_includes helper_access, "AccessibleLists.for"
+    assert_includes helper_access, "actor: add_to_list_actor"
+    assert_includes helper_access, "def add_to_list_actor"
+    assert_includes helper_access, "Current.actor if defined?(Current)"
+    refute_includes helper_access, "def current_actor"
+    refute_includes helper_access, "current_user"
+    refute_includes helper_access, "lists_actor"
   end
 
   def test_template_does_not_ship_copied_core_hooks_or_base_service

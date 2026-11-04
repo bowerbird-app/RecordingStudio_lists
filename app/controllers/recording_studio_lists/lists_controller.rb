@@ -92,7 +92,7 @@ module RecordingStudioLists
     end
   end
 
-  class ListsController < ApplicationController # rubocop:disable Metrics/ClassLength
+  class ListsController < ApplicationController
     include ListAccess
     include MenuResponses
 
@@ -104,22 +104,16 @@ module RecordingStudioLists
     end
 
     def new
-      require_parent_edit!
       @idempotency_key = SecureRandom.uuid
       assign_add_context
-    rescue RecordingStudio::Lists::InvalidList
-      head :not_found
     end
 
     def create
-      require_parent_edit!
       list = build_list
       attach_recording(list)
       respond_created(list)
     rescue RecordingStudio::Lists::BlankName => e
       respond_blank_name(e)
-    rescue RecordingStudio::Lists::InvalidList
-      head :not_found
     rescue RecordingStudio::Lists::Error => e
       respond_list_error(e)
     end

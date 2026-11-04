@@ -17,9 +17,15 @@ module RecordingStudioLists
           raise RecordingStudio::Lists::InvalidList
         }
       )
+      before_action :require_parent_edit!, only: %i[new create]
+      rescue_from RecordingStudio::Lists::InvalidList, with: :missing_list
     end
 
     private
+
+    def missing_list
+      head :not_found
+    end
 
     def load_list!(role:)
       authorize_list!(RecordingStudio::Lists.find(params[:id]), role: role)
