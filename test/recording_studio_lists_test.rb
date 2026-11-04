@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.5", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.6", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -49,14 +49,14 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes gemfile, "widen_recording_studio_requirement"
     assert_includes root_gemfile, "widen_recording_studio_requirement"
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.21.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.10.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.6.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.11.4"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.2"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     assert_includes gemfile, 'gem "view_component", "4.19.0"'
@@ -67,6 +67,14 @@ class RecordingStudioListsTest < Minitest::Test
     refute_includes gemfile, 'tag: "v0.1.133"'
     refute_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.6.0"'
     refute_includes gemfile, 'tag: "0.3.1"'
+  end
+
+  def test_ci_postgres_database_matches_dummy_test_default
+    ci = File.read(File.expand_path("../.github/workflows/ci.yml", __dir__))
+
+    assert_includes ci, "POSTGRES_DB: app_test"
+    assert_includes ci, "postgres://postgres:postgres@localhost:5432/app_test"
+    refute_includes ci, "gem_template_test"
   end
 
   def test_dummy_schema_uses_orderable_position_not_list_item_position
@@ -132,6 +140,8 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes schema, 'create_table "recording_studio_access_constraints"'
     assert_includes schema, 'create_table "recording_studio_access_rules"'
+    assert_includes schema, 'create_table "recording_studio_access_requests"'
+    assert_includes schema, 'create_table "recording_studio_access_request_intents"'
     assert_includes constraints, "create_table :recording_studio_access_constraints"
     assert_includes rules, "create_table :recording_studio_access_rules"
   end
@@ -314,6 +324,8 @@ class RecordingStudioListsTest < Minitest::Test
       File.expand_path("./**/*.{rb,erb}", __dir__)
     ]
     card_callers.each do |path|
+      next if path.include?("/vendor/bundle/")
+
       source = File.read(path)
       next unless source.include?("FlatPack::Card")
 

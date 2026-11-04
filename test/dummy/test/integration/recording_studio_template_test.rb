@@ -15,7 +15,7 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
 
   test "dummy app loads root switchable config and controller support" do
     assert_equal [ "all_workspaces" ], RecordingStudioRootSwitchable.configuration.scopes.keys
-    assert_equal :application_layout, RecordingStudioRootSwitchable.configuration.layout
+    assert_nil RecordingStudioRootSwitchable.configuration.layout
     assert_includes ApplicationController.ancestors, RecordingStudio::RootSwitchable::ControllerSupport
     refute_includes ApplicationController.ancestors.map(&:name), "RecordingStudio::UsesDefaultLayout"
   end
@@ -34,6 +34,8 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert connection.table_exists?(:recording_studio_access_invitations)
     assert connection.table_exists?(:recording_studio_access_constraints)
     assert connection.table_exists?(:recording_studio_access_rules)
+    assert connection.table_exists?(:recording_studio_access_requests)
+    assert connection.table_exists?(:recording_studio_access_request_intents)
     role_column = connection.columns(:recording_studio_accesses).find { |column| column.name == "role" }
     assert_equal :string, role_column.type
     refute connection.table_exists?(:recording_studio_access_boundaries)

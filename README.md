@@ -59,10 +59,12 @@ RecordingStudio::Lists.remove(list, page)
 RecordingStudio::Lists.lists(parent)
 RecordingStudio::Lists.addable(list)
 RecordingStudio::Lists.find(list.id)
+RecordingStudio::Lists.find(list.id, root: parent)
 RecordingStudio::Lists.delete(list)
+RecordingStudio::Lists.delete(list.id, root: parent)
 ```
 
-`create` accepts `idempotency_key` and `actor`. `add` and `update` accept `actor`. Pass a recording or its id.
+`create` accepts `idempotency_key` and `actor`. `add` and `update` accept `actor`. Pass a recording or its id. `find` and `delete` accept `root:` so a lookup stays inside that tree. The list screens always pass the current root.
 
 `update` requires a list recording. A missing list, or any other recordable, raises `InvalidList`. A blank name raises `BlankName` and writes nothing. Surrounding spaces are removed from the name. A blank `description` is stored as `nil`. If you omit `description`, the description is cleared. The recording id stays the same. Recording Studio stores a new list snapshot and an `updated` event.
 
@@ -70,7 +72,7 @@ RecordingStudio::Lists.delete(list)
 
 The index lists names. A List button under the title opens the new-list form. Each row has an Actions menu. Edit list opens the edit form. Delete list deletes the list. New list and edit list ask for a name and an optional description. The list page removes a member. A member name is a link when the host can route that record, and plain text otherwise.
 
-Static interface copy on these screens (and the add-to-list menu), controller flashes, error messages, and JS client strings resolve through `RecordingStudio.t` under `recording_studio.lists` at the render site. When the active locale has no value, fallback comes from the loaded English (host overrides included), then a caller `default:`, then the gem-shipped `config/locales/en.yml` registered at boot. Only this gem’s `recording_studio.lists.*` keys use `RecordingStudio.t`; host or other-namespace keys stay on `I18n.t` with their original `default:`. A plain `default:` with no interpolation is returned as a plain (non-html_safe) String, so views will escape it. Interpolating caller `default:` on a missing `_html` key is stricter than view `t` (args escaped, result html_safe). Public model defaults stay English. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`. Requires Recording Studio `~> 6.1`. The gemspec requires `flat_pack >= 0.1.341`. Development apps pin Flatpack `v0.1.341`.
+Static interface copy on these screens (and the add-to-list menu), controller flashes, error messages, and JS client strings resolve through `RecordingStudio.t` under `recording_studio.lists` at the render site. When the active locale has no value, fallback comes from the loaded English (host overrides included), then a caller `default:`, then the gem-shipped `config/locales/en.yml` registered at boot. Only this gem’s `recording_studio.lists.*` keys use `RecordingStudio.t`; host or other-namespace keys stay on `I18n.t` with their original `default:`. A plain `default:` with no interpolation is returned as a plain (non-html_safe) String, so views will escape it. Interpolating caller `default:` on a missing `_html` key is stricter than view `t` (args escaped, result html_safe). Public model defaults stay English. Hosts can override or translate those keys; there is no dependency on `recording_studio_internationalization`. Requires Recording Studio `~> 6.1`. The gemspec requires `flat_pack >= 0.1.341`. Development apps pin Recording Studio `v6.3.0` and Flatpack `v0.1.341`.
 
 ## Layout
 

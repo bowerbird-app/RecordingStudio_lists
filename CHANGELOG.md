@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.6] - 2026-11-04
+
+### Security
+
+* List member actions (show, edit, update, delete, add, remove) look up the list under the current root. A signed-in user who knows another workspace's list id gets 404 or the existing missing-list denial. `RecordingStudio::Lists.find` and `delete` take optional `root:`.
+
+### Changed
+
+* Development apps pin Recording Studio `v6.3.0`, Flatpack `v0.1.341`, Accessible `v0.24.0`, Metrics `v0.7.2`, Trashable `v0.12.2`, Cache `v0.6.2`, and Root Switchable `v0.11.4`. The gemspec still requires `recording_studio ~> 6.1`.
+* Dummy copies Accessible 0.24 access-request migrations. Root Switchable `config.layout` is `nil` so those screens use core Default Layout.
+* CI Postgres uses `app_test`, matching the dummy `database.yml` default.
+
+### Upgrade notes
+
+- No migration is required.
+- Call `RecordingStudio::Lists.find(id, root: current_root)` and `delete(id, root: current_root)` from host screens that previously looked up by id alone. Omitting `root:` keeps the old Ruby lookup.
+- Dummy and development Gemfiles pin Recording Studio `v6.3.0` and the sibling tags above. Rebuild lockfiles. The gemspec floor stays `~> 6.1`.
+
 ## [0.9.5] - 2026-11-03
 
 ### Changed
@@ -370,7 +388,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...HEAD
+[0.9.6]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.2...v0.9.3
