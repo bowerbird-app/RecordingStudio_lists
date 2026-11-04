@@ -108,7 +108,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     list = create_list("Broken")
     original_find = RecordingStudio::Lists.method(:find)
     original_items = RecordingStudio::Lists.method(:items)
-    RecordingStudio::Lists.define_singleton_method(:find) { |_id| list }
+    RecordingStudio::Lists.define_singleton_method(:find) { |*| list }
     RecordingStudio::Lists.define_singleton_method(:items) { |_list| [nil] }
 
     get "/lists/#{list.id}"
@@ -630,6 +630,44 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "From the index", list.reload.name
   end
 
+  test "member actions deny another root's list id" do
+    other_list, other_page = list_in_another_root
+    RecordingStudio::Lists.add(other_list, other_page, actor: @user)
+    other_id = other_list.id
+    original_name = other_list.name
+
+    get "/lists/#{other_id}"
+    assert_response :not_found
+
+    get "/lists/#{other_id}/edit"
+    assert_response :not_found
+
+    post "/lists/#{other_id}/items", params: { recording_id: @page.id }
+    assert_response :not_found
+    refute_includes RecordingStudio::Lists.items(other_list).map(&:id), @page.id
+
+    delete "/lists/#{other_id}/items/#{other_page.id}"
+    assert_response :not_found
+    assert_includes RecordingStudio::Lists.items(other_list).map(&:id), other_page.id
+
+    patch "/lists/#{other_id}", params: { list: { name: "Taken" } }
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "That list is missing."
+    assert_equal original_name, other_list.reload.name
+
+    delete "/lists/#{other_id}"
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "That list is missing."
+    assert RecordingStudio::Recording.exists?(other_id)
+
+    post "/lists/#{other_id}/items",
+         params: { recording_id: @page.id },
+         headers: { "X-Lists-Menu" => "1" }
+    assert_response :not_found
+  end
+
   private
 
   def with_layouts(lists:, core:)
@@ -653,6 +691,24 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
   def create_list(name)
     RecordingStudio::Lists.create(parent: @root, name: name, actor: @user)
+  end
+
+  def list_in_another_root
+    other = Workspace.create!(name: "Other Lists #{SecureRandom.hex(4)}")
+    other_root = RecordingStudio.root_recording_for(other)
+    other_page = RecordingStudio.record!(
+      action: "created",
+      recordable: Page.new(title: "Foreign #{SecureRandom.hex(4)}"),
+      root_recording: other_root,
+      parent_recording: other_root,
+      actor: @user
+    ).recording
+    other_list = RecordingStudio::Lists.create(
+      parent: other_root,
+      name: "Foreign Shelf #{SecureRandom.hex(4)}",
+      actor: @user
+    )
+    [other_list, other_page]
   end
 
   def with_appended_routes(definition)

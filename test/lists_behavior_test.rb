@@ -71,6 +71,9 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal "Notes", list.recordable.description
     refute RecordingStudio.root_recording?(list)
     assert_equal list, RecordingStudio::Lists.find(list.id)
+    assert_equal list, RecordingStudio::Lists.find(list.id, root: root)
+    other_root = workspace_root
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.find(list.id, root: other_root) }
   end
 
   test "update revises the list and keeps the earlier snapshot" do
@@ -227,6 +230,13 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_nil RecordingStudio::Lists.delete(SecureRandom.uuid)
     assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.delete(target) }
     assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.find(target.id) }
+
+    remaining = RecordingStudio::Lists.create(parent: root, name: "Stay")
+    other_root = workspace_root
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.delete(remaining.id, root: other_root) }
+    assert RecordingStudio::Recording.exists?(remaining.id)
+    assert_equal remaining, RecordingStudio::Lists.delete(remaining.id, root: root)
+    refute RecordingStudio::Recording.exists?(remaining.id)
   end
 
   test "keyed create returns the same list recording" do

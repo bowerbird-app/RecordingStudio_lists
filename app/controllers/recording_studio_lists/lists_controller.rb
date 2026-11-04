@@ -90,6 +90,18 @@ module RecordingStudioLists
     def menu_request?
       request.headers["X-Lists-Menu"] == "1"
     end
+
+    def list_in_current_root
+      RecordingStudio::Lists.find(params[:id], root: parent_recording)
+    end
+
+    def run_membership
+      yield list_in_current_root
+    rescue RecordingStudio::Lists::InvalidList
+      head :not_found
+    rescue RecordingStudio::Lists::Error => e
+      respond_membership_error(e)
+    end
   end
 
   class ListsController < ApplicationController
@@ -118,30 +130,28 @@ module RecordingStudioLists
     end
 
     def show
-      @list = RecordingStudio::Lists.find(params[:id])
+      @list = list_in_current_root
       @items = RecordingStudio::Lists.items(@list)
     rescue RecordingStudio::Lists::InvalidList
       head :not_found
     end
 
     def add_item
-      list = RecordingStudio::Lists.find(params[:id])
-      RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
-      respond_membership(list, Copy.t("flashes.added"))
-    rescue RecordingStudio::Lists::Error => e
-      respond_membership_error(e)
+      run_membership do |list|
+        RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
+        respond_membership(list, Copy.t("flashes.added"))
+      end
     end
 
     def remove_item
-      list = RecordingStudio::Lists.find(params[:id])
-      RecordingStudio::Lists.remove(list, params[:recording_id])
-      respond_membership(list, Copy.t("flashes.removed"))
-    rescue RecordingStudio::Lists::Error => e
-      respond_membership_error(e)
+      run_membership do |list|
+        RecordingStudio::Lists.remove(list, params[:recording_id])
+        respond_membership(list, Copy.t("flashes.removed"))
+      end
     end
 
     def edit
-      @list = RecordingStudio::Lists.find(params[:id])
+      @list = list_in_current_root
       @name = @list.name
       @description = @list.recordable.description
       @return_to = safe_return_path
@@ -159,7 +169,7 @@ module RecordingStudioLists
     end
 
     def destroy
-      RecordingStudio::Lists.delete(params[:id])
+      RecordingStudio::Lists.delete(params[:id], root: parent_recording)
       redirect_to lists_path, notice: Copy.t("flashes.deleted")
     rescue RecordingStudio::Lists::InvalidList => e
       redirect_to lists_path, alert: list_error_copy(e)
@@ -168,7 +178,7 @@ module RecordingStudioLists
     private
 
     def revise_submitted_list
-      @list = RecordingStudio::Lists.find(params[:id])
+      @list = list_in_current_root
       @name = list_params[:name]
       @description = list_params[:description]
       @return_to = safe_return_path
