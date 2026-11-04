@@ -91,12 +91,19 @@ module RecordingStudioLists
       request.headers["X-Lists-Menu"] == "1"
     end
 
-    def list_in_current_root
-      RecordingStudio::Lists.find(params[:id], root: parent_recording)
+    def list_in_current_root(role: :view)
+      list = RecordingStudio::Lists.find(params[:id], root: parent_recording)
+      raise RecordingStudio::Lists::InvalidList unless list_access?(list, role)
+
+      list
+    end
+
+    def list_access?(list, role)
+      RecordingStudioAccessible.authorized?(actor: current_actor, recording: list, role: role)
     end
 
     def run_membership
-      yield list_in_current_root
+      yield list_in_current_root(role: :edit)
     rescue RecordingStudio::Lists::InvalidList
       head :not_found
     rescue RecordingStudio::Lists::Error => e
@@ -108,7 +115,7 @@ module RecordingStudioLists
     include MenuResponses
 
     def index
-      @lists = RecordingStudio::Lists.lists(parent_recording)
+      @lists = RecordingStudio::Lists.lists(parent_recording).select { |list| list_access?(list, :view) }
     rescue RecordingStudio::Lists::ParentNotAllowed => e
       @lists = []
       flash.now[:alert] = list_error_copy(e)
@@ -169,6 +176,7 @@ module RecordingStudioLists
     end
 
     def destroy
+      list_in_current_root(role: :edit)
       RecordingStudio::Lists.delete(params[:id], root: parent_recording)
       redirect_to lists_path, notice: Copy.t("flashes.deleted")
     rescue RecordingStudio::Lists::InvalidList => e
@@ -178,7 +186,7 @@ module RecordingStudioLists
     private
 
     def revise_submitted_list
-      @list = list_in_current_root
+      @list = list_in_current_root(role: :edit)
       @name = list_params[:name]
       @description = list_params[:description]
       @return_to = safe_return_path

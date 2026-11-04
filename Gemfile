@@ -10,6 +10,12 @@ gemspec
 # recording_studio is not published to RubyGems; resolve the gemspec pin from GitHub.
 gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"
+# Required by the gemspec Accessible pin (not on RubyGems). Latest tag is v0.24.0.
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"
+# Required by accessible (query API only; not on RubyGems); same tag as the dummy host.
+gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2", require: false
+# Required by trashable (not on RubyGems); same tag as the dummy host.
+gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"
 # Required by recording_studio_orderable (not on RubyGems); same tag as the dummy host.
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.341"
 gem "minitest", ">= 5.26", "< 6"

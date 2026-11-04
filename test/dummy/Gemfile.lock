@@ -84,10 +84,11 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_lists (0.9.6)
+    recording_studio_lists (0.9.7)
       flat_pack (>= 0.1.341)
       rails (~> 8.1.0)
       recording_studio (~> 6.1)
+      recording_studio_accessible (~> 0.18)
       recording_studio_orderable (~> 0.3)
 
 GEM
@@ -645,7 +646,7 @@ CHECKSUMS
   recording_studio (6.3.0)
   recording_studio_accessible (0.24.0)
   recording_studio_cache (0.6.2)
-  recording_studio_lists (0.9.6)
+  recording_studio_lists (0.9.7)
   recording_studio_metrics (0.7.2)
   recording_studio_orderable (0.3.0)
   recording_studio_root_switchable (0.11.4)

@@ -1,3 +1,14 @@
+def ensure_owner_access!(actor:, recording:)
+  result = RecordingStudioAccessible.bootstrap_owner_access!(
+    recording: recording,
+    actor: actor
+  )
+  return if result.success?
+  return if RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :admin)
+
+  raise result.error
+end
+
 find_or_record_child = lambda do |recordable, root_recording, parent_recording|
   RecordingStudio::Recording
     .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
@@ -35,6 +46,14 @@ begin
   folder_recording = find_or_record_child.call(folder, root_recording, root_recording)
 
   find_or_record_child.call(page, root_recording, folder_recording)
+
+  [
+    root_recording,
+    accessible_root_recording,
+    private_root_recording
+  ].each do |recording|
+    ensure_owner_access!(actor: user, recording: recording)
+  end
 
   ["Dezeen", "ArchDaily", "Design Milk"].each do |title|
     already_on_client = Page.where(title: title).any? do |page|

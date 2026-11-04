@@ -26,6 +26,9 @@ class ListsEnglishFallbackTest < ActionDispatch::IntegrationTest
     )
     @workspace = Workspace.create!(name: "! Fallback Lists #{SecureRandom.hex(4)}")
     @root = RecordingStudio.root_recording_for(@workspace)
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: @root, actor: @user)
+    raise result.error if result.failure?
+
     sign_in @user
     select_root(@root)
   end

@@ -18,6 +18,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     )
     @workspace = Workspace.create!(name: "! Lists #{SecureRandom.hex(4)}")
     @root = RecordingStudio.root_recording_for(@workspace)
+    grant_owner_access!(actor: @user, recording: @root)
     @page = RecordingStudio.record!(
       action: "created",
       recordable: Page.new(title: "Dezeen Board #{SecureRandom.hex(4)}"),
@@ -668,6 +669,126 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "index only includes lists the actor can view under the current root" do
+    create_list("Visible Shelf")
+    other_list, = list_in_another_root
+
+    get "/lists"
+
+    assert_response :success
+    assert_includes response.body, "Visible Shelf"
+    refute_includes response.body, other_list.name
+
+    select_root(other_list.root_recording)
+    get "/lists"
+
+    assert_response :success
+    refute_includes response.body, other_list.name
+    refute_includes response.body, "Visible Shelf"
+  end
+
+  test "member actions deny a current-root list the actor cannot access" do
+    other_list, other_page = list_in_another_root
+    RecordingStudio::Lists.add(other_list, other_page, actor: @user)
+    select_root(other_list.root_recording)
+    other_id = other_list.id
+    original_name = other_list.name
+
+    get "/lists/#{other_id}"
+    assert_response :not_found
+
+    get "/lists/#{other_id}/edit"
+    assert_response :not_found
+
+    post "/lists/#{other_id}/items", params: { recording_id: @page.id }
+    assert_response :not_found
+    refute_includes RecordingStudio::Lists.items(other_list).map(&:id), @page.id
+
+    delete "/lists/#{other_id}/items/#{other_page.id}"
+    assert_response :not_found
+    assert_includes RecordingStudio::Lists.items(other_list).map(&:id), other_page.id
+
+    patch "/lists/#{other_id}", params: { list: { name: "Taken" } }
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "That list is missing."
+    assert_equal original_name, other_list.reload.name
+
+    delete "/lists/#{other_id}"
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "That list is missing."
+    assert RecordingStudio::Recording.exists?(other_id)
+  end
+
+  test "view access can show and open edit but cannot change the list" do
+    list = create_list("Reading")
+    RecordingStudio::Lists.add(list, @page, actor: @user)
+    viewer = create_user("viewer")
+    grant_access!(actor: viewer, recording: @root, role: :view, manager: @user)
+    sign_in viewer
+    select_root(@root)
+
+    get "/lists/#{list.id}"
+    assert_response :success
+    assert_includes response.body, "Reading"
+
+    get "/lists/#{list.id}/edit"
+    assert_response :success
+    assert_select "h1", text: "Edit list"
+
+    patch "/lists/#{list.id}", params: { list: { name: "Taken", description: "Nope" } }
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "That list is missing."
+    assert_equal "Reading", list.reload.name
+
+    post "/lists/#{list.id}/items", params: { recording_id: @page.id }
+    assert_response :not_found
+
+    delete "/lists/#{list.id}/items/#{@page.id}"
+    assert_response :not_found
+    assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+
+    delete "/lists/#{list.id}"
+    assert_redirected_to "/lists"
+    follow_redirect!
+    assert_includes response.body, "That list is missing."
+    assert RecordingStudio::Recording.exists?(list.id)
+  end
+
+  test "edit access can view and change the list" do
+    list = create_list("Reading")
+    editor = create_user("editor")
+    grant_access!(actor: editor, recording: @root, role: :edit, manager: @user)
+    sign_in editor
+    select_root(@root)
+
+    get "/lists/#{list.id}"
+    assert_response :success
+
+    get "/lists/#{list.id}/edit"
+    assert_response :success
+
+    patch "/lists/#{list.id}", params: { list: { name: "Edited", description: "Notes" } }
+    assert_redirected_to "/lists"
+    list.reload
+    assert_equal "Edited", list.name
+    assert_equal "Notes", list.recordable.description
+
+    post "/lists/#{list.id}/items", params: { recording_id: @page.id }
+    assert_redirected_to "/lists/#{list.id}"
+    assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+
+    delete "/lists/#{list.id}/items/#{@page.id}"
+    assert_redirected_to "/lists/#{list.id}"
+    refute_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
+
+    delete "/lists/#{list.id}"
+    assert_redirected_to "/lists"
+    refute RecordingStudio::Recording.exists?(list.id)
+  end
+
   private
 
   def with_layouts(lists:, core:)
@@ -679,6 +800,29 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
   ensure
     RecordingStudioLists.configuration.layout = previous_lists
     RecordingStudio.configuration.layout = previous_core
+  end
+
+  def create_user(label)
+    User.create!(
+      email: "#{label}-#{SecureRandom.hex(4)}@example.com",
+      password: "ListsTestPassword!2026",
+      password_confirmation: "ListsTestPassword!2026"
+    )
+  end
+
+  def grant_owner_access!(actor:, recording:)
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: recording, actor: actor)
+    raise result.error if result.failure?
+  end
+
+  def grant_access!(actor:, recording:, role:, manager:)
+    result = RecordingStudioAccessible.grant_access(
+      recording: recording,
+      actor: actor,
+      role: role,
+      manager_actor: manager
+    )
+    raise result.error if result.failure?
   end
 
   def select_root(root)

@@ -4,9 +4,10 @@ A list is a child recording under a parent you choose. Each member is a list ite
 
 ## Mount
 
-Add `recording_studio_lists` and `recording_studio_orderable` to the host Gemfile.
+Add `recording_studio_lists`, `recording_studio_accessible`, and `recording_studio_orderable` to the host Gemfile.
+The gemspec requires Accessible `~> 0.18`. List screens check access on the list recording.
 Orderable owns sibling position on recordings; lists opts `List` into that capability
-for `ListItem` children. Copy both engines' migrations and migrate Orderable first.
+for `ListItem` children. Copy Accessible and Orderable migrations, then lists, and migrate Orderable first.
 
 ```bash
 bin/rails generate recording_studio_orderable:migrations
@@ -65,6 +66,8 @@ RecordingStudio::Lists.delete(list.id, root: parent)
 ```
 
 `create` accepts `idempotency_key` and `actor`. `add` and `update` accept `actor`. Pass a recording or its id. `find` and `delete` accept `root:` so a lookup stays inside that tree. The list screens always pass the current root.
+
+List screens then check Accessible on that list recording (`RecordingStudioAccessible.authorized?`). Show and the edit form need `:view`. Update, destroy, add, and remove need `:edit`. Index only includes current-root lists the actor can view. A denial uses the same 404 or missing-list redirect as an unknown id. Grant on the root covers lists through inheritance. The Ruby helpers do not check access. The add-to-list menu still lists names under the current root; adding or removing still needs `:edit`.
 
 `update` requires a list recording. A missing list, or any other recordable, raises `InvalidList`. A blank name raises `BlankName` and writes nothing. Surrounding spaces are removed from the name. A blank `description` is stored as `nil`. If you omit `description`, the description is cleared. The recording id stays the same. Recording Studio stores a new list snapshot and an `updated` event.
 

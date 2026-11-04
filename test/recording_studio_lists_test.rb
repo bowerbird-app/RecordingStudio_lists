@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.6", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.7", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -15,6 +15,7 @@ class RecordingStudioListsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_lists.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 6.1"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.18"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.341"'
   end
@@ -53,6 +54,9 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.11.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
@@ -259,6 +263,7 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes readme, "mount RecordingStudioLists::Engine, at: \"/recording_studio_lists\""
     assert_includes readme, "enable_capability(:lists, on: Workspace)"
+    assert_includes readme, "RecordingStudioAccessible.authorized?"
     assert_includes readme, "generate recording_studio_orderable:migrations"
     assert_includes readme, "RecordingStudio::Lists.create"
     assert_includes readme, "RecordingStudio::Lists.update"

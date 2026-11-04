@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.7] - 2026-11-04
+
+### Security
+
+* List screens now enforce Recording Studio Accessible access on the list's own recording. This is a behavior change. Show and edit need `:view`. Update, destroy, add, and remove need `:edit`. A signed-in actor who can select the current root but has no grant on that list (or an ancestor) gets the existing missing-list denial (404 or the "That list is missing." redirect), not a 500. Index only shows current-root lists the actor can view. Grant on the root still covers lists through Accessible inheritance. The add-to-list menu still lists names under the current root; membership posts still hit the edit check.
+
+### Changed
+
+* The gemspec requires `recording_studio_accessible ~> 0.18` (same two-segment pin as Root Switchable). Development apps keep Accessible tag `v0.24.0` (latest git tag; `0.24.1` is on Accessible main and is not tagged).
+* Dummy seeds grant the seeded admin `:admin` on Studio, Client, and Private workspace roots so dummy screens and tests can load lists.
+
+### Upgrade notes
+
+- This is a behavior change. Hosts must grant Accessible access on the list recording or an ancestor (usually the root). Without `:view`, show/edit/index hide the list. Without `:edit`, updates, deletes, and membership changes are denied as a missing list.
+- Add `recording_studio_accessible` if the host does not already bundle it. Copy Accessible migrations if they are not already installed. No lists migration is required.
+- Call `RecordingStudioAccessible.authorized?(actor:, recording: list, role: :view|:edit)` is what the list screens use. Ruby `RecordingStudio::Lists` helpers still do not check access.
+
 ## [0.9.6] - 2026-11-04
 
 ### Security
@@ -388,7 +405,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.7...HEAD
+[0.9.7]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...v0.9.4
