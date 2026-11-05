@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.6] - 2026-11-04
+
+### Security
+
+* List screens now enforce Recording Studio Accessible access on the list recording. This is a behavior change. Show needs `:view`. New, create, edit, update, destroy, add, and remove need `:edit` (`:edit` on the current root for new/create). A signed-in actor who can select the current root but has no grant gets the existing missing-list denial (404 or the "That list is missing." redirect), not a 500. Index and the add-to-list menu filter with `RecordingStudioAccessible.recording_ids_for`. Grant on the root still covers lists through Accessible inheritance. Create with no current root still redirects with the choose-place alert (`ListAccess` `rescue_from` `ParentNotAllowed`).
+* `rescue_from` `InvalidList` is controller-wide, so a missing list on index (and every other action) returns 404.
+
+### Changed
+
+* The gemspec requires `recording_studio_accessible ~> 0.24` and `recording_studio_orderable ~> 0.4`. Development apps pin Accessible `v0.24.0` and Orderable `v0.4.8` so Recording Studio 6 resolves without a Bundler shim.
+* Dummy copies Accessible 0.24 access-request migrations. Tests that need a grant call `bootstrap_owner_access!` or `grant_access` themselves.
+
+### Upgrade notes
+
+- This is a behavior change. Hosts must grant Accessible access on the list recording or an ancestor (usually the root). Without `:view`, show and index hide the list. Without `:edit` on the root, new and create are denied. Without `:edit` on the list, the edit form, updates, deletes, and membership changes are denied as a missing list. Denied screens use 404 or the missing-list redirect on purpose, not Accessible's 403.
+- Add `recording_studio_accessible ~> 0.24` if the host does not already bundle it. Copy Accessible migrations if they are not already installed. No lists migration is required.
+- List screens authorize through Accessible `ControllerAuth#authorize_recording!`. Ruby `RecordingStudio::Lists` helpers still do not check access. Pin Orderable to a tag that allows Recording Studio 6 (`v0.4.8`).
+
 ## [0.9.5] - 2026-11-03
 
 ### Changed
@@ -370,7 +388,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...HEAD
+[0.9.6]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.2...v0.9.3

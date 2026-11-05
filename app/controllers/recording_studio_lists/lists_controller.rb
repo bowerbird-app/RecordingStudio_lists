@@ -93,10 +93,11 @@ module RecordingStudioLists
   end
 
   class ListsController < ApplicationController
+    include ListAccess
     include MenuResponses
 
     def index
-      @lists = RecordingStudio::Lists.lists(parent_recording)
+      @lists = lists_for(parent_recording, minimum_role: :view)
     rescue RecordingStudio::Lists::ParentNotAllowed => e
       @lists = []
       flash.now[:alert] = list_error_copy(e)
@@ -118,30 +119,28 @@ module RecordingStudioLists
     end
 
     def show
-      @list = RecordingStudio::Lists.find(params[:id])
+      @list = load_list!(role: :view)
       @items = RecordingStudio::Lists.items(@list)
     rescue RecordingStudio::Lists::InvalidList
       head :not_found
     end
 
     def add_item
-      list = RecordingStudio::Lists.find(params[:id])
-      RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
-      respond_membership(list, Copy.t("flashes.added"))
-    rescue RecordingStudio::Lists::Error => e
-      respond_membership_error(e)
+      run_membership do |list|
+        RecordingStudio::Lists.add(list, params[:recording_id], actor: current_actor)
+        respond_membership(list, Copy.t("flashes.added"))
+      end
     end
 
     def remove_item
-      list = RecordingStudio::Lists.find(params[:id])
-      RecordingStudio::Lists.remove(list, params[:recording_id])
-      respond_membership(list, Copy.t("flashes.removed"))
-    rescue RecordingStudio::Lists::Error => e
-      respond_membership_error(e)
+      run_membership do |list|
+        RecordingStudio::Lists.remove(list, params[:recording_id])
+        respond_membership(list, Copy.t("flashes.removed"))
+      end
     end
 
     def edit
-      @list = RecordingStudio::Lists.find(params[:id])
+      @list = load_list!(role: :edit)
       @name = @list.name
       @description = @list.recordable.description
       @return_to = safe_return_path
@@ -159,7 +158,7 @@ module RecordingStudioLists
     end
 
     def destroy
-      RecordingStudio::Lists.delete(params[:id])
+      RecordingStudio::Lists.delete(load_list!(role: :edit))
       redirect_to lists_path, notice: Copy.t("flashes.deleted")
     rescue RecordingStudio::Lists::InvalidList => e
       redirect_to lists_path, alert: list_error_copy(e)
@@ -168,7 +167,7 @@ module RecordingStudioLists
     private
 
     def revise_submitted_list
-      @list = RecordingStudio::Lists.find(params[:id])
+      @list = load_list!(role: :edit)
       @name = list_params[:name]
       @description = list_params[:description]
       @return_to = safe_return_path

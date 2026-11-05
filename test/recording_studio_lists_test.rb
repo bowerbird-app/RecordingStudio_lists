@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.5", ::RecordingStudioLists::VERSION
+    assert_equal "0.9.6", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -15,7 +15,8 @@ class RecordingStudioListsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_lists.gemspec", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 6.1"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.3"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.24"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.341"'
   end
 
@@ -47,16 +48,20 @@ class RecordingStudioListsTest < Minitest::Test
     gemfile = File.read(File.expand_path("dummy/Gemfile", __dir__))
     root_gemfile = File.read(File.expand_path("../Gemfile", __dir__))
 
-    assert_includes gemfile, "widen_recording_studio_requirement"
-    assert_includes root_gemfile, "widen_recording_studio_requirement"
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.3.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.21.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.3"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.10.0"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.6.1"'
-    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.1"'
+    refute_includes gemfile, "widen_recording_studio_requirement"
+    refute_includes root_gemfile, "widen_recording_studio_requirement"
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.4.8"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.4.8"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.11.4"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.2"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     assert_includes gemfile, 'gem "view_component", "4.19.0"'
@@ -132,8 +137,68 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes schema, 'create_table "recording_studio_access_constraints"'
     assert_includes schema, 'create_table "recording_studio_access_rules"'
+    assert_includes schema, 'create_table "recording_studio_access_requests"'
+    assert_includes schema, 'create_table "recording_studio_access_request_intents"'
     assert_includes constraints, "create_table :recording_studio_access_constraints"
     assert_includes rules, "create_table :recording_studio_access_rules"
+  end
+
+  def test_list_screens_authorize_through_accessible_controller_auth
+    controller = File.read(File.expand_path("../app/controllers/recording_studio_lists/lists_controller.rb", __dir__))
+    access = File.read(File.expand_path("../app/controllers/concerns/recording_studio_lists/list_access.rb", __dir__))
+    lists = File.read(File.expand_path("../lib/recording_studio_lists/accessible_lists.rb", __dir__))
+    helper = File.read(File.expand_path("../app/helpers/recording_studio_lists/add_to_list_helper.rb", __dir__))
+    helper_access = File.read(
+      File.expand_path("../app/helpers/recording_studio_lists/add_to_list_access.rb", __dir__)
+    )
+
+    assert_includes controller, "include ListAccess"
+    refute_includes controller, "Metrics/ClassLength"
+    refute_includes controller, "require_parent_edit!"
+    refute_includes controller.split("class ListsController").first, "def list_in_current_root"
+    refute_includes controller.split("class ListsController").first, "def list_access?"
+    assert_includes controller, "def revise_submitted_list"
+    assert_includes controller, "def build_list"
+    assert_includes controller, "def parent_recording"
+    assert_includes controller, "def list_params"
+    assert_includes controller, "def assign_add_context"
+    assert_includes controller, "def attach_recording"
+    assert_includes controller, "def current_actor"
+    assert_includes controller, "Current.actor if defined?(Current)"
+    refute_includes controller, "lists_actor"
+    refute_includes access, "def revise_submitted_list"
+    refute_includes access, "def build_list"
+    refute_includes access, "def parent_recording"
+    refute_includes access, "def list_params"
+    refute_includes access, "def assign_add_context"
+    refute_includes access, "def attach_recording"
+    refute_includes access, "def current_actor"
+    refute_includes access, "lists_actor"
+    assert_includes access, "include RecordingStudioAccessible::ControllerAuth"
+    assert_includes access, "authorize_recording!"
+    assert_includes access, "actor: current_actor"
+    assert_includes access, "before_action :require_parent_edit!, only: %i[new create]"
+    assert_includes access, "rescue_from RecordingStudio::Lists::ParentNotAllowed, with: :respond_list_error"
+    assert_includes access, "rescue_from RecordingStudio::Lists::InvalidList, with: :missing_list"
+    assert_includes lists, "RecordingStudioAccessible.recording_ids_for"
+    assert_includes helper, "include AddToListAccess"
+    refute_includes helper, "Metrics/ModuleLength"
+    refute_includes helper, "def add_to_list_accessible_lists"
+    refute_includes helper, "def current_actor"
+    refute_includes helper, "def add_to_list_actor"
+    assert_includes helper, "add_to_list_accessible_lists"
+    refute_includes helper, "current_user"
+    refute_includes helper, "lists_actor"
+    assert_includes helper, "# One lookup for every list under this parent that already holds the recording."
+    assert_includes helper, "# Each keyword is a button or menu setting on the public helper."
+    assert_includes helper_access, "def add_to_list_accessible_lists"
+    assert_includes helper_access, "AccessibleLists.for"
+    assert_includes helper_access, "actor: add_to_list_actor"
+    assert_includes helper_access, "def add_to_list_actor"
+    assert_includes helper_access, "Current.actor if defined?(Current)"
+    refute_includes helper_access, "def current_actor"
+    refute_includes helper_access, "current_user"
+    refute_includes helper_access, "lists_actor"
   end
 
   def test_template_does_not_ship_copied_core_hooks_or_base_service
@@ -242,6 +307,7 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes readme_source, "/recording_studio"
     assert_includes readme_source, "redirects to `/`"
     refute_includes readme_source, "flat_pack_sidebar"
+    refute_includes readme_source, "Accessible `:admin` grants"
   end
 
   def test_product_readme_explains_lists
@@ -249,6 +315,8 @@ class RecordingStudioListsTest < Minitest::Test
 
     assert_includes readme, "mount RecordingStudioLists::Engine, at: \"/recording_studio_lists\""
     assert_includes readme, "enable_capability(:lists, on: Workspace)"
+    assert_includes readme, "RecordingStudioAccessible.recording_ids_for"
+    assert_includes readme, "authorize_recording!"
     assert_includes readme, "generate recording_studio_orderable:migrations"
     assert_includes readme, "RecordingStudio::Lists.create"
     assert_includes readme, "RecordingStudio::Lists.update"

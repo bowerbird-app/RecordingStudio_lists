@@ -16,6 +16,7 @@ class ListsI18nRenderTest < ActionDispatch::IntegrationTest
     )
     @workspace = Workspace.create!(name: "! I18n Lists #{SecureRandom.hex(4)}")
     @root = RecordingStudio.root_recording_for(@workspace)
+    grant_owner_access!(actor: @user, recording: @root)
     @page = RecordingStudio.record!(
       action: "created",
       recordable: Page.new(title: "I18n Page #{SecureRandom.hex(4)}"),
@@ -171,6 +172,11 @@ class ListsI18nRenderTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def grant_owner_access!(actor:, recording:)
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: recording, actor: actor)
+    raise result.error if result.failure?
+  end
 
   def select_root(root)
     patch "/recording_studio_root_switchable/v1/root_switch", params: {

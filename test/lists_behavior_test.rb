@@ -227,6 +227,10 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_nil RecordingStudio::Lists.delete(SecureRandom.uuid)
     assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.delete(target) }
     assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.find(target.id) }
+
+    remaining = RecordingStudio::Lists.create(parent: root, name: "Stay")
+    assert_equal remaining, RecordingStudio::Lists.delete(remaining.id)
+    refute RecordingStudio::Recording.exists?(remaining.id)
   end
 
   test "keyed create returns the same list recording" do

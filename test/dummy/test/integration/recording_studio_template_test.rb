@@ -7,15 +7,17 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert_respond_to ApplicationController.helpers, :recording_studio_add_to_list
   end
 
-  test "legacy sibling engines include the removed default layout module" do
-    assert_includes RecordingStudioOrderable::ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
-    refute_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
-    refute_includes RecordingStudioLists::ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+  test "orderable no longer ships the removed default layout module" do
+    refute_includes RecordingStudioOrderable::ApplicationController.ancestors.map(&:name),
+                    "RecordingStudio::UsesDefaultLayout"
+    refute_includes ApplicationController.ancestors.map(&:name), "RecordingStudio::UsesDefaultLayout"
+    refute_includes RecordingStudioLists::ApplicationController.ancestors.map(&:name),
+                    "RecordingStudio::UsesDefaultLayout"
   end
 
   test "dummy app loads root switchable config and controller support" do
     assert_equal [ "all_workspaces" ], RecordingStudioRootSwitchable.configuration.scopes.keys
-    assert_equal :application_layout, RecordingStudioRootSwitchable.configuration.layout
+    assert_nil RecordingStudioRootSwitchable.configuration.layout
     assert_includes ApplicationController.ancestors, RecordingStudio::RootSwitchable::ControllerSupport
     refute_includes ApplicationController.ancestors.map(&:name), "RecordingStudio::UsesDefaultLayout"
   end
@@ -34,6 +36,8 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     assert connection.table_exists?(:recording_studio_access_invitations)
     assert connection.table_exists?(:recording_studio_access_constraints)
     assert connection.table_exists?(:recording_studio_access_rules)
+    assert connection.table_exists?(:recording_studio_access_requests)
+    assert connection.table_exists?(:recording_studio_access_request_intents)
     role_column = connection.columns(:recording_studio_accesses).find { |column| column.name == "role" }
     assert_equal :string, role_column.type
     refute connection.table_exists?(:recording_studio_access_boundaries)
@@ -57,6 +61,10 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     page_recording = RecordingStudio::Recording.find_by!(recordable: page)
 
     assert_nil Current.actor
+    user = User.find_by!(email: "admin@admin.com")
+    refute RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
+    refute RecordingStudioAccessible.authorized?(actor: user, recording: accessible_root_recording, role: :admin)
+    refute RecordingStudioAccessible.authorized?(actor: user, recording: private_root_recording, role: :admin)
     assert_nil root_recording.parent_recording_id
     assert_nil accessible_root_recording.parent_recording_id
     assert_nil private_root_recording.parent_recording_id

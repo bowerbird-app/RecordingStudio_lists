@@ -2,6 +2,8 @@
 
 module RecordingStudioLists
   module AddToListHelper
+    include AddToListAccess
+
     MEMBERSHIP_JOIN = "INNER JOIN recording_studio_list_items " \
                       "ON recording_studio_list_items.id = recording_studio_recordings.recordable_id"
 
@@ -85,7 +87,7 @@ module RecordingStudioLists
       return_path = add_to_list_return_path(options[:return_to])
       {
         trigger: AddToListTrigger.new(options).to_h,
-        rows: add_to_list_rows(RecordingStudio::Lists.lists(place), target),
+        rows: add_to_list_rows(add_to_list_accessible_lists(place), target),
         new_list_href: add_to_list_new_href(target, return_path),
         recording_id: target.id,
         return_to: return_path

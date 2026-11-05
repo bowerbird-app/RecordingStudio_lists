@@ -5,8 +5,9 @@ RecordingStudioRootSwitchable.configure do |config|
     Current.actor || controller.current_user
   end
 
-  # Render the mounted switcher pages inside the app shell when users visit them.
-  config.layout = :application_layout
+  # v0.11.4 only accepts nil, false, a layout name, or a callable.
+  # :application_layout is rejected; nil uses Recording Studio Default Layout.
+  config.layout = nil
 
   config.after_switch_redirect = lambda do |controller:, return_to:, **|
     candidate_path = return_to.presence
