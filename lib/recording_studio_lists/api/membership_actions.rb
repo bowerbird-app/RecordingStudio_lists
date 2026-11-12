@@ -42,7 +42,7 @@ module RecordingStudioLists
 
       def action_options(api:, handler:, required_role:, input_contract:, docs:)
         {
-          capability: :orderable, version: "1.0.0", http_verb: http_verb_for(handler), required_role:,
+          capability: :list_membership, version: "1.0.0", http_verb: http_verb_for(handler), required_role:,
           handler:, input_contract:, serializer: serializer_for(handler),
           openapi: docs, api:
         }

@@ -35,13 +35,17 @@ class ApiSourceTest < Minitest::Test
     assert_includes membership, "name: :list_remove"
     assert_includes membership, "name: :list_items"
     assert_includes membership, "name: :list_addable"
-    assert_includes membership, "capability: :orderable"
+    assert_includes membership, "capability: :list_membership"
+    refute_includes membership, "capability: :orderable"
     refute_includes membership, "capability: :lists"
     refute_includes membership, "name: :add,"
     assert_includes membership, "List - Add"
     assert_includes membership, "List - Remove"
     refute_includes resource, "ListItem.create"
     refute_includes membership, "ListItem.create"
+    refute_includes resource, "deep_symbolize_keys"
+    refute_includes resource, "transform_keys"
+    assert_includes resource, "RequestPayload.call(context)"
   end
 
   def test_engine_registers_the_api_after_reload

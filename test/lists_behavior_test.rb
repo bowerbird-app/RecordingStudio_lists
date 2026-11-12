@@ -20,6 +20,7 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal ["RecordingStudio::Lists::List"], item_declaration.allowed_parent_types
     assert RecordingStudio.capability_enabled?(:lists, for: Workspace)
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudio::Lists::List")
+    assert RecordingStudio.capability_enabled?(:list_membership, for: "RecordingStudio::Lists::List")
     assert_equal(
       { allows: ["RecordingStudio::Lists::ListItem"] },
       RecordingStudio.capability_options(:orderable, for: "RecordingStudio::Lists::List")

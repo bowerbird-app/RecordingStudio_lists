@@ -202,6 +202,25 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     )
   end
 
+  test "another orderable type does not get list membership actions" do
+    RecordingStudio.enable_capability(:orderable, on: Page)
+    page = record_page(@root, "Orderable page")
+
+    RecordingStudioLists::Api::CAPABILITY_ACTIONS.each do |action|
+      registration = RecordingStudioApi.capability_action(action)
+      refute registration.applicable_to?("Page"), "#{action} leaked to Page"
+      refute RecordingStudioApi.capability_action_enabled_for?(registration, "Page"),
+             "#{action} enabled for Page"
+      assert registration.applicable_to?("RecordingStudio::Lists::List")
+    end
+
+    post "/recording_studio_api/api/v1/pages/#{page.id}/actions/list_add",
+         headers: json_headers(@edit_token),
+         params: { recording_id: @list.id },
+         as: :json
+    assert_response :unprocessable_entity
+  end
+
   test "index paginates with limit and pagination_token" do
     extra = RecordingStudio::Lists.create(parent: @root, name: "Also #{SecureRandom.hex(4)}", actor: @user)
     expected_ids = [@list.id, extra.id].sort

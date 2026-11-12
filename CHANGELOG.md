@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * List index uses `AccessibleLists.for` (`:view`), the same per-list Accessible filter as the HTML index.
-* Membership actions register as member actions with capability `:orderable` (already on List). Recording Studio API v0.21.3 requires a capability name for member scope and checks `applicable_to?` against that capability. A blank capability cannot be registered for member actions. The list type lists the actions with `auto_capability_actions: false`. List does not enable `:lists`.
+* Membership actions register as member actions with Lists-owned capability `:list_membership`, enabled only on `RecordingStudio::Lists::List`. Recording Studio API v0.21.3 requires a capability name for member scope and checks `applicable_to?` against that capability. A blank capability cannot be registered for member actions. The list type lists the actions with `auto_capability_actions: false`. List does not enable `:lists`. Other orderable types do not get `list_add`, `list_remove`, `list_items`, or `list_addable`.
 * `RecordingStudio::Lists::List` does not enable `:lists`. Lists do not nest inside lists. Parent types still enable `:lists` to allow lists as children.
 
 ### Upgrade notes

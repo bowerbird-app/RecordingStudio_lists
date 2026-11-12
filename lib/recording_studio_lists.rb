@@ -9,6 +9,7 @@ require "recording_studio_lists/engine"
 require "recording_studio_lists/configuration"
 require "recording_studio_lists/copy"
 require "recording_studio_lists/capabilities/example"
+require "recording_studio_lists/capabilities/list_membership"
 require "recording_studio/lists"
 
 module RecordingStudioLists

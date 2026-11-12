@@ -39,9 +39,7 @@ module RecordingStudioLists
       end
 
       def fields(context)
-        raw = payload(context)
-        symbolized = raw.respond_to?(:deep_symbolize_keys) ? raw.deep_symbolize_keys : raw.to_h.transform_keys(&:to_sym)
-        symbolized.slice(*Api::WRITABLE_ATTRIBUTES)
+        payload(context).with_indifferent_access.slice(*Api::WRITABLE_ATTRIBUTES)
       end
 
       class Index
