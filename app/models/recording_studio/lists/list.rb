@@ -11,6 +11,8 @@ module RecordingStudio
         allows: ["RecordingStudio::Lists::ListItem"]
       )
 
+      RecordingStudio.enable_capability(:lists, on: self)
+
       validates :name, presence: true
     end
   end

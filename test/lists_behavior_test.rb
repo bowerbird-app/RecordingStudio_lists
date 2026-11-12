@@ -15,10 +15,14 @@ class ListsBehaviorTest < ActiveSupport::TestCase
 
     refute list_declaration.root?
     assert_empty RecordingStudio.declared_allowed_parent_types_for("RecordingStudio::Lists::List")
-    assert_equal ["Workspace"], RecordingStudio.allowed_parent_types_for("RecordingStudio::Lists::List")
+    assert_equal(
+      ["RecordingStudio::Lists::List", "Workspace"].sort,
+      RecordingStudio.allowed_parent_types_for("RecordingStudio::Lists::List").sort
+    )
     refute item_declaration.root?
     assert_equal ["RecordingStudio::Lists::List"], item_declaration.allowed_parent_types
     assert RecordingStudio.capability_enabled?(:lists, for: Workspace)
+    assert RecordingStudio.capability_enabled?(:lists, for: "RecordingStudio::Lists::List")
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudio::Lists::List")
     assert_equal(
       { allows: ["RecordingStudio::Lists::ListItem"] },

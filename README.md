@@ -65,6 +65,32 @@ RecordingStudio::Lists.delete(list)
 
 `create` accepts `idempotency_key` and `actor`. `add` and `update` accept `actor`. Pass a recording or its id.
 
+When Recording Studio API is loaded, this gem registers `RecordingStudio::Lists::List` on each named API. MCP hosts that wrap that API get the same actions. Default API create is not used, because it would skip `RecordingStudio::Lists.create`.
+
+| Verb | Path | Accessible role |
+|---|---|---|
+| GET | `/recording_studio_api/api/v1/lists?parent_id=` | `:view` on the parent |
+| GET | `/recording_studio_api/api/v1/lists/:id` | `:view` on the list |
+| POST | `/recording_studio_api/api/v1/lists` | `:edit` on the parent |
+| PATCH | `/recording_studio_api/api/v1/lists/:id` | `:edit` on the list |
+| DELETE | `/recording_studio_api/api/v1/lists/:id` | `:edit` on the list |
+| POST | `/recording_studio_api/api/v1/lists/:id/actions/add` | `:edit` on the list |
+| POST | `/recording_studio_api/api/v1/lists/:id/actions/remove` | `:edit` on the list |
+| GET | `/recording_studio_api/api/v1/lists/:id/actions/items` | `:view` on the list |
+| GET | `/recording_studio_api/api/v1/lists/:id/actions/addable` | `:view` on the list |
+
+`parent_id` is required for index and create. Index paginates with `limit` and `pagination_token`. Writes send `name` and `description` at the root of the body. `add` and `remove` take `recording_id`. List item CRUD and Orderable reorder are not on this resource. `add` still rejects a self target, a target from another workspace, and a list item.
+
+Install Recording Studio API in the host if you want the JSON surface:
+
+```sh
+bin/rails generate recording_studio_api:install
+bin/rails generate recording_studio_api:migrations
+bin/rails db:migrate
+```
+
+Turn on `:api_access_point` on roots that should hold API clients, and add `RecordingStudioApi::ApiClient` to `access_actor_types`. Recording Studio MCP needs no extra lists code.
+
 List screens check Accessible on that list recording through `authorize_recording!`. Show needs `:view`. New and create need `:edit` on the current root. Edit, update, destroy, add, and remove need `:edit` on the list. Index and the add-to-list menu use `RecordingStudioAccessible.recording_ids_for` (`:view` on index, `:edit` on the menu). A denial uses the same 404 or missing-list redirect as an unknown id, not 403. `InvalidList` is rescued controller-wide (index included) as 404. Create with no current root still redirects with "Choose a place for this list first." New with no current root still renders the form. Grant on the root covers lists through inheritance. The Ruby helpers do not check access.
 
 `update` requires a list recording. A missing list, or any other recordable, raises `InvalidList`. A blank name raises `BlankName` and writes nothing. Surrounding spaces are removed from the name. A blank `description` is stored as `nil`. If you omit `description`, the description is cleared. The recording id stays the same. Recording Studio stores a new list snapshot and an `updated` event.

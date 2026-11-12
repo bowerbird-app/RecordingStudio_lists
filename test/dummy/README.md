@@ -10,6 +10,7 @@ This Rails app exists to validate the Recording Studio addon template in a real 
 - Root workspace plus seeded folder and page recordables
 - Recording Studio default layout, FlatPack assets, and Tailwind source scanning of installed `flatpack-<rev>` and `RecordingStudio-<rev>` checkouts (`app/components`, `app/helpers`, and Recording Studio views)
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
+- Mounted Recording Studio API at `/recording_studio_api` for list JSON actions
 - Dummy-only `/docs/*` pages for gem-specific onboarding
 
 ## Quick Start
@@ -37,6 +38,7 @@ Then open the app and sign in with:
 - `/users/sign_in` - Devise sign-in page
 - `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - dummy-only starter pages
 - `/up` - Rails health check
+- `/recording_studio_api/api/v1` - Recording Studio API when the dummy bundle includes it
 
 ## Why This App Exists
 

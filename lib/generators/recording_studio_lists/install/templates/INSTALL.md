@@ -17,3 +17,5 @@ Next steps:
 8. Keep strict recordable declarations enabled and add `recording_studio_recordable(...)` to every configured recordable before running `RecordingStudio.validate_recordable_declarations!`.
 9. Grant Accessible access on the list recording or an ancestor (usually the root). Without a
    grant, list screens treat the list as missing.
+10. To expose lists over Recording Studio API, add `recording_studio_api`, run its install and
+    migrations, mount the engine, and enable `:api_access_point` on roots that hold API clients.

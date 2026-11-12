@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "api"
+
 module RecordingStudioLists
   class Engine < ::Rails::Engine
     isolate_namespace RecordingStudioLists
@@ -117,6 +119,10 @@ module RecordingStudioLists
       ].each do |type_name|
         RecordingStudio.register_recordable_type(type_name)
       end
+    end
+
+    initializer "recording_studio_lists.api" do
+      config.to_prepare { Api.register! }
     end
   end
 end

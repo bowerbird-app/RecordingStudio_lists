@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-12
+
+### Added
+
+* List index, show, create, update, and delete on Recording Studio API. The handlers call `RecordingStudio::Lists.lists`, `.find`, `.create`, `.update`, and `.delete`.
+* `add`, `remove`, `items`, and `addable` API capability actions (`:edit` for add and remove, `:view` for items and addable). Membership still uses the gem's lock, same-root, and no-self guards. List item CRUD and Orderable reorder stay off this resource.
+* Dummy mounts Recording Studio API so hosts and MCP adapters can use the same Accessible-gated surface.
+
+### Changed
+
+* `RecordingStudio::Lists::List` enables `:lists` so those member actions are applicable on the list recordable. Parent types still enable `:lists` to allow lists as children.
+
+### Upgrade notes
+
+- Pin `v0.10.0`. There is no lists migration. Hosts that already have Recording Studio API get lists when this gem loads. Install and mount API (and MCP, if you use it) as those gems document.
+- Grant Accessible `:view` to list or show a list, `:edit` on the parent to create, and `:edit` on the list to update, delete, add, or remove. A list in another workspace is 404.
+- Development apps pin Recording Studio API `v0.21.3`, Admin `v2.11.0`, Logs `v0.7.3`, Moveable `v4.1.0`, and Icons `v0.2.0`.
+
 ## [0.9.6] - 2026-11-04
 
 ### Security
@@ -388,7 +406,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...v0.10.0
 [0.9.6]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...v0.9.4
