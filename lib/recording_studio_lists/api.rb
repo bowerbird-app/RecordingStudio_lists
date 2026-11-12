@@ -6,7 +6,7 @@ require_relative "api/membership_actions"
 module RecordingStudioLists
   module Api
     TYPE = "RecordingStudio::Lists::List"
-    CAPABILITY_ACTIONS = %i[add remove items addable].freeze
+    CAPABILITY_ACTIONS = %i[list_add list_remove list_items list_addable].freeze
     OUTPUT_KEYS = %i[name description].freeze
     WRITABLE_ATTRIBUTES = %i[name description].freeze
 

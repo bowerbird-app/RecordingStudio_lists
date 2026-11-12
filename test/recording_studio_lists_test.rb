@@ -334,7 +334,7 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes readme, "RecordingStudio::Lists.add"
     assert_includes readme, "RecordingStudio::Lists.delete"
     assert_includes readme, "/recording_studio_api/api/v1/lists"
-    assert_includes readme, "actions/add"
+    assert_includes readme, "actions/list_add"
     assert_includes readme, "/lists"
     assert_includes readme, "/lists/new"
     assert_includes readme, "/lists/:id"

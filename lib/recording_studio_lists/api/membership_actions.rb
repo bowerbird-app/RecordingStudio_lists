@@ -15,22 +15,22 @@ module RecordingStudioLists
       end
 
       def register_add(api)
-        register_action(name: :add, api:, handler: Add, required_role: :edit,
+        register_action(name: :list_add, api:, handler: Add, required_role: :edit,
                         input_contract: recording_id_contract, docs: add_docs)
       end
 
       def register_remove(api)
-        register_action(name: :remove, api:, handler: Remove, required_role: :edit,
+        register_action(name: :list_remove, api:, handler: Remove, required_role: :edit,
                         input_contract: recording_id_contract, docs: remove_docs)
       end
 
       def register_items(api)
-        register_action(name: :items, api:, handler: Items, required_role: :view,
+        register_action(name: :list_items, api:, handler: Items, required_role: :view,
                         input_contract: empty_contract, docs: items_docs)
       end
 
       def register_addable(api)
-        register_action(name: :addable, api:, handler: Addable, required_role: :view,
+        register_action(name: :list_addable, api:, handler: Addable, required_role: :view,
                         input_contract: empty_contract, docs: addable_docs)
       end
 
@@ -42,7 +42,7 @@ module RecordingStudioLists
 
       def action_options(api:, handler:, required_role:, input_contract:, docs:)
         {
-          capability: :lists, version: "1.0.0", http_verb: http_verb_for(handler), required_role:,
+          capability: :orderable, version: "1.0.0", http_verb: http_verb_for(handler), required_role:,
           handler:, input_contract:, serializer: serializer_for(handler),
           openapi: docs, api:
         }

@@ -65,7 +65,7 @@ module RecordingStudioLists
         def pagination_args(parent)
           {
             relation: RecordingStudio::Recording.unscoped.where(
-              id: RecordingStudio::Lists.lists(parent).map(&:id)
+              id: AccessibleLists.for(actor: @context.actor, parent:, minimum_role: :view).map(&:id)
             ),
             resource: @context.resource_name,
             recordable_type: @context.recordable_type,

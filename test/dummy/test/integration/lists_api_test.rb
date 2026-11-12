@@ -45,24 +45,24 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal "Edited", response.parsed_body.fetch("name")
 
-    post "/recording_studio_api/api/v1/lists/#{created_id}/actions/add",
+    post "/recording_studio_api/api/v1/lists/#{created_id}/actions/list_add",
          headers: json_headers(@edit_token),
          params: { recording_id: @page.id },
          as: :json
     assert_response :success
 
-    get "/recording_studio_api/api/v1/lists/#{created_id}/actions/items", headers: json_headers(@edit_token)
+    get "/recording_studio_api/api/v1/lists/#{created_id}/actions/list_items", headers: json_headers(@edit_token)
     assert_response :success
     item_ids = response.parsed_body.fetch("records").map { |record| record.fetch("id") }
     assert_includes item_ids, @page.id
 
-    get "/recording_studio_api/api/v1/lists/#{created_id}/actions/addable", headers: json_headers(@edit_token)
+    get "/recording_studio_api/api/v1/lists/#{created_id}/actions/list_addable", headers: json_headers(@edit_token)
     assert_response :success
     addable_ids = response.parsed_body.fetch("records").map { |record| record.fetch("id") }
     refute_includes addable_ids, @page.id
     refute_includes addable_ids, created_id
 
-    post "/recording_studio_api/api/v1/lists/#{created_id}/actions/remove",
+    post "/recording_studio_api/api/v1/lists/#{created_id}/actions/list_remove",
          headers: json_headers(@edit_token),
          params: { recording_id: @page.id },
          as: :json
@@ -78,10 +78,10 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     get "/recording_studio_api/api/v1/lists/#{@list.id}", headers: json_headers(@view_token)
     assert_response :success
 
-    get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/items", headers: json_headers(@view_token)
+    get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_items", headers: json_headers(@view_token)
     assert_response :success
 
-    get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/addable", headers: json_headers(@view_token)
+    get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_addable", headers: json_headers(@view_token)
     assert_response :success
 
     post "/recording_studio_api/api/v1/lists",
@@ -97,13 +97,13 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
     assert_equal "Reading", @list.reload.name
 
-    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/add",
+    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_add",
          headers: json_headers(@view_token),
          params: { recording_id: @page.id },
          as: :json
     assert_response :forbidden
 
-    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/remove",
+    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_remove",
          headers: json_headers(@view_token),
          params: { recording_id: @page.id },
          as: :json
@@ -134,7 +134,7 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert_equal "Elsewhere", other_list.reload.name
 
-    post "/recording_studio_api/api/v1/lists/#{other_list.id}/actions/add",
+    post "/recording_studio_api/api/v1/lists/#{other_list.id}/actions/list_add",
          headers: json_headers(@edit_token),
          params: { recording_id: @page.id },
          as: :json
@@ -145,14 +145,14 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     elsewhere = RecordingStudio.root_recording_for(Workspace.create!(name: "Foreign #{SecureRandom.hex(4)}"))
     foreign = record_page(elsewhere, "Foreign")
 
-    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/add",
+    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_add",
          headers: json_headers(@edit_token),
          params: { recording_id: @list.id },
          as: :json
     assert_response :unprocessable_entity
     assert_includes response.body, "A list can't contain itself."
 
-    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/add",
+    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_add",
          headers: json_headers(@edit_token),
          params: { recording_id: foreign.id },
          as: :json
@@ -168,6 +168,67 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     statuses = threads.map(&:value)
     assert(statuses.all? { |status| status == 200 })
     assert_equal [first.id, second.id].sort, RecordingStudio::Lists.items(@list).map(&:id).sort
+  end
+
+  test "create with a list parent returns 422 ParentNotAllowed" do
+    post "/recording_studio_api/api/v1/lists",
+         headers: json_headers(@edit_token),
+         params: { parent_id: @list.id, name: "Nested" },
+         as: :json
+    assert_response :unprocessable_entity
+    assert_includes response.body, RecordingStudio::Lists::ParentNotAllowed.new.message
+  end
+
+  test "index excludes a list the actor cannot view" do
+    other_root = RecordingStudio.root_recording_for(Workspace.create!(name: "Hidden #{SecureRandom.hex(4)}"))
+    other_user = User.create!(
+      email: "lists-api-hidden-#{SecureRandom.hex(4)}@example.com",
+      password: "ListsTestPassword!2026",
+      password_confirmation: "ListsTestPassword!2026"
+    )
+    grant_owner_access!(actor: other_user, recording: other_root)
+    hidden = RecordingStudio::Lists.create(parent: other_root, name: "Hidden #{SecureRandom.hex(4)}", actor: other_user)
+
+    get "/recording_studio_api/api/v1/lists",
+        headers: json_headers(@edit_token),
+        params: { parent_id: @root.id }
+    assert_response :success
+    ids = response.parsed_body.fetch("records").map { |record| record.fetch("id") }
+    assert_includes ids, @list.id
+    refute_includes ids, hidden.id
+    assert_includes RecordingStudio::Lists.lists(other_root).map(&:id), hidden.id
+    assert_empty RecordingStudioLists::AccessibleLists.for(
+      actor: @user, parent: other_root, minimum_role: :view
+    )
+  end
+
+  test "index paginates with limit and pagination_token" do
+    extra = RecordingStudio::Lists.create(parent: @root, name: "Also #{SecureRandom.hex(4)}", actor: @user)
+    expected_ids = [@list.id, extra.id].sort
+
+    get "/recording_studio_api/api/v1/lists",
+        headers: json_headers(@edit_token),
+        params: { parent_id: @root.id, limit: 1 }
+    assert_response :success
+    first_payload = response.parsed_body
+    first_ids = first_payload.fetch("records").map { |record| record.fetch("id") }
+    first_meta = first_payload.fetch("meta")
+    assert_equal 1, first_ids.size
+    refute_nil first_meta.fetch("next_pagination_token")
+
+    get "/recording_studio_api/api/v1/lists",
+        headers: json_headers(@edit_token),
+        params: {
+          parent_id: @root.id,
+          limit: 1,
+          pagination_token: first_meta.fetch("next_pagination_token")
+        }
+    assert_response :success
+    second_payload = response.parsed_body
+    second_ids = second_payload.fetch("records").map { |record| record.fetch("id") }
+    assert_equal 1, second_ids.size
+    assert_equal expected_ids, (first_ids + second_ids).sort
+    assert_nil second_payload.fetch("meta").fetch("next_pagination_token")
   end
 
   private
@@ -205,7 +266,7 @@ class ListsApiTest < ActionDispatch::IntegrationTest
   end
 
   def add_member(list_id, recording_id, token)
-    post "/recording_studio_api/api/v1/lists/#{list_id}/actions/add",
+    post "/recording_studio_api/api/v1/lists/#{list_id}/actions/list_add",
          headers: json_headers(token),
          params: { recording_id: recording_id },
          as: :json

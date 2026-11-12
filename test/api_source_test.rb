@@ -11,13 +11,16 @@ class ApiSourceTest < Minitest::Test
     refute_includes source, "remove_const"
     assert_includes source, "configuration.each_api"
     assert_includes source, "RecordingStudio::Lists.create"
+    assert_includes source, "auto_capability_actions: false"
+    assert_includes source, "capability_actions: CAPABILITY_ACTIONS"
+    assert_includes source, "%i[list_add list_remove list_items list_addable]"
   end
 
   def test_handlers_wrap_existing_list_methods
     resource = File.read(File.expand_path("../lib/recording_studio_lists/api/list_resource.rb", __dir__))
     membership = File.read(File.expand_path("../lib/recording_studio_lists/api/membership_actions.rb", __dir__))
 
-    assert_includes resource, "RecordingStudio::Lists.lists(parent)"
+    assert_includes resource, "AccessibleLists.for(actor: @context.actor, parent:, minimum_role: :view)"
     assert_includes resource, "RecordingStudio::Lists.find"
     assert_includes resource, "RecordingStudio::Lists.create"
     assert_includes resource, "RecordingStudio::Lists.update"
@@ -28,6 +31,13 @@ class ApiSourceTest < Minitest::Test
     assert_includes membership, "RecordingStudio::Lists.addable"
     assert_includes membership, "capability_action(name, api:"
     assert_includes membership, "reject_unknown: false"
+    assert_includes membership, "name: :list_add"
+    assert_includes membership, "name: :list_remove"
+    assert_includes membership, "name: :list_items"
+    assert_includes membership, "name: :list_addable"
+    assert_includes membership, "capability: :orderable"
+    refute_includes membership, "capability: :lists"
+    refute_includes membership, "name: :add,"
     assert_includes membership, "List - Add"
     assert_includes membership, "List - Remove"
     refute_includes resource, "ListItem.create"

@@ -74,12 +74,12 @@ When Recording Studio API is loaded, this gem registers `RecordingStudio::Lists:
 | POST | `/recording_studio_api/api/v1/lists` | `:edit` on the parent |
 | PATCH | `/recording_studio_api/api/v1/lists/:id` | `:edit` on the list |
 | DELETE | `/recording_studio_api/api/v1/lists/:id` | `:edit` on the list |
-| POST | `/recording_studio_api/api/v1/lists/:id/actions/add` | `:edit` on the list |
-| POST | `/recording_studio_api/api/v1/lists/:id/actions/remove` | `:edit` on the list |
-| GET | `/recording_studio_api/api/v1/lists/:id/actions/items` | `:view` on the list |
-| GET | `/recording_studio_api/api/v1/lists/:id/actions/addable` | `:view` on the list |
+| POST | `/recording_studio_api/api/v1/lists/:id/actions/list_add` | `:edit` on the list |
+| POST | `/recording_studio_api/api/v1/lists/:id/actions/list_remove` | `:edit` on the list |
+| GET | `/recording_studio_api/api/v1/lists/:id/actions/list_items` | `:view` on the list |
+| GET | `/recording_studio_api/api/v1/lists/:id/actions/list_addable` | `:view` on the list |
 
-`parent_id` is required for index and create. Index paginates with `limit` and `pagination_token`. Writes send `name` and `description` at the root of the body. `add` and `remove` take `recording_id`. List item CRUD and Orderable reorder are not on this resource. `add` still rejects a self target, a target from another workspace, and a list item.
+`parent_id` is required for index and create. Index uses `AccessibleLists.for` (`:view`) and paginates with `limit` and `pagination_token`. Writes send `name` and `description` at the root of the body. `list_add` and `list_remove` take `recording_id`. List item CRUD and Orderable reorder are not on this resource. `list_add` still rejects a self target, a target from another workspace, and a list item. A list cannot be the parent of another list. Membership actions are `list_add`, `list_remove`, `list_items`, and `list_addable` so they do not collide with other gems' `:add` / `:remove` / `:items` / `:addable` names. Recording Studio API member actions require a capability name and `applicable_to?` checks it, so these actions use `:orderable` (already on List). The list type lists them with `auto_capability_actions: false`. List does not enable `:lists`.
 
 Install Recording Studio API in the host if you want the JSON surface:
 

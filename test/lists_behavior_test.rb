@@ -15,14 +15,10 @@ class ListsBehaviorTest < ActiveSupport::TestCase
 
     refute list_declaration.root?
     assert_empty RecordingStudio.declared_allowed_parent_types_for("RecordingStudio::Lists::List")
-    assert_equal(
-      ["RecordingStudio::Lists::List", "Workspace"].sort,
-      RecordingStudio.allowed_parent_types_for("RecordingStudio::Lists::List").sort
-    )
+    assert_equal ["Workspace"], RecordingStudio.allowed_parent_types_for("RecordingStudio::Lists::List")
     refute item_declaration.root?
     assert_equal ["RecordingStudio::Lists::List"], item_declaration.allowed_parent_types
     assert RecordingStudio.capability_enabled?(:lists, for: Workspace)
-    assert RecordingStudio.capability_enabled?(:lists, for: "RecordingStudio::Lists::List")
     assert RecordingStudio.capability_enabled?(:orderable, for: "RecordingStudio::Lists::List")
     assert_equal(
       { allows: ["RecordingStudio::Lists::ListItem"] },
@@ -75,6 +71,11 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal "Notes", list.recordable.description
     refute RecordingStudio.root_recording?(list)
     assert_equal list, RecordingStudio::Lists.find(list.id)
+
+    nested = assert_raises(RecordingStudio::Lists::ParentNotAllowed) do
+      RecordingStudio::Lists.create(parent: list, name: "Nested")
+    end
+    assert_equal RecordingStudio::Lists::ParentNotAllowed.new.message, nested.message
   end
 
   test "update revises the list and keeps the earlier snapshot" do
