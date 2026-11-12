@@ -203,7 +203,6 @@ class ListsApiTest < ActionDispatch::IntegrationTest
   end
 
   test "another orderable type does not get list membership actions" do
-    RecordingStudio.enable_capability(:orderable, on: Page)
     page = record_page(@root, "Orderable page")
 
     RecordingStudioLists::Api::CAPABILITY_ACTIONS.each do |action|

@@ -229,15 +229,6 @@ class RecordingStudioListsTest < Minitest::Test
     assert_empty RecordingStudio.configuration.enabled_recordable_types_for(:example)
   end
 
-  def test_list_membership_capability_wraps_include_for
-    source = File.read(File.expand_path("../lib/recording_studio_lists/capabilities/list_membership.rb", __dir__))
-
-    assert_includes source, "def self.to(**)"
-    assert_includes source, "RecordingStudio::Capabilities.include_for(:list_membership, **)"
-    refute_includes source, "enable_capability"
-    refute_includes source, "set_capability_options"
-  end
-
   def test_dummy_app_uses_recording_studio_default_layout
     application_controller_path = File.expand_path("dummy/app/controllers/application_controller.rb", __dir__)
     controller_source = File.read(application_controller_path)

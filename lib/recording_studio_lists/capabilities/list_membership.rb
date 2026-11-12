@@ -12,5 +12,5 @@ end
 
 RecordingStudio.register_capability(
   :list_membership,
-  source: "recording_studio_lists"
+  source: RecordingStudio::Capabilities::ListMembership
 )

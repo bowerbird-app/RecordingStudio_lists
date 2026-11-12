@@ -34,10 +34,18 @@ module RecordingStudioLists
                         input_contract: empty_contract, docs: addable_docs)
       end
 
-      def register_action(name:, **options)
-        return if ::RecordingStudioApi.capability_action(name, api: options[:api])
+      def register_action(name:, **)
+        return if already_registered?(name, **)
 
-        ::RecordingStudioApi.register_capability_action(name, **action_options(**options))
+        ::RecordingStudioApi.register_capability_action(name, **action_options(**))
+      end
+
+      def already_registered?(name, api:, handler:, **)
+        existing = ::RecordingStudioApi.capability_action(name, api:)
+        return false unless existing
+        return true if existing.handler == handler
+
+        raise ::RecordingStudioApi::ConfigurationError, "API capability action #{name} is already registered"
       end
 
       def action_options(api:, handler:, required_role:, input_contract:, docs:)

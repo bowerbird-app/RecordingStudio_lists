@@ -37,5 +37,3 @@
 @source "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/helpers/**/*.{rb,erb}";
 @source "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/helpers/**/*.{rb,erb}";
 @source "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/components/**/*.{rb,erb}";
-@source "/usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";
-@source "/usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/helpers/**/*.{rb,erb}";
