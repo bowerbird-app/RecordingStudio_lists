@@ -4,7 +4,7 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.9.6", ::RecordingStudioLists::VERSION
+    assert_equal "0.10.0", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -62,6 +62,16 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.11.4"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.2"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.2"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.21.3"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.21.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.11.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.11.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.3"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.3"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.0"'
+    assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.0"'
     assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.341"'
     assert_includes gemfile, 'gem "view_component", "4.19.0"'
@@ -294,6 +304,7 @@ class RecordingStudioListsTest < Minitest::Test
       '"RecordingStudio::Lists::List", "RecordingStudio::Lists::ListItem"]'
     ].join
     assert_includes initializer_source, expected
+    assert_includes initializer_source, "RecordingStudioApi::ApiClient"
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"
@@ -322,6 +333,8 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes readme, "RecordingStudio::Lists.update"
     assert_includes readme, "RecordingStudio::Lists.add"
     assert_includes readme, "RecordingStudio::Lists.delete"
+    assert_includes readme, "/recording_studio_api/api/v1/lists"
+    assert_includes readme, "actions/list_add"
     assert_includes readme, "/lists"
     assert_includes readme, "/lists/new"
     assert_includes readme, "/lists/:id"

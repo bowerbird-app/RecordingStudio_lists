@@ -7,6 +7,7 @@ module RecordingStudio
 
       recording_studio_recordable label: "List", root: false
 
+      include RecordingStudio::Capabilities::ListMembership.to
       include RecordingStudio::Capabilities::Orderable.to(
         allows: ["RecordingStudio::Lists::ListItem"]
       )

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-12
+
+### Added
+
+* List index, show, create, update, and delete on Recording Studio API. The handlers call `RecordingStudio::Lists.lists`, `.find`, `.create`, `.update`, and `.delete`.
+* `list_add`, `list_remove`, `list_items`, and `list_addable` API capability actions (`:edit` for add and remove, `:view` for items and addable). Titles stay type-first (`List - Add`). Membership still uses the gem's lock, same-root, and no-self guards. List item CRUD and Orderable reorder stay off this resource.
+* Dummy mounts Recording Studio API so hosts and MCP adapters can use the same Accessible-gated surface.
+
+### Changed
+
+* List index uses `AccessibleLists.for` (`:view`), the same per-list Accessible filter as the HTML index.
+* Membership actions register as member actions with Lists-owned capability `:list_membership`, enabled only on `RecordingStudio::Lists::List`. Recording Studio API v0.21.3 requires a capability name for member scope and checks `applicable_to?` against that capability. A blank capability cannot be registered for member actions. The list type lists the actions with `auto_capability_actions: false`. List does not enable `:lists`. Other orderable types do not get `list_add`, `list_remove`, `list_items`, or `list_addable`.
+* `RecordingStudio::Lists::List` does not enable `:lists`. Lists do not nest inside lists. Parent types still enable `:lists` to allow lists as children.
+
+### Upgrade notes
+
+- Pin `v0.10.0`. There is no lists migration. Hosts that already have Recording Studio API get lists when this gem loads. Install and mount API (and MCP, if you use it) as those gems document.
+- Grant Accessible `:view` to list or show a list, `:edit` on the parent to create, and `:edit` on the list to update, delete, add, or remove. A list in another workspace is 404. Membership paths are `/actions/list_add`, `/actions/list_remove`, `/actions/list_items`, and `/actions/list_addable`.
+- Do not enable `:lists` on `RecordingStudio::Lists::List`. Create with a list parent raises `ParentNotAllowed` (API 422).
+- Development apps pin Recording Studio API `v0.21.3`, Admin `v2.11.0`, Logs `v0.7.3`, Moveable `v4.1.0`, and Icons `v0.2.0`.
+
 ## [0.9.6] - 2026-11-04
 
 ### Security
@@ -388,7 +409,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...v0.10.0
 [0.9.6]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.3...v0.9.4
