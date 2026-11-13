@@ -197,9 +197,18 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     RecordingStudio::Lists.add(list, third)
     assert_equal [first, second, third], RecordingStudio::Lists.items(list)
 
+    editor = User.create!(
+      email: "reorder-#{SecureRandom.hex(4)}@example.com",
+      password: "ListsTestPassword!2026",
+      password_confirmation: "ListsTestPassword!2026"
+    )
+    result = RecordingStudioAccessible.bootstrap_owner_access!(recording: root, actor: editor)
+    raise result.error if result.failure?
+
     children = list.recording_studio_orderable_children.to_a
     list.recording_studio_orderable_reorder!(
-      ordered_recording_ids: [children[2].id, children[0].id, children[1].id]
+      ordered_recording_ids: [children[2].id, children[0].id, children[1].id],
+      actor: editor
     )
 
     assert_equal [third, first, second], RecordingStudio::Lists.items(list)

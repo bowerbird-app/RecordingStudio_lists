@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-13
+
+### Changed
+
+* The gemspec opens `recording_studio_accessible` from `~> 0.24` to `>= 0.24.0, < 1.0` so Accessible v0.32.0 can resolve. Orderable stays `~> 0.4`. Recording Studio stays `~> 6.1`. FlatPack stays `>= 0.1.341`.
+* Development apps pin Recording Studio `v6.7.0`, FlatPack `v0.1.356`, Accessible `v0.32.0`, Orderable `v0.7.0`, Trashable `v0.14.0`, Metrics `v0.8.0`, Cache `v0.6.3`, Admin `v2.13.0`, API `v0.23.0`, Icons `v0.2.1`, Logs `v0.7.4`, Moveable `v4.1.1`, and Root Switchable `v0.15.0`.
+* The dummy host sets `allow_unauthorized_writes` so Recording Studio 6.5+ writes succeed without `authorize_write`. The dummy root switcher's default root is an Accessible `:view` root, and switch-page tests grant that access, which covers the Root Switchable 0.15 floor. The dummy schema adds Trashable 0.14 `purge_at`.
+
+### Upgrade notes
+
+- Pin `v0.10.1`. There is no lists migration.
+- Replace an Accessible pin of `~> 0.24` with `>= 0.24.0, < 1.0` (or another range that includes 0.32) before resolving this gem with Accessible v0.32.0.
+- Copy the Trashable 0.14 migration and migrate when the host uses Trashable. That adds nullable `purge_at` and `idx_rs_recordings_due_purge_at`.
+- Set `config.authorize_write` or `config.allow_unauthorized_writes` before Recording Studio 6.5 writes. The Root Switchable switch page requires Accessible `:view` on the current root.
+
 ## [0.10.0] - 2026-11-12
 
 ### Added
@@ -409,7 +424,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...v0.10.0
 [0.9.6]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.4...v0.9.5

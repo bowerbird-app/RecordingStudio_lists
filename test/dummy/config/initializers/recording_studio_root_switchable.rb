@@ -5,8 +5,8 @@ RecordingStudioRootSwitchable.configure do |config|
     Current.actor || controller.current_user
   end
 
-  # v0.11.4 only accepts nil, false, a layout name, or a callable.
-  # :application_layout is rejected; nil uses Recording Studio Default Layout.
+  # nil, false, a layout name, or a callable. :application_layout is rejected.
+  # nil uses Recording Studio Default Layout.
   config.layout = nil
 
   config.after_switch_redirect = lambda do |controller:, return_to:, **|
@@ -28,10 +28,16 @@ RecordingStudioRootSwitchable.configure do |config|
         RecordingStudio.root_recording_for(workspace)
       end
     end
+    # Lists tests switch into a root the actor cannot view. The mounted page
+    # still requires :view on the current root, so the default must be a root
+    # the actor can view. Otherwise a seeded workspace becomes current and
+    # the switch page returns 403.
     scope.access_check = ->(**) { true }
 
-    scope.default_root = lambda do |roots:, **|
-      roots.first
+    scope.default_root = lambda do |roots:, actor:, **|
+      roots.find do |recording|
+        RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :view)
+      end
     end
   end
 end

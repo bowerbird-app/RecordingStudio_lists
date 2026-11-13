@@ -5,7 +5,7 @@ A list is a child recording under a parent you choose. Each member is a list ite
 ## Mount
 
 Add `recording_studio_lists`, `recording_studio_accessible`, and `recording_studio_orderable` to the host Gemfile.
-The gemspec requires Accessible `~> 0.24` and Orderable `~> 0.4`. List screens check access on the list recording.
+The gemspec requires Accessible `>= 0.24.0, < 1.0` and Orderable `~> 0.4`. List screens check access on the list recording.
 Orderable owns sibling position on recordings; lists opts `List` into that capability
 for `ListItem` children. Copy Accessible and Orderable migrations, then lists, and migrate Orderable first.
 

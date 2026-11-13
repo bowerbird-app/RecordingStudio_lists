@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 RecordingStudioOrderable.configure do |config|
-  # Lists membership does not require Orderable's Accessible edit check; the
-  # host (or lists controller) already decided the actor may change the list.
-  config.use_recording_studio_accessible = false
+  # Orderable 0.7 always asks Accessible for :edit before reorder, move, and append.
+  # Lists membership add does not call those methods.
   config.log_order_events = true
   config.event_action = "reordered"
 end
