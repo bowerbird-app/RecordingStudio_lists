@@ -5,8 +5,8 @@ RecordingStudioRootSwitchable.configure do |config|
     Current.actor || controller.current_user
   end
 
-  # v0.11.4 only accepts nil, false, a layout name, or a callable.
-  # :application_layout is rejected; nil uses Recording Studio Default Layout.
+  # nil, false, a layout name, or a callable. :application_layout is rejected.
+  # nil uses Recording Studio Default Layout.
   config.layout = nil
 
   config.after_switch_redirect = lambda do |controller:, return_to:, **|
