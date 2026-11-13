@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * The gemspec opens `recording_studio_accessible` from `~> 0.24` to `>= 0.24.0, < 1.0` so Accessible v0.32.0 can resolve. Orderable stays `~> 0.4`. Recording Studio stays `~> 6.1`. FlatPack stays `>= 0.1.341`.
 * Development apps pin Recording Studio `v6.7.0`, FlatPack `v0.1.356`, Accessible `v0.32.0`, Orderable `v0.7.0`, Trashable `v0.14.0`, Metrics `v0.8.0`, Cache `v0.6.3`, Admin `v2.13.0`, API `v0.23.0`, Icons `v0.2.1`, Logs `v0.7.4`, Moveable `v4.1.1`, and Root Switchable `v0.15.0`.
-* The dummy host sets `allow_unauthorized_writes` so Recording Studio 6.5+ writes succeed without `authorize_write`. The dummy switch page grants Accessible access on each root before the request, which covers the Root Switchable 0.15 `:view` floor. The dummy schema adds Trashable 0.14 `purge_at`.
+* The dummy host sets `allow_unauthorized_writes` so Recording Studio 6.5+ writes succeed without `authorize_write`. The dummy root switcher's default root is an Accessible `:view` root, and switch-page tests grant that access, which covers the Root Switchable 0.15 floor. The dummy schema adds Trashable 0.14 `purge_at`.
 
 ### Upgrade notes
 
