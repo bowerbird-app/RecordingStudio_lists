@@ -53,9 +53,12 @@ end
 
 def dummy_bundle_base_env
   {
-    "BUNDLE_GEMFILE" => DUMMY_GEMFILE,
-    "DISABLE_SIMPLECOV" => "true"
+    "BUNDLE_GEMFILE" => DUMMY_GEMFILE
   }
+end
+
+task :clear_coverage do
+  FileUtils.rm_rf(File.expand_path("coverage", __dir__))
 end
 
 Rake::TestTask.new(:test) do |t|
@@ -88,8 +91,13 @@ namespace :test do
     end
   end
 
-  desc "Run gem and dummy app tests"
-  task all: %i[test dummy]
+  desc "Check merged SimpleCov for app/ and lib/ after the gem and dummy suites"
+  task :coverage do
+    ruby "test/coverage_report.rb"
+  end
+
+  desc "Run gem and dummy app tests, then require 94% app/lib line coverage"
+  task all: %i[clear_coverage test dummy coverage]
 end
 
 namespace :app do

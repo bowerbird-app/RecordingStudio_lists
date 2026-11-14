@@ -122,6 +122,52 @@ class InstallGeneratorTest < Minitest::Test
     end
   end
 
+  def test_copy_initializer_writes_the_host_initializer
+    with_temp_app do |dir|
+      generator = build_generator(dir)
+
+      generator.copy_initializer
+
+      written = File.read(File.join(dir, "config/initializers/recording_studio_lists.rb"))
+      assert_includes written, "RecordingStudioLists.configure"
+      load File.expand_path(
+        "../lib/generators/recording_studio_lists/install/templates/recording_studio_lists_initializer.rb",
+        __dir__
+      )
+      assert_kind_of RecordingStudioLists::Configuration, RecordingStudioLists.configuration
+    end
+  end
+
+  def test_yaml_config_is_copied_only_when_the_prompt_is_accepted
+    with_temp_app do |dir|
+      destination = File.join(dir, "config/recording_studio_lists.yml")
+      generator = build_generator(dir)
+
+      generator.stub(:yes?, false) { generator.add_yaml_config }
+      refute File.exist?(destination)
+
+      generator.stub(:yes?, true) { generator.add_yaml_config }
+      written = File.read(destination)
+      assert_includes written, "api_key: \"dev-key\""
+      assert_includes written, "enable_feature_x: true"
+      assert_includes written, "enable_feature_x: false"
+      refute_includes written, "<%= ENV"
+    end
+  end
+
+  def test_show_readme_stays_quiet_unless_the_generator_is_invoking
+    generator = build_generator("/tmp")
+    shown_templates = []
+
+    generator.stub(:behavior, :revoke) do
+      generator.stub(:readme, ->(template) { shown_templates << template }) do
+        generator.show_readme
+      end
+    end
+
+    assert_empty shown_templates
+  end
+
   def test_show_readme_displays_install_guide_for_invoke_behavior
     generator = build_generator("/tmp")
     shown_templates = []

@@ -123,7 +123,7 @@ Open http://localhost:3000
 
 ```bash
 cd ..
-bundle exec rake test
+bundle exec rake test:all
 ```
 
 ---
@@ -133,8 +133,19 @@ bundle exec rake test
 ### Run Tests
 
 ```bash
-# From the gem root
+# From the gem root. Gem suite only.
 bundle exec rake test
+
+# Gem suite, dummy suite, and merged app/lib coverage. This is what CI runs.
+# Fails when line coverage of app/ and lib/ is under 94%.
+bundle exec rake test:all
+```
+
+Build dummy Tailwind before the gem suite. One test reads `test/dummy/app/assets/builds/tailwind.css`, and that file is gitignored.
+
+```bash
+cd test/dummy
+bin/rails tailwindcss:build
 ```
 
 ### Run RuboCop

@@ -4,11 +4,39 @@ require "test_helper"
 
 class RecordingStudioListsTest < Minitest::Test
   def test_version_matches_release
-    assert_equal "0.10.1", ::RecordingStudioLists::VERSION
+    RecordingStudioLists.send(:remove_const, :VERSION)
+    load File.expand_path("../lib/recording_studio_lists/version.rb", __dir__)
+
+    assert_equal "0.10.2", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
     assert_kind_of Class, ::RecordingStudioLists::Engine
+  end
+
+  def test_application_controller_falls_back_when_the_host_has_none
+    had_layout = false
+    original = nil
+    require "action_controller"
+    refute defined?(::ApplicationController)
+
+    base = ActionController::Base
+    had_layout = base.respond_to?(:recording_studio_layout)
+    original = base.method(:recording_studio_layout) if had_layout
+    base.define_singleton_method(:recording_studio_layout) { |*, &block| block }
+
+    load File.expand_path("../app/controllers/recording_studio_lists/application_controller.rb", __dir__)
+
+    assert_equal base, RecordingStudioLists::ApplicationController.superclass
+    assert_equal base, RecordingStudioLists.host_application_controller
+  ensure
+    if defined?(ActionController::Base)
+      if had_layout
+        ActionController::Base.define_singleton_method(:recording_studio_layout, original)
+      elsif ActionController::Base.respond_to?(:recording_studio_layout)
+        ActionController::Base.singleton_class.remove_method(:recording_studio_layout)
+      end
+    end
   end
 
   def test_gemspec_pins_recording_studio_6_1

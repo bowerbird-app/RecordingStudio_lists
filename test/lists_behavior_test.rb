@@ -300,6 +300,106 @@ class ListsBehaviorTest < ActiveSupport::TestCase
     assert_equal expected_ids, candidates.map(&:id)
   end
 
+  test "create update and lookup accept an id and reject a missing parent" do
+    root = workspace_root
+    list = RecordingStudio::Lists.create(parent: root.id, name: "  Shelf  ", description: "   ")
+
+    assert_equal "Shelf", list.name
+    assert_nil list.recordable.description
+
+    noted = RecordingStudio::Lists.create(parent: root, name: "Noted", description: "  Notes  ")
+    assert_equal "  Notes  ", noted.recordable.description
+
+    renamed = RecordingStudio::Lists.update(list.id, name: "Renamed", description: "Kept")
+    assert_equal "Renamed", renamed.reload.name
+    assert_equal "Kept", renamed.recordable.description
+
+    cleared = RecordingStudio::Lists.update(list, name: "Renamed")
+    assert_nil cleared.reload.recordable.description
+
+    assert_raises(RecordingStudio::Lists::ParentNotAllowed) do
+      RecordingStudio::Lists.create(parent: nil, name: "Nope")
+    end
+    assert_raises(RecordingStudio::Lists::ParentNotAllowed) do
+      RecordingStudio::Lists.create(parent: SecureRandom.uuid, name: "Nope")
+    end
+    assert_raises(RecordingStudio::Lists::ParentNotAllowed) do
+      RecordingStudio::Lists.create(parent: Workspace.new(name: "Unsaved"), name: "Nope")
+    end
+    assert_raises(RecordingStudio::Lists::ParentNotAllowed) { RecordingStudio::Lists.lists(nil) }
+    assert_raises(RecordingStudio::Lists::ParentNotAllowed) { RecordingStudio::Lists.lists("") }
+    assert_raises(RecordingStudio::Lists::ParentNotAllowed) do
+      RecordingStudio::Lists.lists(SecureRandom.uuid)
+    end
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.find(nil) }
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.find("") }
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.items(nil) }
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.addable("missing") }
+    assert_nil RecordingStudio::Lists.delete(nil)
+    assert_nil RecordingStudio::Lists.delete("")
+  end
+
+  test "remove leaves a target that is not on the list" do
+    root = workspace_root
+    page = page_under(root, "Stay")
+    other = page_under(root, "Other")
+    list = RecordingStudio::Lists.create(parent: root, name: "Members")
+    RecordingStudio::Lists.add(list, page, actor: user_for("add-actor"))
+
+    assert_equal other, RecordingStudio::Lists.remove(list, other)
+    assert_equal [page], RecordingStudio::Lists.items(list)
+    assert_equal user_for("add-actor").id, created_event(list_item_for(list, page)).actor_id
+
+    assert_raises(RecordingStudio::Lists::InvalidList) { RecordingStudio::Lists.remove(nil, page) }
+    assert_raises(RecordingStudio::Lists::MissingTarget) { RecordingStudio::Lists.remove(list, nil) }
+    assert_raises(RecordingStudio::Lists::MissingTarget) { RecordingStudio::Lists.remove(list, "") }
+    assert_raises(RecordingStudio::Lists::MissingTarget) do
+      RecordingStudio::Lists.remove(list, SecureRandom.uuid)
+    end
+    assert_raises(RecordingStudio::Lists::MissingTarget) { RecordingStudio::Lists.add(list, nil) }
+    assert_raises(RecordingStudio::Lists::MissingTarget) { RecordingStudio::Lists.add(list, "  ") }
+    assert_equal [page], RecordingStudio::Lists.items(list)
+  end
+
+  test "addable on an empty list still skips lists and list items" do
+    root = workspace_root
+    page = page_under(root, "Open")
+    list = RecordingStudio::Lists.create(parent: root, name: "Empty Shelf")
+    candidates = RecordingStudio::Lists.addable(list)
+
+    assert_includes candidates, page
+    assert_includes candidates, root
+    refute_includes candidates, list
+    refute_includes candidates.map(&:recordable_type), "RecordingStudio::Lists::ListItem"
+  end
+
+  test "lists that share a name stay in id order" do
+    root = workspace_root
+    first = RecordingStudio::Lists.create(parent: root, name: "Same")
+    second = RecordingStudio::Lists.create(parent: root, name: "Same")
+
+    assert_equal [first.id, second.id].sort, RecordingStudio::Lists.lists(root).map(&:id)
+  end
+
+  test "a blank idempotency key does not collapse two creates" do
+    root = workspace_root
+    first = RecordingStudio::Lists.create(parent: root, name: "One", idempotency_key: "  ")
+    second = RecordingStudio::Lists.create(parent: root, name: "Two", idempotency_key: "")
+
+    refute_equal first.id, second.id
+  end
+
+  test "accessible list lookup is empty without an actor or a saved parent" do
+    root = workspace_root
+    user = user_for("accessible")
+
+    assert_empty RecordingStudioLists::AccessibleLists.for(actor: nil, parent: root, minimum_role: :view)
+    assert_empty RecordingStudioLists::AccessibleLists.for(actor: user, parent: nil, minimum_role: :view)
+    assert_empty RecordingStudioLists::AccessibleLists.for(
+      actor: user, parent: Workspace.new(name: "Unsaved"), minimum_role: :view
+    )
+  end
+
   test "return paths stay on this site" do
     assert_equal "/lists", RecordingStudio::Lists::InternalPath.sanitize("/lists")
     assert_equal "/lists?x=1", RecordingStudio::Lists::InternalPath.sanitize("  /lists?x=1  ")
@@ -349,5 +449,18 @@ class ListsBehaviorTest < ActiveSupport::TestCase
 
   def unique_name(prefix)
     "#{prefix} #{SecureRandom.hex(4)}"
+  end
+
+  def user_for(label)
+    email = "#{label}@example.com"
+    User.find_by(email: email) || User.create!(
+      email: email,
+      password: "ListsTestPassword!2026",
+      password_confirmation: "ListsTestPassword!2026"
+    )
+  end
+
+  def created_event(recording)
+    RecordingStudio::Event.where(recording_id: recording.id, action: "created").sole
   end
 end

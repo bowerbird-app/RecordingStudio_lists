@@ -220,6 +220,56 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "writes reject a missing parent, a blank name, and a missing member" do
+    post "/recording_studio_api/api/v1/lists",
+         headers: json_headers(@edit_token),
+         params: { name: "Shelf" },
+         as: :json
+    assert_response :unprocessable_entity
+    assert_includes response.body, "parent_id is required"
+
+    get "/recording_studio_api/api/v1/lists", headers: json_headers(@edit_token)
+    assert_response :unprocessable_entity
+    assert_includes response.body, "parent_id is required"
+
+    post "/recording_studio_api/api/v1/lists",
+         headers: json_headers(@edit_token),
+         params: { parent_id: @root.id, name: "   " },
+         as: :json
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Name can't be blank."
+
+    patch "/recording_studio_api/api/v1/lists/#{@list.id}",
+          headers: json_headers(@edit_token),
+          params: { name: "" },
+          as: :json
+    assert_response :unprocessable_entity
+    assert_equal "Reading", @list.reload.name
+
+    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_add",
+         headers: json_headers(@edit_token),
+         params: { recording_id: SecureRandom.uuid },
+         as: :json
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Pick something to add."
+
+    item = RecordingStudio::Lists.add(@list, @page)
+    child = @list.child_recordings.find { |recording| recording.recordable.item_recording_id == item.id }
+    post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_add",
+         headers: json_headers(@edit_token),
+         params: { recording_id: child.id },
+         as: :json
+    assert_response :unprocessable_entity
+    assert_includes response.body, "That can't go on a list."
+
+    post "/recording_studio_api/api/v1/lists",
+         headers: json_headers(@edit_token),
+         params: { parent_id: SecureRandom.uuid, name: "Lost" },
+         as: :json
+    assert_response :not_found
+    assert_includes response.body, "Parent resource was not found"
+  end
+
   test "index paginates with limit and pagination_token" do
     extra = RecordingStudio::Lists.create(parent: @root, name: "Also #{SecureRandom.hex(4)}", actor: @user)
     expected_ids = [@list.id, extra.id].sort
