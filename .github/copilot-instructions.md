@@ -21,7 +21,8 @@
 
 ## Testing
 
-- The standard root validation command is `bundle exec rake test` from the repository root.
+- The gem suite is `bundle exec rake test` from the repository root.
+- The full check is `bundle exec rake test:all`: gem suite, dummy suite, and merged SimpleCov over `app/` and `lib/`. It fails under 94% line coverage. CI runs this. Build dummy Tailwind first.
 - If a change affects dummy app boot, assets, or migrations, also validate the dummy app setup the same way CI does.
 - Add focused regression tests for engine hooks, generators, Recording Studio integration points, and template UX changes.
 

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-11-14
+
+### Changed
+
+* `bundle exec rake test:all` runs the gem suite and the dummy suite under one SimpleCov result for `app/` and `lib/`, including files those suites never load. The task fails when line coverage is under 94%.
+* The dummy Tailwind build also scans Flatpack when the checkout sits under `/agent` or `/agent/repos`, so card utilities such as the default card background are present in the built CSS.
+
+### Upgrade notes
+
+- Pin `v0.10.2`. There is no lists migration and no host code change.
+
 ## [0.10.1] - 2026-11-13
 
 ### Changed
@@ -424,7 +435,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.2...HEAD
+[0.10.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.6...v0.10.0
 [0.9.6]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.9.5...v0.9.6
