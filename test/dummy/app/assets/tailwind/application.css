@@ -11,6 +11,9 @@
 @source "../../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}";
 @source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";
 @source "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";
+/* Checkouts nested under /agent or /agent/repos need extra levels to reach /usr/local. */
+@source "../../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";
+@source "../../../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";
 
 /* Git checkouts use RecordingStudio, which the lowercase glob above does not match. */
 @source "../../../../../../usr/local/lib/ruby/gems/**/bundler/gems/RecordingStudio-*/app/views/**/*.erb";
