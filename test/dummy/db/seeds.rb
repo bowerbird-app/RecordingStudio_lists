@@ -1,6 +1,6 @@
 find_or_record_child = lambda do |recordable, root_recording, parent_recording|
   RecordingStudio::Recording
-    .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+    .kept
     .find_by(
       root_recording: root_recording,
       parent_recording: parent_recording,
@@ -9,7 +9,8 @@ find_or_record_child = lambda do |recordable, root_recording, parent_recording|
     action: "created",
     recordable: recordable,
     root_recording: root_recording,
-    parent_recording: parent_recording
+    parent_recording: parent_recording,
+    actor: Current.actor
   ).recording
 end
 
@@ -28,9 +29,9 @@ previous_actor = Current.actor
 Current.actor = user
 
 begin
-  root_recording = RecordingStudio.root_recording_for(workspace)
-  accessible_root_recording = RecordingStudio.root_recording_for(accessible_workspace)
-  private_root_recording = RecordingStudio.root_recording_for(private_workspace)
+  root_recording = RecordingStudio.create_root_recording!(workspace, actor: user)
+  accessible_root_recording = RecordingStudio.create_root_recording!(accessible_workspace, actor: user)
+  private_root_recording = RecordingStudio.create_root_recording!(private_workspace, actor: user)
 
   folder_recording = find_or_record_child.call(folder, root_recording, root_recording)
 
@@ -39,7 +40,7 @@ begin
   ["Dezeen", "ArchDaily", "Design Milk"].each do |title|
     already_on_client = Page.where(title: title).any? do |page|
       RecordingStudio::Recording
-        .where(RecordingStudio::Recording.recording_studio_trashable_kept_sql)
+        .kept
         .exists?(
           recordable: page,
           root_recording: accessible_root_recording,

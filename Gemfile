@@ -6,14 +6,14 @@ source "https://rubygems.org"
 gemspec
 
 # recording_studio is not published to RubyGems; resolve the gemspec pin from GitHub.
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.7.0"
-gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.7.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"
+gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.10.0"
 # Required by the gemspec Accessible pin (not on RubyGems).
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.32.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.44.0"
 # Required by accessible (query API only; not on RubyGems); same tag as the dummy host.
-gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.14.0", require: false
+gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.17.0", require: false
 # Required by trashable (not on RubyGems); same tag as the dummy host.
-gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.8.0"
+gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.0"
 # Required by recording_studio_orderable (not on RubyGems); same tag as the dummy host.
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.356"
 gem "minitest", ">= 5.26", "< 6"
@@ -25,8 +25,8 @@ gem "sprockets-rails"
 
 group :development, :test do
   gem "debug"
-  gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.13.0"
-  gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.0"
+  gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.16.0"
+  gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.4"
   gem "recording_studio_icons", github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.1"
   gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.4"
   gem "recording_studio_moveable", github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.1"

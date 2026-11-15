@@ -25,7 +25,7 @@ class ListsEnglishFallbackTest < ActionDispatch::IntegrationTest
       password_confirmation: "ListsTestPassword!2026"
     )
     @workspace = Workspace.create!(name: "! Fallback Lists #{SecureRandom.hex(4)}")
-    @root = RecordingStudio.root_recording_for(@workspace)
+    @root = RecordingStudio.create_root_recording!(@workspace, actor: @user)
     result = RecordingStudioAccessible.bootstrap_owner_access!(recording: @root, actor: @user)
     raise result.error if result.failure?
 

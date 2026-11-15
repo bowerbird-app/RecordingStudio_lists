@@ -17,7 +17,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       password_confirmation: "ListsTestPassword!2026"
     )
     @workspace = Workspace.create!(name: "! Lists #{SecureRandom.hex(4)}")
-    @root = RecordingStudio.root_recording_for(@workspace)
+    @root = RecordingStudio.create_root_recording!(@workspace, actor: @user)
     grant_owner_access!(actor: @user, recording: @root)
     @page = RecordingStudio.record!(
       action: "created",
@@ -400,7 +400,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes RecordingStudio::Lists.items(list).map(&:id), @page.id
 
     other = Workspace.create!(name: "Z Lists #{SecureRandom.hex(4)}")
-    other_root = RecordingStudio.root_recording_for(other)
+    other_root = RecordingStudio.create_root_recording!(other, actor: @user)
     other_page = RecordingStudio.record!(
       action: "created",
       recordable: Page.new(title: "Elsewhere #{SecureRandom.hex(4)}"),
@@ -890,7 +890,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
 
   def list_in_another_root
     other = Workspace.create!(name: "Other Lists #{SecureRandom.hex(4)}")
-    other_root = RecordingStudio.root_recording_for(other)
+    other_root = RecordingStudio.create_root_recording!(other, actor: @user)
     other_page = RecordingStudio.record!(
       action: "created",
       recordable: Page.new(title: "Foreign #{SecureRandom.hex(4)}"),
