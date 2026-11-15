@@ -7,7 +7,7 @@ class RecordingStudioListsTest < Minitest::Test
     RecordingStudioLists.send(:remove_const, :VERSION)
     load File.expand_path("../lib/recording_studio_lists/version.rb", __dir__)
 
-    assert_equal "0.10.2", ::RecordingStudioLists::VERSION
+    assert_equal "0.10.3", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -39,10 +39,10 @@ class RecordingStudioListsTest < Minitest::Test
     end
   end
 
-  def test_gemspec_pins_recording_studio_6_1
+  def test_gemspec_allows_recording_studio_through_core_7
     gemspec = File.read(File.expand_path("../recording_studio_lists.gemspec", __dir__))
 
-    assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 6.1"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 6.1", "< 8.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", ">= 0.24.0", "< 1.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", "~> 0.4"'
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.341"'
