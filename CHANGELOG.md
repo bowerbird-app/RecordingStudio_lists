@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-15
+
+### Changed
+
+* Require Recording Studio `>= 7.0`, `< 8.0`. Accessible is `>= 0.44.0`, `< 1.0`. Orderable is `>= 0.10.0`, `< 1.0`.
+* Development apps pin Recording Studio `v7.0.0`, Accessible `v0.44.0`, Orderable `v0.10.0`, Trashable `v0.17.0`, Root Switchable `v0.16.0`, Admin `v2.16.0`, API `v0.23.4`, and Metrics `v0.9.0`. Cache, Icons, Logs, Moveable, and Flatpack stay on `v0.6.3`, `v0.2.1`, `v0.7.4`, `v4.1.1`, and `v0.1.356`.
+* Seeds and tests that create a root call `RecordingStudio.create_root_recording!`. Lookups stay on `root_recording_for`.
+* The dummy `authorize_write` callback allows a write when an actor is present. It does not set `allow_unauthorized_writes`.
+* Dummy seeds and the home page read kept recordings with `Recording.kept`. Trashable `0.17.0` removed `recording_studio_trashable_kept_sql`.
+* The dummy schema copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`.
+
+### Upgrade notes
+
+- Pin `v0.11.0`. There is no lists migration.
+- Require Recording Studio `>= 7.0`, `< 8.0`, Accessible `>= 0.44.0`, `< 1.0`, and Orderable `>= 0.10.0`, `< 1.0`.
+- Paths that created a root with `root_recording_for` call `create_root_recording!(recordable, actor:)`. Lookups keep `root_recording_for` and handle `nil`. This gem does not create workspace roots.
+- Set `config.authorize_write`. Leave `allow_unauthorized_writes` unset. `create_root_recording!` authorizes with `root_recording` nil, so the callback has to allow that create.
+- Copy core migration `20261114090000_add_root_recording_id_to_recording_studio_events` when `recording_studio_events` has no `root_recording_id`.
+- Replace `recording_studio_trashable_kept_sql` with `Recording.kept` or `RecordingStudio.kept_sql` on Trashable `0.17.0`.
+
 ## [0.10.3] - 2026-11-15
 
 ### Changed
@@ -445,7 +465,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.3...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.3...v0.11.0
 [0.10.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.2...v0.10.3
 [0.10.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.0...v0.10.1

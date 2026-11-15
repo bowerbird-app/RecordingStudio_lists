@@ -9,7 +9,10 @@ class ListsApiTest < ActionDispatch::IntegrationTest
       password: "ListsTestPassword!2026",
       password_confirmation: "ListsTestPassword!2026"
     )
-    @root = RecordingStudio.root_recording_for(Workspace.create!(name: "Lists API #{SecureRandom.hex(4)}"))
+    @root = RecordingStudio.create_root_recording!(
+      Workspace.create!(name: "Lists API #{SecureRandom.hex(4)}"),
+      actor: @user
+    )
     grant_owner_access!(actor: @user, recording: @root)
     @page = record_page(@root, "Member")
     @list = RecordingStudio::Lists.create(parent: @root, name: "Reading", description: "Magazines", actor: @user)
@@ -115,7 +118,10 @@ class ListsApiTest < ActionDispatch::IntegrationTest
   end
 
   test "a list in another workspace is not found" do
-    other_root = RecordingStudio.root_recording_for(Workspace.create!(name: "Other #{SecureRandom.hex(4)}"))
+    other_root = RecordingStudio.create_root_recording!(
+      Workspace.create!(name: "Other #{SecureRandom.hex(4)}"),
+      actor: @user
+    )
     other_user = User.create!(
       email: "lists-api-other-#{SecureRandom.hex(4)}@example.com",
       password: "ListsTestPassword!2026",
@@ -142,7 +148,10 @@ class ListsApiTest < ActionDispatch::IntegrationTest
   end
 
   test "add enforces same-root no-self and lock through the gem" do
-    elsewhere = RecordingStudio.root_recording_for(Workspace.create!(name: "Foreign #{SecureRandom.hex(4)}"))
+    elsewhere = RecordingStudio.create_root_recording!(
+      Workspace.create!(name: "Foreign #{SecureRandom.hex(4)}"),
+      actor: @user
+    )
     foreign = record_page(elsewhere, "Foreign")
 
     post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_add",
@@ -180,7 +189,10 @@ class ListsApiTest < ActionDispatch::IntegrationTest
   end
 
   test "index excludes a list the actor cannot view" do
-    other_root = RecordingStudio.root_recording_for(Workspace.create!(name: "Hidden #{SecureRandom.hex(4)}"))
+    other_root = RecordingStudio.create_root_recording!(
+      Workspace.create!(name: "Hidden #{SecureRandom.hex(4)}"),
+      actor: @user
+    )
     other_user = User.create!(
       email: "lists-api-hidden-#{SecureRandom.hex(4)}@example.com",
       password: "ListsTestPassword!2026",
@@ -253,7 +265,7 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_includes response.body, "Pick something to add."
 
-    item = RecordingStudio::Lists.add(@list, @page)
+    item = RecordingStudio::Lists.add(@list, @page, actor: @user)
     child = @list.child_recordings.find { |recording| recording.recordable.item_recording_id == item.id }
     post "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_add",
          headers: json_headers(@edit_token),

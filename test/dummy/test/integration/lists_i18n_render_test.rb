@@ -15,7 +15,7 @@ class ListsI18nRenderTest < ActionDispatch::IntegrationTest
       password_confirmation: "ListsTestPassword!2026"
     )
     @workspace = Workspace.create!(name: "! I18n Lists #{SecureRandom.hex(4)}")
-    @root = RecordingStudio.root_recording_for(@workspace)
+    @root = RecordingStudio.create_root_recording!(@workspace, actor: @user)
     grant_owner_access!(actor: @user, recording: @root)
     @page = RecordingStudio.record!(
       action: "created",
@@ -105,7 +105,7 @@ class ListsI18nRenderTest < ActionDispatch::IntegrationTest
   test "different root membership alert translates when message matches class default" do
     list = RecordingStudio::Lists.create(parent: @root, name: "Shelf", actor: @user)
     other = Workspace.create!(name: "Z I18n #{SecureRandom.hex(4)}")
-    other_root = RecordingStudio.root_recording_for(other)
+    other_root = RecordingStudio.create_root_recording!(other, actor: @user)
     other_page = RecordingStudio.record!(
       action: "created",
       recordable: Page.new(title: "Elsewhere #{SecureRandom.hex(4)}"),

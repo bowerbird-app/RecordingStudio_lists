@@ -16,6 +16,7 @@ class MoveListItemPositionsToOrderableMigrationTest < ActiveSupport::TestCase
     load MIGRATION_PATH unless defined?(MoveListItemPositionsToOrderable)
     @migration = MoveListItemPositionsToOrderable.new
     @connection = ActiveRecord::Base.connection
+    Current.actor = migration_actor
   end
 
   test "up copies position values onto orderable storage and preserves item order" do
@@ -198,7 +199,10 @@ class MoveListItemPositionsToOrderableMigrationTest < ActiveSupport::TestCase
   end
 
   def workspace_root(prefix = "Migration Workspace")
-    RecordingStudio.root_recording_for(Workspace.create!(name: unique_name(prefix)))
+    RecordingStudio.create_root_recording!(
+      Workspace.create!(name: unique_name(prefix)),
+      actor: migration_actor
+    )
   end
 
   def page_under(root, title)
@@ -206,8 +210,17 @@ class MoveListItemPositionsToOrderableMigrationTest < ActiveSupport::TestCase
       action: "created",
       recordable: Page.new(title: unique_name(title)),
       root_recording: root,
-      parent_recording: root
+      parent_recording: root,
+      actor: migration_actor
     ).recording
+  end
+
+  def migration_actor
+    @migration_actor ||= User.create!(
+      email: "migration-#{SecureRandom.hex(4)}@example.com",
+      password: "ListsTestPassword!2026",
+      password_confirmation: "ListsTestPassword!2026"
+    )
   end
 
   def unique_name(prefix)

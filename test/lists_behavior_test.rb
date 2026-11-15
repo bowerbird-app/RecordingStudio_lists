@@ -7,6 +7,10 @@ require_relative "dummy/config/environment"
 require "rails/test_help"
 
 class ListsBehaviorTest < ActiveSupport::TestCase
+  setup do
+    Current.actor = user_for("lists-writer")
+  end
+
   test "list and list item declarations validate" do
     assert RecordingStudio.validate_recordable_declarations!
 
@@ -35,7 +39,7 @@ class ListsBehaviorTest < ActiveSupport::TestCase
 
     root = workspace_root
     error = assert_raises(RecordingStudio::InvalidParent) do
-      root.record(RecordingStudio::Lists::ListItem, parent_recording: root) do |item|
+      root.record(RecordingStudio::Lists::ListItem, parent_recording: root, actor: user_for("lists-writer")) do |item|
         item.item_recording = root
       end
     end
@@ -52,7 +56,8 @@ class ListsBehaviorTest < ActiveSupport::TestCase
           action: "created",
           recordable: RecordingStudio::Lists::List.new(name: "Blocked"),
           root_recording: root,
-          parent_recording: root
+          parent_recording: root,
+          actor: user_for("lists-writer")
         )
       end
       scope = RecordingStudio::Recording.where(recordable_type: "RecordingStudio::Lists::List")
@@ -423,7 +428,10 @@ class ListsBehaviorTest < ActiveSupport::TestCase
   end
 
   def workspace_root(prefix = "Lists Workspace")
-    RecordingStudio.root_recording_for(Workspace.create!(name: unique_name(prefix)))
+    RecordingStudio.create_root_recording!(
+      Workspace.create!(name: unique_name(prefix)),
+      actor: user_for("lists-writer")
+    )
   end
 
   def page_under(root, title)
@@ -431,7 +439,8 @@ class ListsBehaviorTest < ActiveSupport::TestCase
       action: "created",
       recordable: Page.new(title: unique_name(title)),
       root_recording: root,
-      parent_recording: root
+      parent_recording: root,
+      actor: user_for("lists-writer")
     ).recording
   end
 
