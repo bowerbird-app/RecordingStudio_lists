@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The dummy `authorize_write` callback allows a write when an actor is present. It does not set `allow_unauthorized_writes`.
 * Dummy seeds and the home page read kept recordings with `Recording.kept`. Trashable `0.17.0` removed `recording_studio_trashable_kept_sql`.
 * The dummy schema copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`.
+* Dummy and development lockfiles update `puma` to `8.1.0`. The dummy lockfile updates `msgpack` to `1.8.7`.
 
 ### Upgrade notes
 
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set `config.authorize_write`. Leave `allow_unauthorized_writes` unset. `create_root_recording!` authorizes with `root_recording` nil, so the callback has to allow that create.
 - Copy core migration `20261114090000_add_root_recording_id_to_recording_studio_events` when `recording_studio_events` has no `root_recording_id`.
 - Replace `recording_studio_trashable_kept_sql` with `Recording.kept` or `RecordingStudio.kept_sql` on Trashable `0.17.0`.
+- Dummy and development lockfiles pin `puma` `8.1.0`. The dummy lockfile pins `msgpack` `1.8.7`.
 
 ## [0.10.3] - 2026-11-15
 
