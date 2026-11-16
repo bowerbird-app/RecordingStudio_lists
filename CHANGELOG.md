@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+* The dummy app pins the latest GitHub releases: Recording Studio `v7.3.0`, Accessible `v0.45.1`, Trashable `v1.0.1`, Cache `v0.7.0`, API `v1.2.1`, Admin `v2.18.0`, Logs `v0.8.0`, Moveable `v6.0.0`, Icons `v0.4.0`, and Flatpack `v0.1.377`. Orderable stays `v0.10.0`, Root Switchable stays `v0.16.0`, and Metrics stays `v0.9.0`. The development Gemfile is unchanged.
+* The dummy sets `config.admin_root_resolver` to the Studio Workspace root recording. Accessible 0.45 denies its mounted pages when that resolver is missing.
+* The dummy schema copies core migration `20261116120000_add_recording_studio_events_timeline_index`.
+* The dummy adds `RecordingStudioApi::AdminApi` to `recordable_types` only when `admin_root_recordable_type_names` is present. API 1.2 declares that recordable only in that case. This dummy sets the list to empty, so AdminApi stays unregistered.
+
 ## [0.11.0] - 2026-11-15
 
 ### Changed
