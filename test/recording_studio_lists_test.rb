@@ -335,8 +335,8 @@ class RecordingStudioListsTest < Minitest::Test
     ].join
     assert_includes initializer_source, expected
     assert_includes initializer_source, "RecordingStudioApi::ApiClient"
-    refute_includes initializer_source, '"RecordingStudioApi::AdminApi"'
-    assert_includes initializer_source, "AdminApi declares recording_studio_recordable only when an admin root"
+    assert_includes initializer_source, "if RecordingStudioApi.configuration.admin_root_recordable_type_names.present?"
+    assert_includes initializer_source, 'config.recordable_types << "RecordingStudioApi::AdminApi"'
     refute_includes initializer_source, "config.include_children"
     refute_includes initializer_source, "config.features."
     refute_includes initializer_source, "v3"

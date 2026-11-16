@@ -4,14 +4,18 @@ RecordingStudio.configure do |config|
   # Registered delegated_type recordables (strings or classes)
   config.recordable_types = ["Workspace", "Folder", "Page", "RecordingStudio::Lists::List", "RecordingStudio::Lists::ListItem"]
   if defined?(RecordingStudioApi)
+    # recording_studio_api.rb loads later and sets the same empty list. Clear it
+    # first so AdminApi is not registered against the default AdminRoot name.
+    RecordingStudioApi.configuration.admin_root_recordable_type_names = []
     config.recordable_types += [
       "RecordingStudio::Access",
       "RecordingStudioApi::ApiClient",
       "RecordingStudioApi::ApiCredential",
       "RecordingStudioApi::ApiAccessToken"
     ]
-    # AdminApi declares recording_studio_recordable only when an admin root
-    # type is configured. This dummy has none, so it is not a recordable type.
+    if RecordingStudioApi.configuration.admin_root_recordable_type_names.present?
+      config.recordable_types << "RecordingStudioApi::AdminApi"
+    end
   end
 
   # Require each configured ActiveRecord type to call recording_studio_recordable.
