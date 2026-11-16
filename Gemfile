@@ -10,11 +10,11 @@ gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"
 gem "recording_studio_orderable", github: "bowerbird-app/RecordingStudio_orderable", tag: "v0.10.0"
 # Required by the gemspec Accessible pin (not on RubyGems).
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.44.0"
-# Required by accessible (query API only; not on RubyGems); same tag as the dummy host.
+# Required by accessible (query API only; not on RubyGems).
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.17.0", require: false
 # Required by trashable (not on RubyGems); same tag as the dummy host.
 gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.0"
-# Required by recording_studio_orderable (not on RubyGems); same tag as the dummy host.
+# Required by recording_studio_orderable (not on RubyGems).
 gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.356"
 gem "minitest", ">= 5.26", "< 6"
 gem "view_component", "4.19.0"

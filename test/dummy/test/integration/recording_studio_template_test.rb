@@ -66,6 +66,7 @@ class RecordingStudioTemplateTest < ActiveSupport::TestCase
     refute RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
     refute RecordingStudioAccessible.authorized?(actor: user, recording: accessible_root_recording, role: :admin)
     refute RecordingStudioAccessible.authorized?(actor: user, recording: private_root_recording, role: :admin)
+    assert_equal root_recording, RecordingStudioAccessible.admin_root
     assert_nil root_recording.parent_recording_id
     assert_nil accessible_root_recording.parent_recording_id
     assert_nil private_root_recording.parent_recording_id

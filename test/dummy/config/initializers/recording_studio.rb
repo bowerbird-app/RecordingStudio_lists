@@ -8,9 +8,10 @@ RecordingStudio.configure do |config|
       "RecordingStudio::Access",
       "RecordingStudioApi::ApiClient",
       "RecordingStudioApi::ApiCredential",
-      "RecordingStudioApi::ApiAccessToken",
-      "RecordingStudioApi::AdminApi"
+      "RecordingStudioApi::ApiAccessToken"
     ]
+    # AdminApi declares recording_studio_recordable only when an admin root
+    # type is configured. This dummy has none, so it is not a recordable type.
   end
 
   # Require each configured ActiveRecord type to call recording_studio_recordable.
