@@ -2,6 +2,7 @@
 
 require_relative "api/list_resource"
 require_relative "api/membership_actions"
+require_relative "api/tool_descriptions"
 
 module RecordingStudioLists
   module Api
@@ -45,13 +46,7 @@ module RecordingStudioLists
     end
 
     def type_openapi
-      {
-        tags: ["Lists"],
-        description: "Named lists of recordings. Index, show, create, update, and delete wrap " \
-                     "RecordingStudio::Lists.lists, RecordingStudio::Lists.find, " \
-                     "RecordingStudio::Lists.create, RecordingStudio::Lists.update, and " \
-                     "RecordingStudio::Lists.delete."
-      }
+      ToolDescriptions.type_openapi
     end
 
     def register_resource_handlers(api)
