@@ -14,6 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The dummy schema copies core migration `20261116120000_add_recording_studio_events_timeline_index`.
 * The dummy adds `RecordingStudioApi::AdminApi` to `recordable_types` only when `admin_root_recordable_type_names` is present. API 1.2 declares that recordable only in that case. This dummy sets the list to empty, so AdminApi stays unregistered.
 
+## [0.11.2] - 2026-11-17
+
+### Changed
+
+* MCP and OpenAPI titles for the membership actions are Add to list, Remove from list, List items, and List addable records. Descriptions that name those tools use the same titles. Paths stay `list_add`, `list_remove`, `list_items`, and `list_addable`. The registration tag stays Lists. Published operations stay on the List tag. Index, show, create, update, and delete keep the API summaries: List lists, Get a list, Create a list, Update a list, and Delete a list.
+
+### Upgrade notes
+
+- Pin `v0.11.2`. No migration is required.
+- Request paths and fields did not change.
+- Point clients at the titles above.
+
 ## [0.11.1] - 2026-11-17
 
 ### Changed
@@ -87,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * List index, show, create, update, and delete on Recording Studio API. The handlers call `RecordingStudio::Lists.lists`, `.find`, `.create`, `.update`, and `.delete`.
-* `list_add`, `list_remove`, `list_items`, and `list_addable` API capability actions (`:edit` for add and remove, `:view` for items and addable). Titles stay type-first (`List - Add`). Membership still uses the gem's lock, same-root, and no-self guards. List item CRUD and Orderable reorder stay off this resource.
+* `list_add`, `list_remove`, `list_items`, and `list_addable` API capability actions (`:edit` for add and remove, `:view` for items and addable). Membership still uses the gem's lock, same-root, and no-self guards. List item CRUD and Orderable reorder stay off this resource.
 * Dummy mounts Recording Studio API so hosts and MCP adapters can use the same Accessible-gated surface.
 
 ### Changed

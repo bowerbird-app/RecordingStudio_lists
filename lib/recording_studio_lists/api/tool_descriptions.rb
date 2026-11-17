@@ -5,7 +5,7 @@ module RecordingStudioLists
     module ToolCopy
       SECTION =
         "A list is a named collection you build from things in this workspace to keep track of them, " \
-        "e.g. \"Q3 launch coverage\". Create a list, then add or remove records with List - Add and List - Remove."
+        "e.g. \"Q3 launch coverage\". Create a list, then add or remove records with Add to list and Remove from list."
 
       LIST_ROW =
         "id, type, parent_id, root_id, created_at, updated_at, name, and description"
@@ -28,7 +28,7 @@ module RecordingStudioLists
       TEXT
 
       CREATE = <<~TEXT.tr("\n", " ").squeeze(" ").strip.freeze
-        Creates a list. Do this before List - Add. You need edit access on the parent.
+        Creates a list. Do this before Add to list. You need edit access on the parent.
         Pass parent_id, the id of a record allowed to hold lists. A list cannot be the parent.
         name is required. Spaces around the name are removed. description is optional, and a blank
         description is stored empty. Pass an Idempotency-Key header to reuse the list already created
@@ -45,12 +45,12 @@ module RecordingStudioLists
 
       DESTROY =
         "Deletes the list and the membership rows on it. This cannot be undone. Records that were on the " \
-        "list stay in the workspace. Use List - Remove when you only want one record off the list. You need " \
+        "list stay in the workspace. Use Remove from list when you only want one record off the list. You need " \
         "edit access on the list. Returns the list as it was, with deleted true and deleted_via destroyed. " \
         "A caller without edit access is forbidden."
 
       ADD = <<~TEXT.tr("\n", " ").squeeze(" ").strip.freeze
-        Adds one record to this list. The list must already exist. Take recording_id from List - Addable,
+        Adds one record to this list. The list must already exist. Take recording_id from List addable records,
         or pass a record id you already have in this workspace. You need edit access on the list.
         The record has to be in the same workspace. The call is rejected when the record is this list,
         a list item, or in another workspace. Adding a record that is already on the list changes nothing
@@ -59,18 +59,18 @@ module RecordingStudioLists
 
       REMOVE = <<~TEXT.tr("\n", " ").squeeze(" ").strip.freeze
         Removes one record from this list. The record stays in the workspace. Use this instead of delete
-        when the list should remain. You need edit access on the list. Take recording_id from List - Items.
+        when the list should remain. You need edit access on the list. Take recording_id from List items.
         If that record is not on the list, the call still succeeds. Returns the list, with #{LIST_ROW}.
         A caller without edit access is forbidden.
       TEXT
 
       ITEMS =
-        "Returns the records on this list, in list order. Use this to get ids for List - Remove. You need " \
+        "Returns the records on this list, in list order. Use this to get ids for Remove from list. You need " \
         "view access on the list. Each row has id and type. The response includes every row. There is no " \
         "page size and no cap. An unknown list, or a list outside this API scope, is not found."
 
       ADDABLE =
-        "Returns records in this workspace that you can still add to the list. Use these ids with List - Add. " \
+        "Returns records in this workspace that you can still add to the list. Use these ids with Add to list. " \
         "You need view access on the list. The action does not check access on each row. Each row has id and " \
         "type. Rows leave out this list, other lists, list items, and records already on the list. Order is " \
         "created_at, then id. The response includes every matching row. There is no page size and no cap."
@@ -86,8 +86,8 @@ module RecordingStudioLists
         "found when that id is outside this scope."
 
       LIST_ID = "The id of the list, from index or from create."
-      ADD_RECORDING_ID = "The id of the record to add, from List - Addable or a record id you already have."
-      REMOVE_RECORDING_ID = "The id of the record to remove, from List - Items."
+      ADD_RECORDING_ID = "The id of the record to add, from List addable records or a record id you already have."
+      REMOVE_RECORDING_ID = "The id of the record to remove, from List items."
       INDEX_PARENT_ID = "The id of the record that holds the lists. A list cannot be that parent."
       LIMIT = "How many lists to return. The default is 50 and the maximum is 100, unless the host " \
               "changed the API page limits."
@@ -126,19 +126,19 @@ module RecordingStudioLists
       end
 
       def add
-        action("List - Add", ToolCopy::ADD, ToolCopy::LIST_ID)
+        action("Add to list", ToolCopy::ADD, ToolCopy::LIST_ID)
       end
 
       def remove
-        action("List - Remove", ToolCopy::REMOVE, ToolCopy::LIST_ID)
+        action("Remove from list", ToolCopy::REMOVE, ToolCopy::LIST_ID)
       end
 
       def items
-        action("List - Items", ToolCopy::ITEMS, ToolCopy::LIST_ID)
+        action("List items", ToolCopy::ITEMS, ToolCopy::LIST_ID)
       end
 
       def addable
-        action("List - Addable", ToolCopy::ADDABLE, ToolCopy::LIST_ID)
+        action("List addable records", ToolCopy::ADDABLE, ToolCopy::LIST_ID)
       end
 
       def list_id(text)

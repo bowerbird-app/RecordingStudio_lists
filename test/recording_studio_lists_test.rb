@@ -7,7 +7,7 @@ class RecordingStudioListsTest < Minitest::Test
     RecordingStudioLists.send(:remove_const, :VERSION)
     load File.expand_path("../lib/recording_studio_lists/version.rb", __dir__)
 
-    assert_equal "0.11.1", ::RecordingStudioLists::VERSION
+    assert_equal "0.11.2", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
