@@ -97,19 +97,12 @@ module RecordingStudioLists
       ORDER = "Sort direction for created_at. asc is oldest first. desc is newest first."
       COUNT = "Pass true to get only total_count for lists under that parent. limit, sort, order, " \
               "and pagination_token are ignored."
-      IGNORED_QUERY = "This index does not search. q is ignored."
-      IGNORED_NAME = "This index does not filter on name. filter[name] is ignored."
-      IGNORED_DESCRIPTION = "This index does not filter on description. filter[description] is ignored."
     end
 
     module IndexQuery
       module_function
 
       def parameters
-        paging + ignored_filters
-      end
-
-      def paging
         [
           query("parent_id", ToolCopy::INDEX_PARENT_ID, required: true),
           query("limit", ToolCopy::LIMIT, schema: { type: "integer", minimum: 1 }),
@@ -117,14 +110,6 @@ module RecordingStudioLists
           query("sort", ToolCopy::SORT, schema: { type: "string", enum: ["created_at"], default: "created_at" }),
           query("order", ToolCopy::ORDER, schema: { type: "string", enum: %w[asc desc], default: "asc" }),
           query("count", ToolCopy::COUNT, schema: { type: "boolean", default: false })
-        ]
-      end
-
-      def ignored_filters
-        [
-          query("q", ToolCopy::IGNORED_QUERY),
-          query("filter[name]", ToolCopy::IGNORED_NAME),
-          query("filter[description]", ToolCopy::IGNORED_DESCRIPTION)
         ]
       end
 
@@ -169,7 +154,7 @@ module RecordingStudioLists
       def section
         {
           tag: { description: ToolCopy::SECTION },
-          tags: ["List"],
+          tags: ["Lists"],
           description: ToolCopy::SECTION,
           details_schema: field_schema
         }

@@ -300,11 +300,13 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     document = RecordingStudioApi.openapi_document(version: "v1")
     index = document.dig(:paths, "/recording_studio_api/api/v1/lists", "get")
     assert_includes index.fetch(:description), "paged"
+    registration = RecordingStudioApi.recordable_registration_for("RecordingStudio::Lists::List")
+    assert_equal ["Lists"], registration.openapi.fetch(:tags)
+    index_names = registration.openapi.dig(:index, :parameters).map { |parameter| parameter.fetch(:name) }
+    assert_includes index_names, "parent_id"
+    %w[q filter[name] filter[description]].each { |name| refute_includes index_names, name }
     parameters = index.fetch(:parameters)
     assert_includes parameters.map { |parameter| parameter.fetch("name") }, "parent_id"
-    query = parameters.find { |parameter| parameter.fetch("name") == "q" }
-    assert_includes query.fetch("description"), "ignored"
-    refute_includes query.fetch("description"), "substring"
     count = parameters.find { |parameter| parameter.fetch("name") == "count" }
     refute_includes count.fetch("description"), "not loaded"
     add = document.dig(:paths, "/recording_studio_api/api/v1/lists/{id}/actions/list_add", "post")

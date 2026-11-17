@@ -38,11 +38,11 @@ class ApiToolDescriptionsTest < Minitest::Test
     assert_includes openapi.dig(:details_schema, :properties, :name, :description), "name"
     assert_includes openapi.dig(:details_schema, :properties, :description, :description), "update"
     assert_includes parent_description(openapi), "parent"
-    index_parameters = openapi.dig(:index, :parameters)
-    assert_includes index_parameters.map { |parameter| parameter.fetch(:name) }, "parent_id"
-    query = index_parameters.find { |parameter| parameter.fetch(:name) == "q" }
-    assert_includes query.fetch(:description), "ignored"
-    assert_includes index_parameters.first.fetch(:description), "holds the lists"
+    assert_equal ["Lists"], openapi.fetch(:tags)
+    index_names = openapi.dig(:index, :parameters).map { |parameter| parameter.fetch(:name) }
+    assert_includes index_names, "parent_id"
+    %w[q filter[name] filter[description]].each { |name| refute_includes index_names, name }
+    assert_includes openapi.dig(:index, :parameters, 0, :description), "holds the lists"
     %i[show update destroy].each do |name|
       assert_includes openapi.dig(name, :parameters, 0, :description), "index"
     end
