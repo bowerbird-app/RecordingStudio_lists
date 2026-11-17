@@ -1,5 +1,18 @@
 # Migration Notes
 
+## Upgrading To 0.11.1
+
+No migration is needed.
+
+### What Changed
+
+- List tool descriptions say what the call does, when to use it, where ids come from, and what comes back.
+- Delete copy says the list and its membership rows are removed and the records that were on the list stay.
+
+### Upgrade Steps
+
+No migration is required.
+
 ## Upgrading To 0.9.5
 
 No migration is needed.

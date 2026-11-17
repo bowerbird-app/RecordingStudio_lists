@@ -14,6 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The dummy schema copies core migration `20261116120000_add_recording_studio_events_timeline_index`.
 * The dummy adds `RecordingStudioApi::AdminApi` to `recordable_types` only when `admin_root_recordable_type_names` is present. API 1.2 declares that recordable only in that case. This dummy sets the list to empty, so AdminApi stays unregistered.
 
+## [0.11.1] - 2026-11-17
+
+### Changed
+
+* List API and MCP copy now says what each tool does, when to use it, where ids come from, what comes back, and which calls cannot be undone. The Lists section intro is plain language. `recording_id`, `name`, `description`, `parent_id`, and the list `id` each have a description.
+
+### Upgrade notes
+
+- Pin `v0.11.1`. No migration is required. Tool descriptions changed. Request and response fields did not.
+
 ## [0.11.0] - 2026-11-15
 
 ### Changed

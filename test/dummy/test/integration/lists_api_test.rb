@@ -282,6 +282,38 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Parent resource was not found"
   end
 
+  test "registered list tools and inputs keep plain descriptions" do
+    catalog = RecordingStudioApi.documentation_catalog(version: "v1")
+    section = catalog.fetch(:resources).find { |entry| entry.fetch(:recordable_type) == "RecordingStudio::Lists::List" }
+    endpoints = section.fetch(:endpoints)
+    texts = []
+    endpoints.each { |endpoint| collect_descriptions(endpoint, texts) }
+
+    assert_includes endpoints.map { |endpoint| endpoint.fetch(:action) }, "resources#index"
+    assert(endpoints.any? { |endpoint| endpoint.fetch(:path).end_with?("/actions/list_add") })
+    assert(endpoints.any? { |endpoint| endpoint.fetch(:path).end_with?("/actions/list_items") })
+    texts.each do |text|
+      refute_empty text.strip
+      refute_includes text, "RecordingStudio::"
+      refute_includes text, "Path parameter"
+    end
+    document = RecordingStudioApi.openapi_document(version: "v1")
+    index = document.dig(:paths, "/recording_studio_api/api/v1/lists", "get")
+    assert_includes index.fetch(:description), "paged"
+    parameters = index.fetch(:parameters)
+    assert_includes parameters.map { |parameter| parameter.fetch("name") }, "parent_id"
+    query = parameters.find { |parameter| parameter.fetch("name") == "q" }
+    assert_includes query.fetch("description"), "ignored"
+    refute_includes query.fetch("description"), "substring"
+    count = parameters.find { |parameter| parameter.fetch("name") == "count" }
+    refute_includes count.fetch("description"), "not loaded"
+    add = document.dig(:paths, "/recording_studio_api/api/v1/lists/{id}/actions/list_add", "post")
+    recording_id = add.dig(:requestBody, :content, "application/json", :schema, :properties, "recording_id")
+    assert_includes recording_id[:description] || recording_id["description"], "List - Addable"
+    list_id = add.fetch(:parameters).find { |parameter| (parameter["name"] || parameter[:name]) == "id" }
+    assert_includes list_id["description"] || list_id[:description], "index"
+  end
+
   test "index paginates with limit and pagination_token" do
     extra = RecordingStudio::Lists.create(parent: @root, name: "Also #{SecureRandom.hex(4)}", actor: @user)
     expected_ids = [@list.id, extra.id].sort
@@ -312,6 +344,18 @@ class ListsApiTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def collect_descriptions(value, texts)
+    case value
+    when Hash
+      value.each do |key, child|
+        texts << child if key.to_s == "description" && child.is_a?(String)
+        collect_descriptions(child, texts)
+      end
+    when Array
+      value.each { |child| collect_descriptions(child, texts) }
+    end
+  end
 
   def json_headers(token)
     { "Authorization" => "Bearer #{token}", "Accept" => "application/json" }

@@ -16,12 +16,12 @@ module RecordingStudioLists
 
       def register_add(api)
         register_action(name: :list_add, api:, handler: Add, required_role: :edit,
-                        input_contract: recording_id_contract, docs: add_docs)
+                        input_contract: add_contract, docs: add_docs)
       end
 
       def register_remove(api)
         register_action(name: :list_remove, api:, handler: Remove, required_role: :edit,
-                        input_contract: recording_id_contract, docs: remove_docs)
+                        input_contract: remove_contract, docs: remove_docs)
       end
 
       def register_items(api)
@@ -57,39 +57,27 @@ module RecordingStudioLists
       end
 
       def add_docs
-        {
-          title: "List - Add",
-          summary: "List - Add",
-          description: "Adds a recording to this list. The list must be editable. The target must " \
-                       "exist in the same workspace, must not be this list, and must not already " \
-                       "be a list item."
-        }
+        ToolDescriptions.add
       end
 
       def remove_docs
-        {
-          title: "List - Remove",
-          summary: "List - Remove",
-          description: "Removes a recording from this list. The list must be editable. The target " \
-                       "must exist. The list row is locked while membership is removed."
-        }
+        ToolDescriptions.remove
       end
 
       def items_docs
-        {
-          title: "List - Items",
-          summary: "List - Items",
-          description: "Returns the recordings on this list, in list order. The list must be viewable."
-        }
+        ToolDescriptions.items
       end
 
       def addable_docs
-        {
-          title: "List - Addable",
-          summary: "List - Addable",
-          description: "Returns recordings in this workspace that can still be added to the list. " \
-                       "Skips the list itself, list items, other lists, and recordings already on it."
-        }
+        ToolDescriptions.addable
+      end
+
+      def add_contract
+        recording_id_contract(ToolCopy::ADD_RECORDING_ID)
+      end
+
+      def remove_contract
+        recording_id_contract(ToolCopy::REMOVE_RECORDING_ID)
       end
 
       def http_verb_for(handler)
@@ -106,10 +94,12 @@ module RecordingStudioLists
         { records: Array(recordings).map { |recording| { id: recording.id, type: recording.recordable_type } } }
       end
 
-      def recording_id_contract
+      def recording_id_contract(description)
         {
           reject_unknown: false,
-          fields: { recording_id: { type: :string, required: true, allow_blank: false } }
+          fields: {
+            recording_id: { type: :string, required: true, allow_blank: false, description: description }
+          }
         }
       end
 
