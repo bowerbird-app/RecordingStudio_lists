@@ -1,5 +1,22 @@
 # Migration Notes
 
+## Upgrading To 0.11.3
+
+Host apps MUST run the Recording Studio 7.4, 7.5 and 7.7 migrations.
+
+### What Changed
+
+- Development and dummy apps pin Recording Studio `v7.7.2`, Flatpack `v0.1.379`, Accessible `v0.54.1`, Orderable `v0.11.1`, Admin `v2.19.0`, API `v1.17.0`, Icons `v0.4.2`, Logs `v0.8.2`, Moveable `v6.0.3`, Trashable `v1.2.3`, and Metrics `v0.9.2`. The dummy also pins Cache `v0.7.1` and Root Switchable `v0.16.1`.
+- `view_component` is `~> 4.19`. Dummy `simplecov` is `~> 0.22`.
+- There is no lists migration.
+- The dummy adds `config/recording_studio_api.yml` with `shared: {}` and owner columns on API clients. The dummy does not include the Recording Studio 7.4, 7.5, or 7.7 migrations.
+
+### Upgrade Steps
+
+Host apps MUST run the Recording Studio 7.4, 7.5 and 7.7 migrations. Pin `v0.11.3`.
+
+Hosts that use Recording Studio API copy `20261117000024_add_owner_to_recording_studio_api_api_clients`, set `owner` on each API client, and add `config/recording_studio_api.yml`.
+
 ## Upgrading To 0.11.2
 
 No migration is needed.

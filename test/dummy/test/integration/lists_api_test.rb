@@ -426,6 +426,9 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     )
     raise result.error if result.failure?
 
+    api_client = result.value.fetch(:api_client)
+    api_client.update!(owner: @user) if api_client.owner != @user
+
     result.value.fetch(:access_token)
   end
 
