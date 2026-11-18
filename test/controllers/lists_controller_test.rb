@@ -39,8 +39,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Home"
     assert_equal %w[h1 a], css_select("h1, a[href='/lists/new']").map(&:name)
     assert_select "nav.flat-pack-page-nav a[href='/lists/new']", count: 0
-    assert_select "a[href='/lists/new']", text: "List", count: 1 do
-      assert_select "svg[data-flat-pack--icon-name-value='plus']"
+    assert_select "a[href='/lists/new']", text: "List", count: 1 do |links|
+      assert_heroicon(links.first, "plus")
     end
     assert_select "a", text: "New list", count: 0
 
@@ -183,15 +183,15 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
             assert_select "li" do |items|
               assert_includes items.first["class"], "items-center"
               refute_includes items.first["class"], "!items-center"
-              assert_select "button[aria-label='Actions']" do
-                assert_select "svg[data-flat-pack--icon-name-value='ellipsis-vertical']"
+              assert_select "button[aria-label='Actions']" do |buttons|
+                assert_heroicon(buttons.first, "ellipsis-vertical")
               end
               assert_select "a[href=?]", "/lists/#{list_id}/edit", text: "Edit list" do |links|
-                assert_select links.first, "svg[data-flat-pack--icon-name-value='pencil']"
+                assert_heroicon(links.first, "pencil")
               end
               assert_select "button[type=submit][form=?]", form_id, text: "Delete list" do |buttons|
                 assert_includes buttons.first["class"], "text-danger-text-color"
-                assert_select buttons.first, "svg[data-flat-pack--icon-name-value='trash']"
+                assert_heroicon(buttons.first, "trash")
               end
             end
           end
@@ -275,7 +275,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     membership_queries = queries.count { |sql| sql.include?("recording_studio_list_items") }
     assert_equal 1, membership_queries
     assert_select "button", text: "Add to list" do |buttons|
-      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='chevron-down']"
+      assert_heroicon(buttons.first, "chevron-down")
       refute_includes buttons.first["class"], "fp-hit-target"
       assert_includes buttons.first["class"], "rounded-[var(--button-border-radius)]"
     end
@@ -285,8 +285,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
       assert_includes button["class"], "p-[var(--button-icon-only-padding-md)]"
       assert_includes button["class"], "h-[var(--button-round-size-md)]"
       assert_includes button["class"], "w-[var(--button-round-size-md)]"
-      assert_select button, "svg[data-flat-pack--icon-name-value='heart']"
-      assert_select button, "svg[data-flat-pack--icon-name-value='chevron-down']", count: 0
+      assert_heroicon(button, "heart")
+      assert_equal 1, css_select(button, "svg").size
       assert_select button, "span", count: 0
     end
     assert_includes response.body, "controllers/recording_studio_lists/add_to_list_controller"
@@ -301,7 +301,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "button[type=button][form=?]", "add-to-list-1-#{alpha.id}", text: "Alpha" do |buttons|
       refute_includes buttons.first["class"], "[&>svg]:order-last"
       assert_equal "true", buttons.first["data-flat-pack-dropdown-keep-open"]
-      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check'][class*='ms-auto']"
+      check = assert_heroicon(buttons.first, "check")
+      assert_includes check["class"], "ms-auto"
+      assert_nil check["hidden"]
     end
     assert_select "form#add-to-list-1-#{alpha.id}[action=?]", "/lists/#{alpha.id}/items/#{@page.id}" do
       assert_select "input[name=_method][value=delete]"
@@ -316,14 +318,18 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_select "button[type=button][form=?]", "add-to-list-1-#{zebra.id}", text: "Zebra" do |buttons|
       refute_includes buttons.first["class"], "[&>svg]:order-last"
       assert_equal "true", buttons.first["data-flat-pack-dropdown-keep-open"]
-      assert_select buttons.first, "svg[data-flat-pack--icon-name-value='check']", count: 0
+      check = assert_heroicon(buttons.first, "check")
+      assert_includes check["class"], "ms-auto"
+      refute_nil check["hidden"]
     end
     assert_select "[data-recording-studio-lists--add-to-list-target=reveal]", text: "List"
     new_list = css_select("[data-recording-studio-lists--add-to-list-target=reveal]").first
     query = Rack::Utils.parse_query(URI.parse(new_list["href"]).query)
     assert_equal @page.id.to_s, query["recording_id"]
     assert_equal "/", query["return_to"]
-    assert_select "a[href='#{new_list['href']}'] svg[data-flat-pack--icon-name-value='plus']"
+    assert_heroicon(new_list, "plus")
+    refute_includes response.body, "flat-pack--icon"
+    refute_includes response.body, "icon-name-value"
     assert_select ".fp-button-dropdown__form[hidden][data-recording-studio-lists--add-to-list-target=create-panel]",
                   count: 2 do
       assert_select "form[data-recording-studio-lists--add-to-list-target=create]" do
@@ -373,7 +379,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     assert_includes named, 'aria-label="Keep this"'
     refute_includes named, "Saved for later"
     assert_includes labeled, "HOST Add to list"
-    assert_includes labeled, "chevron-down"
+    assert_heroicon(Nokogiri::HTML.fragment(labeled).at_css("button"), "chevron-down")
     refute_includes labeled, "fp-hit-target"
 
     error = assert_raises(ArgumentError) do
@@ -934,6 +940,33 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
         refute_includes card["class"], "border-[length:var(--card-border-width)]"
       end
     end
+  end
+
+  def assert_heroicon(scope, name)
+    expected = heroicon_drawing(name)
+    svg = css_select(scope, "svg").find { |node| icon_drawing(node) == expected }
+    assert svg, "expected a #{name} icon"
+    svg
+  end
+
+  def heroicon_drawing(name)
+    @heroicon_drawings ||= {}
+    @heroicon_drawings[name] ||= begin
+      html = FlatPack::Shared::IconComponent.new(name: name, size: :sm).render_in(heroicon_view)
+      icon_drawing(Nokogiri::HTML.fragment(html).at_css("svg"))
+    end
+  end
+
+  def icon_drawing(svg)
+    svg.element_children.map { |child| child.to_html.gsub(/\s+/, "") }.join
+  end
+
+  def heroicon_view
+    return @heroicon_view if defined?(@heroicon_view)
+
+    controller = ActionController::Base.new
+    controller.request = ActionDispatch::TestRequest.create
+    @heroicon_view = controller.view_context
   end
 
   def sql_during

@@ -7,7 +7,7 @@ class RecordingStudioListsTest < Minitest::Test
     RecordingStudioLists.send(:remove_const, :VERSION)
     load File.expand_path("../lib/recording_studio_lists/version.rb", __dir__)
 
-    assert_equal "0.12.0", ::RecordingStudioLists::VERSION
+    assert_equal "0.13.0", ::RecordingStudioLists::VERSION
   end
 
   def test_engine_exists
@@ -45,7 +45,19 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 7.0", "< 8.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", ">= 0.44.0", "< 1.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_orderable", ">= 0.10.0", "< 1.0"'
-    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.341"'
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.2.0"'
+  end
+
+  def test_sources_do_not_keep_the_removed_icon_controller
+    root = File.expand_path("..", __dir__)
+    paths = Dir.glob(File.join(root, "{app,lib}", "**", "*.{rb,erb,js}"))
+    paths << File.join(root, "test", "dummy", "config", "importmap.rb")
+    offenders = paths.select do |path|
+      source = File.read(path)
+      source.include?("flat-pack--icon") || source.include?("icon-name-value") || source.include?("heroicons")
+    end
+
+    assert_empty(offenders.map { |path| path.delete_prefix("#{root}/") })
   end
 
   def test_gemspec_excludes_cursor_config
@@ -100,8 +112,8 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.3"'
     assert_includes gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.2"'
     assert_includes root_gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.2"'
-    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.379"'
-    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.379"'
+    assert_includes gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.2.0"'
+    assert_includes root_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.2.0"'
     assert_includes gemfile, 'gem "view_component", "~> 4.19"'
     assert_includes root_gemfile, 'gem "view_component", "~> 4.19"'
     assert_includes gemfile, 'gem "minitest", ">= 5.26", "< 6"'
@@ -380,7 +392,7 @@ class RecordingStudioListsTest < Minitest::Test
     assert_includes readme, "/lists/:id"
     assert_includes readme, "/lists/:id/edit"
     assert_includes readme, "recording_studio_add_to_list"
-    assert_includes readme, "v0.1.341"
+    assert_includes readme, "v0.2.0"
     refute_includes readme, "GemTemplate"
     refute_includes readme, "addon template"
     refute_includes readme, "this is a template"

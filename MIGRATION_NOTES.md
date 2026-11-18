@@ -1,5 +1,19 @@
 # Migration Notes
 
+## Upgrading To 0.13.0
+
+No database migration is needed.
+
+### What Changed
+
+- The gem requires Flatpack `>= 0.2.0`. Development and dummy apps pin tag `v0.2.0`.
+- Add to list renders the check with `FlatPack::Shared::IconComponent` for every list name. The icon stays in the row. `hidden` marks a list that does not contain the recording.
+- The dummy importmap no longer pins `flat_pack/heroicons`.
+
+### Upgrade Steps
+
+Upgrade `flat_pack` to `0.2.0` at the same time as this gem. Remove a host pin for `flat_pack/heroicons`. No migration is required.
+
 ## Upgrading To 0.12.0
 
 No database migration is needed.
