@@ -7,12 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-11-18
+
 ### Changed
 
-* The dummy app pins the latest GitHub releases: Recording Studio `v7.3.0`, Accessible `v0.45.1`, Trashable `v1.0.1`, Cache `v0.7.0`, API `v1.2.1`, Admin `v2.18.0`, Logs `v0.8.0`, Moveable `v6.0.0`, Icons `v0.4.0`, and Flatpack `v0.1.377`. Orderable stays `v0.10.0`, Root Switchable stays `v0.16.0`, and Metrics stays `v0.9.0`. The development Gemfile is unchanged.
-* The dummy sets `config.admin_root_resolver` to the Studio Workspace root recording. Accessible 0.45 denies its mounted pages when that resolver is missing.
-* The dummy schema copies core migration `20261116120000_add_recording_studio_events_timeline_index`.
-* The dummy adds `RecordingStudioApi::AdminApi` to `recordable_types` only when `admin_root_recordable_type_names` is present. API 1.2 declares that recordable only in that case. This dummy sets the list to empty, so AdminApi stays unregistered.
+* Development and dummy apps pin Recording Studio `v7.7.2`, Flatpack `v0.1.379`, Accessible `v0.54.1`, Orderable `v0.11.1`, Admin `v2.19.0`, API `v1.17.0`, Icons `v0.4.2`, Logs `v0.8.2`, Moveable `v6.0.3`, Trashable `v1.2.3`, and Metrics `v0.9.2`. The dummy also pins Cache `v0.7.1` and Root Switchable `v0.16.1`.
+* `view_component` is `~> 4.19`. Dummy `simplecov` is `~> 0.22`.
+* The dummy adds `config/recording_studio_api.yml` (`shared: {}`) and API client owner columns (`owner_type`, `owner_id`). Keys issued in the dummy set `owner` to the actor. The dummy does not include the Recording Studio 7.4, 7.5, or 7.7 migrations.
+
+### Upgrade notes
+
+- Pin `v0.11.3`. There is no lists migration.
+- Host apps MUST run the Recording Studio 7.4, 7.5 and 7.7 migrations.
+- Hosts that use Recording Studio API copy `20261117000024_add_owner_to_recording_studio_api_api_clients`, set `owner` on each API client, and add `config/recording_studio_api.yml`.
+- Gemspec ranges stay Recording Studio `>= 7.0`, `< 8.0`, Accessible `>= 0.44.0`, `< 1.0`, Orderable `>= 0.10.0`, `< 1.0`, and Flatpack `>= 0.1.341`.
 
 ## [0.11.2] - 2026-11-17
 
@@ -31,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * List API and MCP copy now says what each tool does, when to use it, where ids come from, what comes back, and which calls cannot be undone. The Lists section intro is plain language. `recording_id`, `name`, `description`, `parent_id`, and the list `id` each have a description.
+* The dummy app pins the latest GitHub releases: Recording Studio `v7.3.0`, Accessible `v0.45.1`, Trashable `v1.0.1`, Cache `v0.7.0`, API `v1.2.1`, Admin `v2.18.0`, Logs `v0.8.0`, Moveable `v6.0.0`, Icons `v0.4.0`, and Flatpack `v0.1.377`. Orderable stays `v0.10.0`, Root Switchable stays `v0.16.0`, and Metrics stays `v0.9.0`. The development Gemfile is unchanged.
+* The dummy sets `config.admin_root_resolver` to the Studio Workspace root recording. Accessible 0.45 denies its mounted pages when that resolver is missing.
+* The dummy schema copies core migration `20261116120000_add_recording_studio_events_timeline_index`.
+* The dummy adds `RecordingStudioApi::AdminApi` to `recordable_types` only when `admin_root_recordable_type_names` is present. API 1.2 declares that recordable only in that case. This dummy sets the list to empty, so AdminApi stays unregistered.
 
 ### Upgrade notes
 
@@ -496,7 +508,10 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.3...HEAD
+[0.11.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.2...v0.11.3
+[0.11.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.1...v0.11.2
+[0.11.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.3...v0.11.0
 [0.10.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.2...v0.10.3
 [0.10.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.10.1...v0.10.2
