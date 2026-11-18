@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+* Development and dummy apps pin Admin `v2.19.1` and API `v1.17.1`.
+
 ## [0.11.3] - 2026-11-18
 
 ### Changed
