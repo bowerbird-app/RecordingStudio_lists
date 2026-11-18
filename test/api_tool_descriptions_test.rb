@@ -52,7 +52,10 @@ class ApiToolDescriptionsTest < Minitest::Test
     %i[show update destroy].each do |name|
       assert_includes openapi.dig(name, :parameters, 0, :description), "index"
     end
-    assert_includes membership.add_contract.dig(:fields, :recording_id, :description), "List addable records"
+    add_recording_id = membership.add_contract.dig(:fields, :recording_id, :description)
+    assert_includes add_recording_id, "already have"
+    refute_includes add_recording_id, "List addable records"
+    refute_includes membership.add_docs.fetch(:description), "List addable records"
     assert_includes membership.remove_contract.dig(:fields, :recording_id, :description), "List items"
     ACTIONS.each do |name|
       assert_includes membership.public_send("#{name}_docs").dig(:parameters, 0, :description), "index"

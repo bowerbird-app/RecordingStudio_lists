@@ -11,7 +11,7 @@ module RecordingStudioLists
         register_add(api)
         register_remove(api)
         register_items(api)
-        register_addable(api)
+        register_addable(api) if RecordingStudioLists::Api.operations_api?(api)
       end
 
       def register_add(api)

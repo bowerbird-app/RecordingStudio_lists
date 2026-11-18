@@ -59,12 +59,6 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     item_ids = response.parsed_body.fetch("records").map { |record| record.fetch("id") }
     assert_includes item_ids, @page.id
 
-    get "/recording_studio_api/api/v1/lists/#{created_id}/actions/list_addable", headers: json_headers(@edit_token)
-    assert_response :success
-    addable_ids = response.parsed_body.fetch("records").map { |record| record.fetch("id") }
-    refute_includes addable_ids, @page.id
-    refute_includes addable_ids, created_id
-
     post "/recording_studio_api/api/v1/lists/#{created_id}/actions/list_remove",
          headers: json_headers(@edit_token),
          params: { recording_id: @page.id },
@@ -82,9 +76,6 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_items", headers: json_headers(@view_token)
-    assert_response :success
-
-    get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_addable", headers: json_headers(@view_token)
     assert_response :success
 
     post "/recording_studio_api/api/v1/lists",
@@ -217,6 +208,8 @@ class ListsApiTest < ActionDispatch::IntegrationTest
   test "another orderable type does not get list membership actions" do
     page = record_page(@root, "Orderable page")
 
+    assert_nil RecordingStudioApi.capability_action(:list_addable)
+
     RecordingStudioLists::Api::CAPABILITY_ACTIONS.each do |action|
       registration = RecordingStudioApi.capability_action(action)
       refute registration.applicable_to?("Page"), "#{action} leaked to Page"
@@ -311,7 +304,9 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     refute_includes count.fetch("description"), "not loaded"
     add = document.dig(:paths, "/recording_studio_api/api/v1/lists/{id}/actions/list_add", "post")
     recording_id = add.dig(:requestBody, :content, "application/json", :schema, :properties, "recording_id")
-    assert_includes recording_id[:description] || recording_id["description"], "List addable records"
+    recording_description = recording_id[:description] || recording_id["description"]
+    assert_includes recording_description, "already have"
+    refute_includes recording_description, "List addable records"
     list_id = add.fetch(:parameters).find { |parameter| (parameter["name"] || parameter[:name]) == "id" }
     assert_includes list_id["description"] || list_id[:description], "index"
     assert_membership_titles(document)
@@ -348,14 +343,82 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_nil second_payload.fetch("meta").fetch("next_pagination_token")
   end
 
+  test "public OpenAPI and documentation catalog omit list_addable" do
+    document = RecordingStudioApi.openapi_document(version: "v1", api: :public)
+    catalog = RecordingStudioApi.documentation_catalog(version: "v1", api: :public)
+    registration = RecordingStudioApi.recordable_registration_for("RecordingStudio::Lists::List", api: :public)
+
+    assert_empty paths_named(document, "list_addable")
+    refute catalog_paths(catalog).any? { |path| path.include?("list_addable") }
+    refute_includes Array(registration.capability_actions).map(&:to_sym), :list_addable
+    assert_nil RecordingStudioApi.capability_action(:list_addable, api: :public)
+
+    get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_addable", headers: json_headers(@edit_token)
+    assert_response :unprocessable_entity
+    assert_equal "unsupported_action", response.parsed_body.dig("error", "code")
+    assert_includes response.parsed_body.dig("error", "message"), "list_addable"
+  end
+
+  test "operations API still lists and returns addable records" do
+    register_operations_lists!
+    document = RecordingStudioApi.openapi_document(version: "v1", api: :operations)
+    catalog = RecordingStudioApi.documentation_catalog(version: "v1", api: :operations)
+    registration = RecordingStudioApi.recordable_registration_for("RecordingStudio::Lists::List", api: :operations)
+    action = RecordingStudioApi.capability_action(:list_addable, api: :operations)
+    addable_paths = paths_named(document, "list_addable")
+
+    assert_includes Array(registration.capability_actions).map(&:to_sym), :list_addable
+    assert action.applicable_to?("RecordingStudio::Lists::List")
+    refute action.applicable_to?("Page")
+    assert_equal ["List addable records"], addable_paths.map { |path| path.fetch(:summary) }
+    assert catalog_paths(catalog).any? { |path| path.include?("/actions/list_addable") }
+
+    get "/recording_studio_api/apis/operations/v1/lists/#{@list.id}/actions/list_addable",
+        headers: json_headers(issue_token(role: :view, api: :operations))
+    assert_response :success
+    addable_ids = response.parsed_body.fetch("records").map { |record| record.fetch("id") }
+    assert_includes addable_ids, @page.id
+    refute_includes addable_ids, @list.id
+  end
+
   private
+
+  def register_operations_lists!
+    RecordingStudioApi.configuration.api(:operations)
+    register_operations_workspace!
+    RecordingStudioLists::Api.register_api(:operations)
+  end
+
+  def register_operations_workspace!
+    return if RecordingStudioApi.recordable_registration_for("Workspace", api: :operations)
+
+    RecordingStudioApi.register_recordable_type_api(
+      "Workspace",
+      api: :operations,
+      operations: %i[show],
+      serializer: ->(workspace, **) { { name: workspace.name } },
+      output_keys: %i[name]
+    )
+  end
+
+  def paths_named(document, action_name)
+    document.fetch(:paths).filter_map do |path, operations|
+      operation = operations["get"] || operations[:get]
+      next unless path.include?(action_name) && operation
+
+      { path: path, summary: operation[:summary] || operation["summary"] }
+    end
+  end
+
+  def catalog_paths(catalog)
+    catalog.fetch(:resources).flat_map { |section| section.fetch(:endpoints).map { |endpoint| endpoint.fetch(:path) } }
+  end
 
   def assert_membership_titles(document)
     {
       ["/recording_studio_api/api/v1/lists/{id}/actions/list_add", "post"] => "Add to list",
       ["/recording_studio_api/api/v1/lists/{id}/actions/list_remove", "post"] => "Remove from list",
-      ["/recording_studio_api/api/v1/lists/{id}/actions/list_items", "get"] => "List items",
-      ["/recording_studio_api/api/v1/lists/{id}/actions/list_addable", "get"] => "List addable records"
+      ["/recording_studio_api/api/v1/lists/{id}/actions/list_items", "get"] => "List items"
     }.each do |(path, verb), title|
       operation = document.dig(:paths, path, verb)
       assert_equal title, operation.fetch(:summary)
@@ -416,9 +479,9 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     { "Authorization" => "Bearer #{token}", "Accept" => "application/json" }
   end
 
-  def issue_token(role:)
+  def issue_token(role:, api: :public)
     result = RecordingStudioApi::Services::IssueTestCredential.call(
-      api: :public,
+      api: api,
       actor: @user,
       access_point_recording: @root,
       role: role,

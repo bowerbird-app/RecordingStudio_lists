@@ -7,7 +7,9 @@ require_relative "api/tool_descriptions"
 module RecordingStudioLists
   module Api
     TYPE = "RecordingStudio::Lists::List"
-    CAPABILITY_ACTIONS = %i[list_add list_remove list_items list_addable].freeze
+    CAPABILITY_ACTIONS = %i[list_add list_remove list_items].freeze
+    ADDABLE_ACTION = :list_addable
+    OPERATIONS_API = "operations"
     OUTPUT_KEYS = %i[name description].freeze
     WRITABLE_ATTRIBUTES = %i[name description].freeze
 
@@ -32,17 +34,27 @@ module RecordingStudioLists
     end
 
     def type_options(api)
-      type_behavior.merge(api:, serializer: method(:serialize_fields), openapi: type_openapi)
+      type_behavior(api).merge(api:, serializer: method(:serialize_fields), openapi: type_openapi)
     end
 
-    def type_behavior
+    def type_behavior(api)
       {
         operations: %i[index show create update destroy],
         auto_capability_actions: false,
-        capability_actions: CAPABILITY_ACTIONS,
+        capability_actions: capability_actions_for(api),
         output_keys: OUTPUT_KEYS,
         writable_attributes: WRITABLE_ATTRIBUTES
       }
+    end
+
+    def capability_actions_for(api)
+      return CAPABILITY_ACTIONS unless operations_api?(api)
+
+      [*CAPABILITY_ACTIONS, ADDABLE_ACTION]
+    end
+
+    def operations_api?(api)
+      api.to_s == OPERATIONS_API
     end
 
     def type_openapi

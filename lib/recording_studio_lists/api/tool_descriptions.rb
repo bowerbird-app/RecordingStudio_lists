@@ -50,8 +50,8 @@ module RecordingStudioLists
         "A caller without edit access is forbidden."
 
       ADD = <<~TEXT.tr("\n", " ").squeeze(" ").strip.freeze
-        Adds one record to this list. The list must already exist. Take recording_id from List addable records,
-        or pass a record id you already have in this workspace. You need edit access on the list.
+        Adds one record to this list. The list must already exist. Pass a record id you already have
+        in this workspace. You need edit access on the list.
         The record has to be in the same workspace. The call is rejected when the record is this list,
         a list item, or in another workspace. Adding a record that is already on the list changes nothing
         and still succeeds. Returns the list, with #{LIST_ROW}. A caller without edit access is forbidden.
@@ -86,7 +86,7 @@ module RecordingStudioLists
         "found when that id is outside this scope."
 
       LIST_ID = "The id of the list, from index or from create."
-      ADD_RECORDING_ID = "The id of the record to add, from List addable records or a record id you already have."
+      ADD_RECORDING_ID = "The id of the record to add. Use a record id you already have in this workspace."
       REMOVE_RECORDING_ID = "The id of the record to remove, from List items."
       INDEX_PARENT_ID = "The id of the record that holds the lists. A list cannot be that parent."
       LIMIT = "How many lists to return. The default is 50 and the maximum is 100, unless the host " \
