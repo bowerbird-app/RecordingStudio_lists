@@ -25,8 +25,8 @@ gem "sprockets-rails"
 
 group :development, :test do
   gem "debug"
-  gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.19.0"
-  gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v1.17.0"
+  gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.19.1"
+  gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v1.17.1"
   gem "recording_studio_icons", github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.2"
   gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.2"
   gem "recording_studio_moveable", github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.3"
