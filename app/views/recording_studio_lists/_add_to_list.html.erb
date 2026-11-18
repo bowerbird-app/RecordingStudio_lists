@@ -1,8 +1,4 @@
 <div data-controller="recording-studio-lists--add-to-list">
-  <template data-recording-studio-lists--add-to-list-target="check">
-    <%= render FlatPack::Shared::IconComponent.new(name: "check", size: :sm, class: "ms-auto") %>
-  </template>
-
   <% rows.each do |row| %>
     <%= form_with url: (row[:member] ? row[:remove_url] : row[:add_url]), method: (row[:member] ? :delete : :post), html: { id: row[:form_id], class: "hidden", data: { add_url: row[:add_url], remove_url: row[:remove_url] } } do %>
       <%= hidden_field_tag :recording_id, recording_id %>
@@ -18,14 +14,7 @@
         }
       ) do |menu| %>
     <% rows.each do |row| %>
-      <% menu.menu_item(
-        text: row[:name],
-        icon: ("check" if row[:member]),
-        icon_position: :end,
-        keep_open: true,
-        form: row[:form_id],
-        type: "button"
-      ) %>
+      <% menu.menu_html add_to_list_choice(row) %>
     <% end %>
     <% menu.menu_divider(
       **{
@@ -73,13 +62,6 @@
       <%= hidden_field_tag :recording_id, recording_id %>
       <%= hidden_field_tag :return_to, return_to if return_to.present? %>
     <% end %>
-    <%= render FlatPack::Button::DropdownItem::Component.new(
-      text: "Name",
-      icon: "check",
-      icon_position: :end,
-      keep_open: true,
-      type: "button",
-      form: "add-to-list-new-row"
-    ) %>
+    <%= add_to_list_choice({ name: "Name", form_id: "add-to-list-new-row", member: true }) %>
   </template>
 </div>

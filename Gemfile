@@ -15,7 +15,7 @@ gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashab
 # Required by trashable (not on RubyGems); same tag as the dummy host.
 gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.2"
 # Required by recording_studio_orderable (not on RubyGems).
-gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.1.379"
+gem "flat_pack", github: "bowerbird-app/flatpack", tag: "v0.2.0"
 gem "minitest", ">= 5.26", "< 6"
 gem "view_component", "~> 4.19"
 

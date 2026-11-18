@@ -7,6 +7,10 @@ module RecordingStudioLists
     MEMBERSHIP_JOIN = "INNER JOIN recording_studio_list_items " \
                       "ON recording_studio_list_items.id = recording_studio_recordings.recordable_id"
 
+    def add_to_list_choice(row)
+      AddToListChoice.html(self, row)
+    end
+
     def recording_studio_add_to_list(recording, **)
       options = add_to_list_options(**)
       if options[:icon_only] && options[:show_chevron] == true

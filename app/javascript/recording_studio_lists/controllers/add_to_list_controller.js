@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["check", "row"]
+  static targets = ["row"]
 
   connect() {
     const menuSelector = "[data-recording-studio-lists--add-to-list-target='menu']"
@@ -152,18 +152,16 @@ export default class extends Controller {
   }
 
   flip(item, form) {
+    const mark = item.querySelector("[data-recording-studio-lists--add-to-list-target='check']")
     const removing = form.querySelector("[name='_method']")?.value === "delete"
     if (removing) {
-      item.querySelector("[data-flat-pack--icon-name-value='check']")?.remove()
+      mark?.setAttribute("hidden", "")
       form.setAttribute("action", form.dataset.addUrl)
       form.querySelector("[name='_method']")?.remove()
       return
     }
 
-    if (!item.querySelector("[data-flat-pack--icon-name-value='check']")) {
-      const icon = this.checkTarget.content.querySelector("svg")?.cloneNode(true)
-      if (icon) item.append(icon)
-    }
+    mark?.removeAttribute("hidden")
     form.setAttribute("action", form.dataset.removeUrl)
     if (!form.querySelector("[name='_method']")) {
       const input = document.createElement("input")

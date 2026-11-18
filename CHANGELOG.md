@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Development and dummy apps pin Admin `v2.19.1` and API `v1.17.1`.
 
+## [0.13.0] - 2026-11-18
+
+### Changed
+
+* Require Flatpack `>= 0.2.0`. Development and dummy apps pin `v0.2.0`.
+* Add to list renders a check icon on the server for every list name. The `hidden` attribute marks a list that does not contain the recording. Choosing the name shows or hides that icon.
+
+### Upgrade notes
+
+- Pin `v0.13.0` and upgrade `flat_pack` to `0.2.0` at the same time.
+- No database migration is required.
+- Remove a manual `flat_pack/heroicons` importmap pin. Flatpack 0.2.0 removed `flat-pack--icon` and `heroicons.js`.
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-0130).
+
 ## [0.12.0] - 2026-11-18
 
 ### Removed
@@ -528,7 +542,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.3...v0.12.0
 [0.11.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.2...v0.11.3
 [0.11.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.1...v0.11.2
