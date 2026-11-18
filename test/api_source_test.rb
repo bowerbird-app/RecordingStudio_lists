@@ -13,8 +13,10 @@ class ApiSourceTest < Minitest::Test
     assert_includes source, "ToolDescriptions.type_openapi"
     refute_includes source, "Named lists of recordings"
     assert_includes source, "auto_capability_actions: false"
-    assert_includes source, "capability_actions: CAPABILITY_ACTIONS"
-    assert_includes source, "%i[list_add list_remove list_items list_addable]"
+    assert_includes source, "capability_actions: capability_actions_for(api)"
+    assert_includes source, "%i[list_add list_remove list_items].freeze"
+    assert_includes source, "ADDABLE_ACTION = :list_addable"
+    assert_includes source, "def operations_api?"
   end
 
   def test_handlers_wrap_existing_list_methods
@@ -35,6 +37,7 @@ class ApiSourceTest < Minitest::Test
     assert_includes membership, "name: :list_add"
     assert_includes membership, "name: :list_remove"
     assert_includes membership, "name: :list_items"
+    assert_includes membership, "register_addable(api) if RecordingStudioLists::Api.operations_api?(api)"
     assert_includes membership, "name: :list_addable"
     assert_includes membership, "capability: :list_membership"
     refute_includes membership, "capability: :orderable"
@@ -51,6 +54,18 @@ class ApiSourceTest < Minitest::Test
     refute_includes resource, "deep_symbolize_keys"
     refute_includes resource, "transform_keys"
     assert_includes resource, "RequestPayload.call(context)"
+  end
+
+  def test_list_addable_is_listed_only_for_the_operations_api
+    public_actions = RecordingStudioLists::Api.capability_actions_for(:public)
+    operations_actions = RecordingStudioLists::Api.capability_actions_for("operations")
+    other_actions = RecordingStudioLists::Api.capability_actions_for(:workspace)
+
+    assert_equal %i[list_add list_remove list_items], public_actions
+    assert_equal %i[list_add list_remove list_items list_addable], operations_actions
+    assert_equal public_actions, other_actions
+    refute RecordingStudioLists::Api.operations_api?(:public)
+    assert RecordingStudioLists::Api.operations_api?(:operations)
   end
 
   def test_engine_registers_the_api_after_reload
