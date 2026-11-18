@@ -1,5 +1,20 @@
 # Migration Notes
 
+## Upgrading To 0.12.0
+
+No database migration is needed.
+
+### What Changed
+
+- The public API no longer registers `list_addable` (List addable records).
+- MCP tools generated from the public API lose that action.
+- Add to list still accepts `recording_id`. Pass an id you already have.
+- The API named `operations` still registers `list_addable`.
+
+### Upgrade Steps
+
+Stop calling `list_addable` on the public API. No migration is required.
+
 ## Upgrading To 0.11.3
 
 Host apps MUST run the Recording Studio 7.4, 7.5 and 7.7 migrations.

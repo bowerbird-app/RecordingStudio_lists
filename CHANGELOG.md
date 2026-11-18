@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Development and dummy apps pin Admin `v2.19.1` and API `v1.17.1`.
 
+## [0.12.0] - 2026-11-18
+
+### Removed
+
+* The public API no longer registers `list_addable` (List addable records). MCP tools built from that API lose the action too. Add to list takes a recording id the caller already has.
+
+### Changed
+
+* The API named `operations` still registers `list_addable`.
+
+### Upgrade notes
+
+- Pin `v0.12.0`. No database migration is required.
+- Stop calling `list_addable` on the public API. Pass a recording id you already have to Add to list.
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-0120).
+
 ## [0.11.3] - 2026-11-18
 
 ### Changed
@@ -512,7 +528,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.3...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.3...v0.12.0
 [0.11.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.2...v0.11.3
 [0.11.2]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.1...v0.11.2
 [0.11.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.0...v0.11.1
