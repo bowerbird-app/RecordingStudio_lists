@@ -1,5 +1,18 @@
 # Migration Notes
 
+## Upgrading To 0.11.2
+
+No migration is needed.
+
+### What Changed
+
+- MCP and OpenAPI membership titles are Add to list, Remove from list, List items, and List addable records.
+- Descriptions that name those tools use the same titles. Paths and fields are unchanged. The registration tag stays Lists. Published operations stay on the List tag.
+
+### Upgrade Steps
+
+No migration is required. Point clients at those titles.
+
 ## Upgrading To 0.11.1
 
 No migration is needed.

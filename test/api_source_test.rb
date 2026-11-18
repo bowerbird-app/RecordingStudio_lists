@@ -43,8 +43,9 @@ class ApiSourceTest < Minitest::Test
     assert_includes membership, "ToolDescriptions.add"
     assert_includes membership, "ToolDescriptions.remove"
     copy = File.read(File.expand_path("../lib/recording_studio_lists/api/tool_descriptions.rb", __dir__))
-    assert_includes copy, "List - Add"
-    assert_includes copy, "List - Remove"
+    assert_includes copy, "Add to list"
+    assert_includes copy, "Remove from list"
+    refute_includes copy, "List - "
     refute_includes resource, "ListItem.create"
     refute_includes membership, "ListItem.create"
     refute_includes resource, "deep_symbolize_keys"

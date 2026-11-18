@@ -311,9 +311,12 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     refute_includes count.fetch("description"), "not loaded"
     add = document.dig(:paths, "/recording_studio_api/api/v1/lists/{id}/actions/list_add", "post")
     recording_id = add.dig(:requestBody, :content, "application/json", :schema, :properties, "recording_id")
-    assert_includes recording_id[:description] || recording_id["description"], "List - Addable"
+    assert_includes recording_id[:description] || recording_id["description"], "List addable records"
     list_id = add.fetch(:parameters).find { |parameter| (parameter["name"] || parameter[:name]) == "id" }
     assert_includes list_id["description"] || list_id[:description], "index"
+    assert_membership_titles(document)
+    assert_resource_titles(document)
+    assert_no_type_first_list_copy(document)
   end
 
   test "index paginates with limit and pagination_token" do
@@ -346,6 +349,56 @@ class ListsApiTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def assert_membership_titles(document)
+    {
+      ["/recording_studio_api/api/v1/lists/{id}/actions/list_add", "post"] => "Add to list",
+      ["/recording_studio_api/api/v1/lists/{id}/actions/list_remove", "post"] => "Remove from list",
+      ["/recording_studio_api/api/v1/lists/{id}/actions/list_items", "get"] => "List items",
+      ["/recording_studio_api/api/v1/lists/{id}/actions/list_addable", "get"] => "List addable records"
+    }.each do |(path, verb), title|
+      operation = document.dig(:paths, path, verb)
+      assert_equal title, operation.fetch(:summary)
+      assert_equal title, operation.fetch(:title)
+      assert_equal ["List"], operation.fetch(:tags)
+    end
+  end
+
+  def assert_resource_titles(document)
+    member = "/recording_studio_api/api/v1/lists/{id}"
+    {
+      ["/recording_studio_api/api/v1/lists", "get"] => "List lists",
+      ["/recording_studio_api/api/v1/lists", "post"] => "Create a list",
+      [member, "get"] => "Get a list",
+      [member, "patch"] => "Update a list",
+      [member, "delete"] => "Delete a list"
+    }.each do |(path, verb), summary|
+      operation = document.dig(:paths, path, verb)
+      assert_equal summary, operation.fetch(:summary)
+      assert_nil operation[:title]
+      assert_equal ["List"], operation.fetch(:tags)
+    end
+  end
+
+  def assert_no_type_first_list_copy(document)
+    texts = []
+    document.fetch(:paths).each do |path, operations|
+      next unless path.include?("/lists")
+
+      operations.each_value { |operation| collect_descriptions(operation, texts) }
+      operations.each_value do |operation|
+        texts << operation[:summary].to_s
+        texts << operation[:title].to_s
+        Array(operation[:tags]).each { |tag| texts << tag.to_s }
+      end
+    end
+    document.fetch(:tags).each do |tag|
+      texts << (tag[:name] || tag["name"]).to_s
+      texts << (tag[:description] || tag["description"]).to_s
+    end
+
+    texts.each { |text| refute_includes text, "List - " }
+  end
 
   def collect_descriptions(value, texts)
     case value

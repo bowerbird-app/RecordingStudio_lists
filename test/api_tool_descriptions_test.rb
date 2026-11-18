@@ -5,7 +5,13 @@ require "test_helper"
 class ApiToolDescriptionsTest < Minitest::Test
   OPERATIONS = %i[index show create update destroy].freeze
   ACTIONS = %i[add remove items addable].freeze
-  FORBIDDEN = ["RecordingStudio::", "Path parameter"].freeze
+  TITLES = {
+    add: "Add to list",
+    remove: "Remove from list",
+    items: "List items",
+    addable: "List addable records"
+  }.freeze
+  FORBIDDEN = ["RecordingStudio::", "Path parameter", "List - "].freeze
 
   def test_every_tool_and_input_has_a_plain_description
     texts = description_texts
@@ -46,11 +52,28 @@ class ApiToolDescriptionsTest < Minitest::Test
     %i[show update destroy].each do |name|
       assert_includes openapi.dig(name, :parameters, 0, :description), "index"
     end
-    assert_includes membership.add_contract.dig(:fields, :recording_id, :description), "List - Addable"
-    assert_includes membership.remove_contract.dig(:fields, :recording_id, :description), "List - Items"
+    assert_includes membership.add_contract.dig(:fields, :recording_id, :description), "List addable records"
+    assert_includes membership.remove_contract.dig(:fields, :recording_id, :description), "List items"
     ACTIONS.each do |name|
       assert_includes membership.public_send("#{name}_docs").dig(:parameters, 0, :description), "index"
     end
+  end
+
+  def test_membership_titles_are_the_action
+    texts = string_values(RecordingStudioLists::Api.type_openapi)
+
+    TITLES.each do |name, title|
+      docs = membership.public_send("#{name}_docs")
+      assert_equal title, docs.fetch(:title)
+      assert_equal title, docs.fetch(:summary)
+      texts.concat(string_values(docs))
+      next unless %i[add remove].include?(name)
+
+      texts.concat(string_values(membership.public_send("#{name}_contract")))
+    end
+
+    texts.each { |text| refute_includes text, "List - " }
+    assert_equal ["Lists"], RecordingStudioLists::Api.type_openapi.fetch(:tags)
   end
 
   private
@@ -71,6 +94,23 @@ class ApiToolDescriptionsTest < Minitest::Test
       collect(membership.public_send("#{name}_contract"), texts) if %i[add remove].include?(name)
     end
     texts
+  end
+
+  def string_values(value)
+    texts = []
+    collect_strings(value, texts)
+    texts
+  end
+
+  def collect_strings(value, texts)
+    case value
+    when Hash
+      value.each_value { |child| collect_strings(child, texts) }
+    when Array
+      value.each { |child| collect_strings(child, texts) }
+    when String
+      texts << value
+    end
   end
 
   def collect(value, texts)
