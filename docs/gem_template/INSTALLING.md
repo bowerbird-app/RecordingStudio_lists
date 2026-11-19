@@ -196,16 +196,16 @@ The `gem_template` helper provides access to all engine routes.
 
 ## RecordingStudio Host-App Check
 
-This template's dummy app uses RecordingStudio `v7.7.2` (`>= 7.0`, `< 8.0` in the gemspec). Keep
+This template's dummy app uses RecordingStudio `~> 7.8` at tag `v7.8.0` (`>= 7.0`, `< 8.0` in the gemspec). Keep
 `config.require_recordable_declarations = true`, declare every configured recordable with
 `recording_studio_recordable(...)`, and create roots with `RecordingStudio.create_root_recording!(recordable, actor:)`.
 `RecordingStudio.root_recording_for` only finds a root.
 Child recordings must be created with an explicit `parent_recording`.
 
-When Accessible is bundled, the dummy pins Accessible `v0.54.1` (the gemspec allows `>= 0.44.0`, `< 1.0`) and
-`recording_studio_trashable` `v1.2.3` with `require: false` (Accessible loads
+When Accessible is bundled, the dummy pins Accessible `~> 0.58` at tag `v0.58.0` (the gemspec allows `>= 0.44.0`, `< 1.0`) and
+`recording_studio_trashable` `~> 1.3` at tag `v1.3.0` with `require: false` (Accessible loads
 the query API only). Run `bin/rails generate recording_studio_accessible:migrations`,
-migrate, and rebuild Tailwind after bumping FlatPack (`v0.1.315`). Accessible
+migrate, and rebuild Tailwind after bumping FlatPack (`v0.2.0`). Accessible
 `0.10+` adds access invitations; `0.11+` stores grant roles as strings
 (`view` / `edit` / `admin`); `0.14+` adds optional action-audience constraint and
 rule tables; `0.17+` filters kept recordings through Trashable’s query SQL.

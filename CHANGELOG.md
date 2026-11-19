@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Development and dummy apps pin Admin `v2.19.1` and API `v1.17.1`.
+* Development and dummy apps pin Recording Studio `v7.8.0`, Accessible `v0.58.0`, Orderable `v0.12.0`, Moveable `v6.1.0`, Trashable `v1.3.0`, Metrics `v0.10.0`, Icons `v0.5.0`, Logs `v0.9.0`, and API `v1.20.0`. Admin stays `v2.19.1`. Flatpack stays `v0.2.0`. The dummy also pins Cache `v0.8.0` and Root Switchable `v0.17.0`. Each pin is `~> major.minor` plus the tag.
 
 ## [0.13.0] - 2026-11-18
 
