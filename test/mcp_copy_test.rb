@@ -9,38 +9,36 @@ class McpCopyTest < Minitest::Test
   ].freeze
 
   def test_register_is_a_no_op_when_mcp_is_not_loaded
-    hide_mcp_constant
-
-    refute defined?(::RecordingStudioMcp)
-    assert_nil RecordingStudioLists::McpCopy.register!
-  ensure
-    restore_mcp_constant
+    RecordingStudioLists::McpCopy.stub(:mcp_available?, false) do
+      assert_nil RecordingStudioLists::McpCopy.register!
+    end
   end
 
   def test_register_is_a_no_op_when_register_tool_is_missing
-    hide_mcp_constant
-    Object.const_set(:RecordingStudioMcp, Module.new)
+    fake = Object.new
 
-    refute_respond_to RecordingStudioMcp, :register_tool
-    assert_nil RecordingStudioLists::McpCopy.register!
-  ensure
-    restore_mcp_constant
+    RecordingStudioLists::McpCopy.stub(:mcp, fake) do
+      RecordingStudioLists::McpCopy.stub(:mcp_available?, false) do
+        refute_respond_to fake, :register_tool
+        assert_nil RecordingStudioLists::McpCopy.register!
+      end
+    end
   end
 
   def test_register_declares_list_type_and_named_tools
-    hide_mcp_constant
-    types = []
-    tools = {}
-    stub_mcp(types: types, tools: tools)
+    fake = RecordingMcp.new
 
-    RecordingStudioLists::McpCopy.register!
-    RecordingStudioLists::McpCopy.register!
+    RecordingStudioLists::McpCopy.stub(:mcp_available?, true) do
+      RecordingStudioLists::McpCopy.stub(:mcp, fake) do
+        RecordingStudioLists::McpCopy.register!
+        RecordingStudioLists::McpCopy.register!
+      end
+    end
 
-    assert_equal 2, types.size
-    registration = types.first
+    assert_equal 2, fake.types.size
+    registration = fake.types.first
     assert_equal "RecordingStudio::Lists::List", registration[:type]
     assert_equal RecordingStudioLists::McpCopy::Copy::TYPE, registration[:description]
-    assert_equal "List", RecordingStudioLists::McpCopy::PUBLIC_TYPE_NAME
     assert_includes registration[:description], "workspace"
     assert_includes registration[:description], "create_list"
     refute_includes registration[:description], "list_items"
@@ -48,9 +46,9 @@ class McpCopyTest < Minitest::Test
     FORBIDDEN.each { |phrase| refute_includes registration[:description], phrase }
 
     expected = RecordingStudioLists::McpCopy.tool_names.fetch(:operations)
-    assert_equal expected, tools.keys
+    assert_equal expected, fake.tools.keys
     expected.each do |name|
-      tool = tools.fetch(name)
+      tool = fake.tools.fetch(name)
       assert_equal "RecordingStudio::Lists::List", tool[:type]
       assert_equal RecordingStudioLists::McpCopy::Copy::TITLES.fetch(name), tool[:title]
       assert_equal RecordingStudioLists::McpCopy::Copy::DESCRIPTIONS.fetch(name), tool[:description]
@@ -61,23 +59,30 @@ class McpCopyTest < Minitest::Test
       FORBIDDEN.each { |phrase| refute_includes tool[:description], phrase }
     end
 
-    list = tools.fetch("list_lists")
+    list = fake.tools.fetch("list_lists")
     assert_equal :index, list[:operation]
     refute list.key?(:action)
-    create = tools.fetch("create_list")
+    create = fake.tools.fetch("create_list")
     assert_equal :create, create[:operation]
     assert create[:input].key?("name")
-    add = tools.fetch("add_to_list")
+    add = fake.tools.fetch("add_to_list")
     assert_equal :list_add, add[:action]
     refute add.key?(:operation)
-    members = tools.fetch("list_list_members")
+    members = fake.tools.fetch("list_list_members")
     assert_equal :list_items, members[:action]
-    addable = tools.fetch("list_addable")
+    addable = fake.tools.fetch("list_addable")
     assert_equal :list_addable, addable[:action]
-    refute tools.key?("list_items")
-    refute tools.key?("add_list_item")
-  ensure
-    restore_mcp_constant
+    refute fake.tools.key?("list_items")
+    refute fake.tools.key?("add_list_item")
+  end
+
+  def test_writable_inputs_use_api_tool_copy
+    inputs = RecordingStudioLists::McpCopy::Copy::INPUTS
+    copy = RecordingStudioLists::Api::ToolCopy
+
+    assert_equal copy::NAME, inputs.fetch("create_list").fetch("name").fetch(:description)
+    assert_equal copy::DESCRIPTION, inputs.fetch("update_list").fetch("description").fetch(:description)
+    assert_equal copy::ADD_RECORDING_ID, inputs.fetch("add_to_list").fetch("recording_id").fetch(:description)
   end
 
   def test_tool_names_split_public_and_operations
@@ -120,27 +125,20 @@ class McpCopyTest < Minitest::Test
     end
   end
 
-  private
+  class RecordingMcp
+    attr_reader :types, :tools
 
-  def stub_mcp(types:, tools:)
-    mcp = Module.new
-    mcp.define_singleton_method(:register_type) { |**registration| types << registration }
-    mcp.define_singleton_method(:register_tool) do |**registration|
+    def initialize
+      @types = []
+      @tools = {}
+    end
+
+    def register_type(**registration)
+      types << registration
+    end
+
+    def register_tool(**registration)
       tools[registration.fetch(:name)] = registration
     end
-    Object.const_set(:RecordingStudioMcp, mcp)
-    mcp
-  end
-
-  def hide_mcp_constant
-    @saved_mcp = defined?(::RecordingStudioMcp) ? ::RecordingStudioMcp : :absent
-    Object.send(:remove_const, :RecordingStudioMcp) if defined?(::RecordingStudioMcp)
-  end
-
-  def restore_mcp_constant
-    Object.send(:remove_const, :RecordingStudioMcp) if defined?(::RecordingStudioMcp)
-    return if @saved_mcp == :absent || @saved_mcp.nil?
-
-    Object.const_set(:RecordingStudioMcp, @saved_mcp)
   end
 end

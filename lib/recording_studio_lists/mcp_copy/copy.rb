@@ -66,16 +66,11 @@ module RecordingStudioLists
         and records already on the list. The list must already exist.
       TEXT
 
-      NAME = "The list name. Required. Spaces at the ends are removed. A blank name is rejected."
-      DESCRIPTION =
-        "Optional note on the list. A blank value is stored empty. On update, leaving this out " \
-        "clears the current description."
-      ADD_RECORDING_ID = "The id of the record to add. Use a record id you already have in this workspace."
       REMOVE_RECORDING_ID = "The id of the record to remove, from list_list_members."
 
       WRITABLE_INPUTS = {
-        "name" => { description: NAME },
-        "description" => { description: DESCRIPTION }
+        "name" => { description: Api::ToolCopy::NAME },
+        "description" => { description: Api::ToolCopy::DESCRIPTION }
       }.freeze
 
       TITLES = {
@@ -108,7 +103,7 @@ module RecordingStudioLists
         "create_list" => WRITABLE_INPUTS,
         "update_list" => WRITABLE_INPUTS,
         "delete_list" => {},
-        "add_to_list" => { "recording_id" => { description: ADD_RECORDING_ID } },
+        "add_to_list" => { "recording_id" => { description: Api::ToolCopy::ADD_RECORDING_ID } },
         "remove_from_list" => { "recording_id" => { description: REMOVE_RECORDING_ID } },
         "list_list_members" => {},
         "list_addable" => {}

@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Dummy app pins `puma` `8.1.2`, `net-ssh` `7.3.10`, and `brakeman` `8.1.1`. Dummy `.ruby-version` is `3.3.14`.
+* Dummy app pins `puma` `8.1.2`, `net-ssh` `7.3.10`, and `brakeman` `8.1.1`. Dummy `.ruby-version` is `3.3.14`. Root `Gemfile.lock` also pins `puma` `8.1.2`.
 
 ### Upgrade notes
 
