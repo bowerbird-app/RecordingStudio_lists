@@ -19,3 +19,6 @@ Next steps:
    grant, list screens treat the list as missing.
 10. To expose lists over Recording Studio API, add `recording_studio_api`, run its install and
     migrations, mount the engine, and enable `:api_access_point` on roots that hold API clients.
+    Recording Studio MCP is optional. When it is loaded, include
+    `RecordingStudioLists::McpCopy.tool_names[:public]` on the public server and
+    `[:operations]` on the operations server.

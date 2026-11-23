@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "api"
+require_relative "mcp_copy"
 
 module RecordingStudioLists
   class Engine < ::Rails::Engine
@@ -123,6 +124,10 @@ module RecordingStudioLists
 
     initializer "recording_studio_lists.api" do
       config.to_prepare { Api.register! }
+    end
+
+    initializer "recording_studio_lists.mcp", after: "recording_studio_lists.api" do
+      config.to_prepare { McpCopy.register! }
     end
   end
 end

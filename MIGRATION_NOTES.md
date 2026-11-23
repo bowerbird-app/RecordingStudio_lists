@@ -1,5 +1,21 @@
 # Migration Notes
 
+## Upgrading To 0.13.1
+
+No database migration is needed.
+
+### What Changed
+
+- When Recording Studio MCP is loaded, this gem registers named tools for workspace lists.
+- Public tools: `list_lists`, `show_list`, `create_list`, `update_list`, `delete_list`, `add_to_list`, `remove_from_list`, `list_list_members`.
+- Operations also includes `list_addable`.
+- Membership listing is `list_list_members` so it does not clash with Presskits `list_items`.
+- Trash and access grants stay on Trashable and Accessible.
+
+### Upgrade Steps
+
+Pin `v0.13.1`. Include the public tool names on the public MCP server and the operations names on the operations server. MCP is optional. No migration is required.
+
 ## Upgrading To 0.13.0
 
 No database migration is needed.
