@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Named Recording Studio MCP tools for workspace lists when the host loads `recording_studio_mcp`: `list_lists`, `show_list`, `create_list`, `update_list`, `delete_list`, `add_to_list`, `remove_from_list`, and `list_list_members`. `list_addable` is on the operations list only. Presskits already owns `list_items`, so membership listing uses `list_list_members`.
 
+### Changed
+
+* Dummy app pins `puma` `8.1.2`, `net-ssh` `7.3.10`, and `brakeman` `8.1.1`. Dummy `.ruby-version` is `3.3.14`.
+
 ### Upgrade notes
 
 - Pin `v0.13.1`. No database migration is required.
