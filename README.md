@@ -65,7 +65,7 @@ RecordingStudio::Lists.delete(list)
 
 `create` accepts `idempotency_key` and `actor`. `add` and `update` accept `actor`. Pass a recording or its id.
 
-When Recording Studio API is loaded, this gem registers `RecordingStudio::Lists::List` on each named API. MCP hosts that wrap that API get the same actions. Default API create is not used, because it would skip `RecordingStudio::Lists.create`.
+When Recording Studio API is loaded, this gem registers `RecordingStudio::Lists::List` on each named API. Default API create is not used, because it would skip `RecordingStudio::Lists.create`. When Recording Studio MCP is also loaded, the gem registers named tools onto those endpoints. MCP is optional.
 
 | Verb | Path | Accessible role |
 |---|---|---|
@@ -88,7 +88,9 @@ bin/rails generate recording_studio_api:migrations
 bin/rails db:migrate
 ```
 
-Turn on `:api_access_point` on roots that should hold API clients, and add `RecordingStudioApi::ApiClient` to `access_actor_types`. Recording Studio MCP needs no extra lists code.
+Turn on `:api_access_point` on roots that should hold API clients, and add `RecordingStudioApi::ApiClient` to `access_actor_types`.
+
+When Recording Studio MCP is loaded, include the lists tools on the matching server. Public: `list_lists`, `show_list`, `create_list`, `update_list`, `delete_list`, `add_to_list`, `remove_from_list`, `list_list_members`. Operations also includes `list_addable`. Use `RecordingStudioLists::McpCopy.tool_names`. Membership listing is `list_list_members` because Presskits already owns `list_items`. A list is a saved workspace collection, not a press kit ListSection. Trash stays with Trashable. Access grants stay with Accessible.
 
 List screens check Accessible on that list recording through `authorize_recording!`. Show needs `:view`. New and create need `:edit` on the current root. Edit, update, destroy, add, and remove need `:edit` on the list. Index and the add-to-list menu use `RecordingStudioAccessible.recording_ids_for` (`:view` on index, `:edit` on the menu). A denial uses the same 404 or missing-list redirect as an unknown id, not 403. `InvalidList` is rescued controller-wide (index included) as 404. Create with no current root still redirects with "Choose a place for this list first." New with no current root still renders the form. Grant on the root covers lists through inheritance. The Ruby helpers do not check access.
 

@@ -72,6 +72,7 @@ class ApiSourceTest < Minitest::Test
     names = RecordingStudioLists::Engine.initializers.map(&:name)
 
     assert_includes names, "recording_studio_lists.api"
+    assert_includes names, "recording_studio_lists.mcp"
   end
 
   def test_does_not_fake_recording_studio_api

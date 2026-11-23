@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Development and dummy apps pin Recording Studio `v7.8.0`, Accessible `v0.58.0`, Orderable `v0.12.0`, Moveable `v6.1.0`, Trashable `v1.3.0`, Metrics `v0.10.0`, Icons `v0.5.0`, Logs `v0.9.0`, and API `v1.20.0`. Admin stays `v2.19.1`. Flatpack stays `v0.2.0`. The dummy also pins Cache `v0.8.0` and Root Switchable `v0.17.0`. Each pin is `~> major.minor` plus the tag.
 
+## [0.13.1] - 2026-11-23
+
+### Added
+
+* Named Recording Studio MCP tools for workspace lists when the host loads `recording_studio_mcp`: `list_lists`, `show_list`, `create_list`, `update_list`, `delete_list`, `add_to_list`, `remove_from_list`, and `list_list_members`. `list_addable` is on the operations list only. Presskits already owns `list_items`, so membership listing uses `list_list_members`.
+
+### Changed
+
+* Dummy app pins `puma` `8.1.2`, `net-ssh` `7.3.10`, and `brakeman` `8.1.1`. Dummy `.ruby-version` is `3.3.14`. Root `Gemfile.lock` also pins `puma` `8.1.2`.
+
+### Upgrade notes
+
+- Pin `v0.13.1`. No database migration is required.
+- Hosts that use Recording Studio MCP `>= 0.45.2` get these named tools when this gem loads. Include `RecordingStudioLists::McpCopy.tool_names[:public]` on the public server and `[:operations]` on the operations server. MCP is still optional.
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-0131).
+
 ## [0.13.0] - 2026-11-18
 
 ### Changed
@@ -542,7 +558,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.3...v0.12.0
 [0.11.3]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.2...v0.11.3
