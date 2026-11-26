@@ -7,9 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-26
+
+### Removed
+
+* **Breaking.** Lists is no longer registered on the API named `operations` when this gem loads. `Api.register!` skips that API. Named MCP tools are public only. `RecordingStudioLists::McpCopy.tool_names[:operations]` is empty. Hosts that included those names on the operations MCP server stop offering `create_list` and the other list tools there.
+
+### Added
+
+* Optional list metrics when the host loads `recording_studio_metrics`: `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. MCP catalog names are `lists-total`, `lists-over_time`, `list_items-total`, and `list_items-over_time`. Metrics and MCP stay optional. The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)` to publish the catalog.
+
 ### Changed
 
 * Development and dummy apps pin Recording Studio `v7.8.0`, Accessible `v0.58.0`, Orderable `v0.12.0`, Moveable `v6.1.0`, Trashable `v1.3.0`, Metrics `v0.10.0`, Icons `v0.5.0`, Logs `v0.9.0`, and API `v1.20.0`. Admin stays `v2.19.1`. Flatpack stays `v0.2.0`. The dummy also pins Cache `v0.8.0` and Root Switchable `v0.17.0`. Each pin is `~> major.minor` plus the tag.
+
+### Upgrade notes
+
+- Pin `v0.14.0`. No database migration is required.
+- Stop including `RecordingStudioLists::McpCopy.tool_names[:operations]` on the operations MCP server. Keep `[:public]` on the public server.
+- Stop calling list CRUD or `list_addable` on the operations API unless the host calls `RecordingStudioLists::Api.register_api(:operations)` on purpose.
+- Hosts that load Metrics can execute `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`.
+- See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-0140).
 
 ## [0.13.1] - 2026-11-23
 
@@ -558,7 +576,8 @@ New addons copied from this template are born on Recording Studio 4.x.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_lists/compare/v0.11.3...v0.12.0

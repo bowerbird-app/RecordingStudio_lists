@@ -2,6 +2,7 @@
 
 require_relative "api"
 require_relative "mcp_copy"
+require_relative "metrics"
 
 module RecordingStudioLists
   class Engine < ::Rails::Engine
@@ -128,6 +129,10 @@ module RecordingStudioLists
 
     initializer "recording_studio_lists.mcp", after: "recording_studio_lists.api" do
       config.to_prepare { McpCopy.register! }
+    end
+
+    initializer "recording_studio_lists.metrics", after: "recording_studio_lists.mcp" do
+      config.to_prepare { Metrics.register! }
     end
   end
 end

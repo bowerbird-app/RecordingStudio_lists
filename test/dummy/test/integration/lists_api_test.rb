@@ -359,47 +359,15 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body.dig("error", "message"), "list_addable"
   end
 
-  test "operations API still lists and returns addable records" do
-    register_operations_lists!
-    document = RecordingStudioApi.openapi_document(version: "v1", api: :operations)
-    catalog = RecordingStudioApi.documentation_catalog(version: "v1", api: :operations)
-    registration = RecordingStudioApi.recordable_registration_for("RecordingStudio::Lists::List", api: :operations)
-    action = RecordingStudioApi.capability_action(:list_addable, api: :operations)
-    addable_paths = paths_named(document, "list_addable")
+  test "register! skips the operations API" do
+    RecordingStudioApi.configuration.api(:operations)
+    RecordingStudioLists::Api.register!
 
-    assert_includes Array(registration.capability_actions).map(&:to_sym), :list_addable
-    assert action.applicable_to?("RecordingStudio::Lists::List")
-    refute action.applicable_to?("Page")
-    assert_equal ["List addable records"], addable_paths.map { |path| path.fetch(:summary) }
-    assert catalog_paths(catalog).any? { |path| path.include?("/actions/list_addable") }
-
-    get "/recording_studio_api/apis/operations/v1/lists/#{@list.id}/actions/list_addable",
-        headers: json_headers(issue_token(role: :view, api: :operations))
-    assert_response :success
-    addable_ids = response.parsed_body.fetch("records").map { |record| record.fetch("id") }
-    assert_includes addable_ids, @page.id
-    refute_includes addable_ids, @list.id
+    assert_nil RecordingStudioApi.recordable_registration_for("RecordingStudio::Lists::List", api: :operations)
+    assert_nil RecordingStudioApi.capability_action(:list_addable, api: :operations)
   end
 
   private
-
-  def register_operations_lists!
-    RecordingStudioApi.configuration.api(:operations)
-    register_operations_workspace!
-    RecordingStudioLists::Api.register_api(:operations)
-  end
-
-  def register_operations_workspace!
-    return if RecordingStudioApi.recordable_registration_for("Workspace", api: :operations)
-
-    RecordingStudioApi.register_recordable_type_api(
-      "Workspace",
-      api: :operations,
-      operations: %i[show],
-      serializer: ->(workspace, **) { { name: workspace.name } },
-      output_keys: %i[name]
-    )
-  end
 
   def paths_named(document, action_name)
     document.fetch(:paths).filter_map do |path, operations|

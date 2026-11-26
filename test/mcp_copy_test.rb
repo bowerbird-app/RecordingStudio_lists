@@ -45,7 +45,7 @@ class McpCopyTest < Minitest::Test
     refute_includes registration[:description], "ListSection"
     FORBIDDEN.each { |phrase| refute_includes registration[:description], phrase }
 
-    expected = RecordingStudioLists::McpCopy.tool_names.fetch(:operations)
+    expected = RecordingStudioLists::McpCopy.tool_names.fetch(:public)
     assert_equal expected, fake.tools.keys
     expected.each do |name|
       tool = fake.tools.fetch(name)
@@ -70,8 +70,7 @@ class McpCopyTest < Minitest::Test
     refute add.key?(:operation)
     members = fake.tools.fetch("list_list_members")
     assert_equal :list_items, members[:action]
-    addable = fake.tools.fetch("list_addable")
-    assert_equal :list_addable, addable[:action]
+    refute fake.tools.key?("list_addable")
     refute fake.tools.key?("list_items")
     refute fake.tools.key?("add_list_item")
   end
@@ -92,10 +91,9 @@ class McpCopyTest < Minitest::Test
       list_lists show_list create_list update_list delete_list
       add_to_list remove_from_list list_list_members
     ], names.fetch(:public)
-    assert_equal names.fetch(:public) + %w[list_addable], names.fetch(:operations)
+    assert_equal [], names.fetch(:operations)
     refute_includes names.fetch(:public), "list_addable"
     refute_includes names.fetch(:public), "list_items"
-    names.fetch(:operations).each { |name| assert_match(/\A[A-Za-z][A-Za-z0-9_.-]*\z/, name) }
   end
 
   def test_gemspec_does_not_depend_on_recording_studio_mcp
@@ -104,10 +102,15 @@ class McpCopyTest < Minitest::Test
     engine = File.read(File.expand_path("../lib/recording_studio_lists/engine.rb", __dir__))
 
     refute_includes gemspec, "recording_studio_mcp"
+    refute_includes gemspec, "recording_studio_metrics"
     refute_includes entry, 'require "recording_studio_mcp"'
+    refute_includes entry, 'require "recording_studio_metrics"'
     assert_includes engine, 'require_relative "mcp_copy"'
+    assert_includes engine, 'require_relative "metrics"'
     assert_includes engine, 'initializer "recording_studio_lists.mcp", after: "recording_studio_lists.api"'
     assert_includes engine, "McpCopy.register!"
+    assert_includes engine, 'initializer "recording_studio_lists.metrics", after: "recording_studio_lists.mcp"'
+    assert_includes engine, "Metrics.register!"
   end
 
   def test_writes_state_prerequisites_and_every_tool_has_output

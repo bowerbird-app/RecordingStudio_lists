@@ -20,5 +20,8 @@ Next steps:
 10. To expose lists over Recording Studio API, add `recording_studio_api`, run its install and
     migrations, mount the engine, and enable `:api_access_point` on roots that hold API clients.
     Recording Studio MCP is optional. When it is loaded, include
-    `RecordingStudioLists::McpCopy.tool_names[:public]` on the public server and
-    `[:operations]` on the operations server.
+    `RecordingStudioLists::McpCopy.tool_names[:public]` on the public server.
+    Do not include Lists tools on the operations server.
+    Recording Studio Metrics is optional. When it is loaded, this gem registers
+    `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`.
+    The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)`.
