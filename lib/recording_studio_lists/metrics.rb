@@ -9,6 +9,8 @@ module RecordingStudioLists
     API = :operations
     EXPOSE = { api: [API] }.freeze
     AUTHORIZE = lambda do |context|
+      return false unless context
+
       actor = actor_for(context)
       recording = recording_for(context)
       return false if actor.blank? || recording.blank?
