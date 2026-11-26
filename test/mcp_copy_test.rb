@@ -91,9 +91,11 @@ class McpCopyTest < Minitest::Test
       list_lists show_list create_list update_list delete_list
       add_to_list remove_from_list list_list_members
     ], names.fetch(:public)
-    assert_equal [], names.fetch(:operations)
+    assert_equal %w[lists-total lists-over_time list_items-total list_items-over_time], names.fetch(:operations)
     refute_includes names.fetch(:public), "list_addable"
     refute_includes names.fetch(:public), "list_items"
+    refute_includes names.fetch(:operations), "create_list"
+    refute_includes names.fetch(:operations), "list_addable"
   end
 
   def test_gemspec_does_not_depend_on_recording_studio_mcp
@@ -110,7 +112,7 @@ class McpCopyTest < Minitest::Test
     assert_includes engine, 'initializer "recording_studio_lists.mcp", after: "recording_studio_lists.api"'
     assert_includes engine, "McpCopy.register!"
     assert_includes engine, 'initializer "recording_studio_lists.metrics", after: "recording_studio_lists.mcp"'
-    assert_includes engine, "Metrics.register! if defined?(::RecordingStudioMetrics)"
+    assert_includes engine, "Metrics.register!"
   end
 
   def test_writes_state_prerequisites_and_every_tool_has_output

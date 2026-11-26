@@ -11,6 +11,10 @@ module RecordingStudioLists
       list_lists show_list create_list update_list delete_list
       add_to_list remove_from_list list_list_members
     ].freeze
+    # Catalog metrics are not register_tool targets. Hosts include them by name.
+    METRIC_TOOL_NAMES = %w[
+      lists-total lists-over_time list_items-total list_items-over_time
+    ].freeze
     OPERATIONS = {
       "list_lists" => :index,
       "show_list" => :show,
@@ -46,7 +50,7 @@ module RecordingStudioLists
     end
 
     def tool_names
-      { public: PUBLIC_TOOL_NAMES, operations: [] }
+      { public: PUBLIC_TOOL_NAMES, operations: METRIC_TOOL_NAMES }
     end
 
     def register_types

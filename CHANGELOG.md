@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-* **Breaking.** Lists is no longer registered on the API named `operations` when this gem loads. `Api.register!` skips that API. Named MCP tools are public only. `RecordingStudioLists::McpCopy.tool_names[:operations]` is empty. Hosts that included those names on the operations MCP server stop offering `create_list` and the other list tools there.
+* **Breaking.** Lists is no longer registered on the API named `operations` when this gem loads. `Api.register!` skips that API. Named list CRUD tools stay on the public MCP list only. Hosts that included those names on the operations MCP server stop offering `create_list` and the other list tools there.
 
 ### Added
 
-* Optional list metrics when the host loads `recording_studio_metrics`: `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. MCP catalog names are `lists-total`, `lists-over_time`, `list_items-total`, and `list_items-over_time`. Metrics and MCP stay optional. The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)` to publish the catalog. A caller needs Accessible view on the API access recording.
+* Optional list metrics when the host loads `recording_studio_metrics`: `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. MCP catalog names are `lists-total`, `lists-over_time`, `list_items-total`, and `list_items-over_time`. Those catalog names are `RecordingStudioLists::McpCopy.tool_names[:operations]`. Metrics stay staff-only on the operations API. The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)` to publish the catalog. Metrics and MCP stay optional.
 
 ### Changed
 
@@ -24,9 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Upgrade notes
 
 - Pin `v0.14.0`. No database migration is required.
-- Stop including `RecordingStudioLists::McpCopy.tool_names[:operations]` on the operations MCP server. Keep `[:public]` on the public server.
+- Keep `tool_names[:public]` on the public MCP server. Put `tool_names[:operations]` (the four list metric catalog names) on the operations MCP server. Do not put list CRUD tools there.
 - Stop calling list CRUD or `list_addable` on the operations API unless the host calls `RecordingStudioLists::Api.register_api(:operations)` on purpose.
-- Hosts that load Metrics can execute `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. The caller needs Accessible view on the API access recording.
+- Hosts that load Metrics and Admin can execute `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time` on operations. The grant must hold `:view` on the Admin access recording. A workspace token is denied. Metrics deny when Admin is not loaded.
 - See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-0140).
 
 ## [0.13.1] - 2026-11-23

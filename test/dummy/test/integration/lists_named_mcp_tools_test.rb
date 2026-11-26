@@ -29,7 +29,7 @@ class ListsNamedMcpToolsTest < ActionDispatch::IntegrationTest
     names = RecordingStudioLists::McpCopy.tool_names
 
     assert_equal PUBLIC_TOOLS, names.fetch(:public)
-    assert_equal [], names.fetch(:operations)
+    assert_equal RecordingStudioLists::McpCopy::METRIC_TOOL_NAMES, names.fetch(:operations)
 
     get "/recording_studio_api/api/v1/lists",
         headers: json_headers(@edit_token),
@@ -121,7 +121,9 @@ class ListsNamedMcpToolsTest < ActionDispatch::IntegrationTest
       api: :operations
     )
     assert_equal RecordingStudioLists::McpCopy.tool_names.fetch(:public), PUBLIC_TOOLS
-    assert_empty RecordingStudioLists::McpCopy.tool_names.fetch(:operations)
+    assert_equal RecordingStudioLists::McpCopy::METRIC_TOOL_NAMES,
+                 RecordingStudioLists::McpCopy.tool_names.fetch(:operations)
+    refute_includes RecordingStudioLists::McpCopy.tool_names.fetch(:operations), "create_list"
   end
 
   test "mcp registration is a no-op in this dummy without RecordingStudioMcp" do

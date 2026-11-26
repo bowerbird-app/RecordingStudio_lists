@@ -3,6 +3,8 @@
 require "test_helper"
 
 class ListsMetricsTest < ActionDispatch::IntegrationTest
+  OPERATIONS_METRICS = "/recording_studio_api/apis/operations/v1/metrics"
+
   setup do
     @user = User.create!(
       email: "lists-metrics-#{SecureRandom.hex(4)}@example.com",
@@ -41,27 +43,40 @@ class ListsMetricsTest < ActionDispatch::IntegrationTest
     assert_catalog_names
   end
 
-  test "metric authorize follows accessible view on the access recording" do
+  test "operations metrics deny a workspace token and allow a staff token" do
     skip "recording_studio_metrics is optional" unless RecordingStudioLists::Metrics.metrics_available?
+    skip "recording_studio_admin is optional" unless defined?(::RecordingStudioAdmin)
 
-    blank = Struct.new(:actor, :access_recording).new(nil, nil)
-    refute RecordingStudioLists::Metrics::AUTHORIZE.call(blank)
-    refute RecordingStudioLists::Metrics::AUTHORIZE.call(Struct.new(:actor, :access_recording).new(@user, nil))
-    assert RecordingStudioLists::Metrics::AUTHORIZE.call(
-      Struct.new(:actor, :access_recording).new(@user, @root)
-    )
+    RecordingStudioLists::Metrics.register! unless RecordingStudioMetrics.find("lists.total")
+    ensure_operations_metrics_api!
 
-    endpoint = Struct.new(:access_grant, :access_recording).new(Struct.new(:actor).new(@user), @root)
-    assert RecordingStudioLists::Metrics::AUTHORIZE.call(endpoint)
-
-    stranger = User.create!(
-      email: "lists-metrics-stranger-#{SecureRandom.hex(4)}@example.com",
+    other = User.create!(
+      email: "lists-metrics-other-#{SecureRandom.hex(4)}@example.com",
       password: "ListsTestPassword!2026",
       password_confirmation: "ListsTestPassword!2026"
     )
-    refute RecordingStudioLists::Metrics::AUTHORIZE.call(
-      Struct.new(:access_grant, :access_recording).new(Struct.new(:actor).new(stranger), @root)
+    other_root = RecordingStudio.create_root_recording!(
+      Workspace.create!(name: "Lists metrics other #{SecureRandom.hex(4)}"),
+      actor: other
     )
+    grant_owner_access!(actor: other, recording: other_root)
+    RecordingStudio::Lists.create(parent: @root, name: "Alpha shelf", actor: @user)
+    RecordingStudio::Lists.create(parent: other_root, name: "Beta shelf", actor: other)
+
+    workspace_token = issue_token(actor: @user, recording: @root, role: :view, api: :operations)
+    get "#{OPERATIONS_METRICS}/lists/total", headers: json_headers(workspace_token)
+    assert_response :forbidden
+
+    staff = User.create!(
+      email: "lists-metrics-staff-#{SecureRandom.hex(4)}@example.com",
+      password: "ListsTestPassword!2026",
+      password_confirmation: "ListsTestPassword!2026"
+    )
+    admin_root = staff_admin_root(staff)
+    staff_token = issue_token(actor: staff, recording: admin_root, role: :view, api: :operations)
+    get "#{OPERATIONS_METRICS}/lists/total", headers: json_headers(staff_token)
+    assert_response :success
+    assert_operator response.parsed_body.fetch("value").to_i, :>=, 2
   end
 
   private
@@ -87,6 +102,9 @@ class ListsMetricsTest < ActionDispatch::IntegrationTest
   end
 
   def assert_catalog_names
+    expected = RecordingStudioLists::McpCopy::METRIC_TOOL_NAMES
+    assert_equal expected, RecordingStudioLists::McpCopy.tool_names.fetch(:operations)
+
     {
       "lists.total" => [ "lists-total", "RecordingStudio::Lists::List" ],
       "list_items.total" => [ "list_items-total", "RecordingStudio::Lists::ListItem" ],
@@ -102,7 +120,7 @@ class ListsMetricsTest < ActionDispatch::IntegrationTest
       refute definition.exposed_to_api?(:public)
       assert_equal({ recordable_type: recordable_type }, scoped_where(definition))
       refute_includes RecordingStudioLists::McpCopy.tool_names.fetch(:public), catalog_name
-      refute_includes RecordingStudioLists::McpCopy.tool_names.fetch(:operations), catalog_name
+      assert_includes expected, catalog_name
     end
   end
 
@@ -115,6 +133,41 @@ class ListsMetricsTest < ActionDispatch::IntegrationTest
     end
     assert_equal :scoped, definition.scope.call(relation)
     captured
+  end
+
+  def ensure_operations_metrics_api!
+    RecordingStudioApi.configuration.api(:operations)
+    RecordingStudioMetrics::Api.register!(api: :operations)
+  rescue RecordingStudioApi::ConfigurationError
+    nil
+  end
+
+  def staff_admin_root(staff)
+    workspace = Workspace.find_or_create_by!(name: "Studio Workspace")
+    recording = RecordingStudio.root_recording_for(workspace) ||
+                RecordingStudio.create_root_recording!(workspace, actor: staff)
+    grant_owner_access!(actor: staff, recording: recording)
+    recording
+  end
+
+  def issue_token(actor:, recording:, role:, api:)
+    result = RecordingStudioApi::Services::IssueTestCredential.call(
+      api: api,
+      actor: actor,
+      access_point_recording: recording,
+      role: role,
+      name: "lists-metrics-#{role}-#{SecureRandom.hex(4)}"
+    )
+    raise result.error if result.failure?
+
+    api_client = result.value.fetch(:api_client)
+    api_client.update!(owner: actor) if api_client.owner != actor
+
+    result.value.fetch(:access_token)
+  end
+
+  def json_headers(token)
+    { "Authorization" => "Bearer #{token}", "Accept" => "application/json" }
   end
 
   def grant_owner_access!(actor:, recording:)
