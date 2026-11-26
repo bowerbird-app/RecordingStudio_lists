@@ -359,7 +359,17 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body.dig("error", "message"), "list_addable"
   end
 
-  test "operations API still lists and returns addable records" do
+  test "register! skips the operations API and leaves the public API" do
+    RecordingStudioApi.configuration.api(:operations)
+    before = RecordingStudioApi.recordable_registration_for("RecordingStudio::Lists::List", api: :operations)
+    RecordingStudioLists::Api.register!
+
+    assert_same before, RecordingStudioApi.recordable_registration_for("RecordingStudio::Lists::List", api: :operations)
+    assert RecordingStudioApi.recordable_registration_for("RecordingStudio::Lists::List", api: :public)
+    assert_nil RecordingStudioApi.capability_action(:list_addable, api: :public)
+  end
+
+  test "register_api still serves list_addable on operations" do
     register_operations_lists!
     document = RecordingStudioApi.openapi_document(version: "v1", api: :operations)
     catalog = RecordingStudioApi.documentation_catalog(version: "v1", api: :operations)
@@ -370,7 +380,7 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     assert_includes Array(registration.capability_actions).map(&:to_sym), :list_addable
     assert action.applicable_to?("RecordingStudio::Lists::List")
     refute action.applicable_to?("Page")
-    assert_equal ["List addable records"], addable_paths.map { |path| path.fetch(:summary) }
+    assert_equal [ "List addable records" ], addable_paths.map { |path| path.fetch(:summary) }
     assert catalog_paths(catalog).any? { |path| path.include?("/actions/list_addable") }
 
     get "/recording_studio_api/apis/operations/v1/lists/#{@list.id}/actions/list_addable",
@@ -379,6 +389,9 @@ class ListsApiTest < ActionDispatch::IntegrationTest
     addable_ids = response.parsed_body.fetch("records").map { |record| record.fetch("id") }
     assert_includes addable_ids, @page.id
     refute_includes addable_ids, @list.id
+
+    get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_addable", headers: json_headers(@edit_token)
+    assert_response :unprocessable_entity
   end
 
   private

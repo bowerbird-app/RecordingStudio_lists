@@ -18,7 +18,11 @@ module RecordingStudioLists
     def register!
       return unless defined?(::RecordingStudioApi)
 
-      ::RecordingStudioApi.configuration.each_api { |api| register_api(api.name) }
+      ::RecordingStudioApi.configuration.each_api do |api|
+        next if operations_api?(api.name)
+
+        register_api(api.name)
+      end
     end
 
     def register_api(api)

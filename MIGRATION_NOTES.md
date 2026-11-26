@@ -1,5 +1,20 @@
 # Migration Notes
 
+## Upgrading To 0.14.0
+
+No database migration is needed.
+
+### What Changed
+
+- This gem no longer registers Lists on the API named `operations` at boot. Public list API and public MCP tools are unchanged.
+- `RecordingStudioLists::McpCopy.tool_names[:operations]` is the four list metric catalog names. Include those on the operations MCP server. Do not include list CRUD tools there.
+- `list_addable` is not registered unless the host calls `RecordingStudioLists::Api.register_api(:operations)`.
+- When Recording Studio Metrics is loaded, this gem registers `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. MCP catalog names are `lists-total`, `lists-over_time`, `list_items-total`, and `list_items-over_time`. The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)`. Metrics are staff-only: the operations grant must hold `:view` on the Admin access recording. They deny when Admin is not loaded. Metrics and MCP stay optional.
+
+### Upgrade Steps
+
+Pin `v0.14.0`. Remove list CRUD tool names from the operations MCP server. Keep the public list tools on the public server. Include `tool_names[:operations]` for the list metric catalog. No migration is required.
+
 ## Upgrading To 0.13.1
 
 No database migration is needed.

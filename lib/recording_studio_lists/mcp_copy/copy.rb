@@ -60,12 +60,6 @@ module RecordingStudioLists
         remove_from_list. Each row has id and type. The list must already exist.
       TEXT
 
-      ADDABLE = <<~TEXT.tr("\n", " ").squeeze(" ").strip.freeze
-        #{PURPOSE} Returns records in this workspace that you can still add to the list. Use these ids
-        with add_to_list. Each row has id and type. Rows leave out this list, other lists, list items,
-        and records already on the list. The list must already exist.
-      TEXT
-
       REMOVE_RECORDING_ID = "The id of the record to remove, from list_list_members."
 
       WRITABLE_INPUTS = {
@@ -81,8 +75,7 @@ module RecordingStudioLists
         "delete_list" => "Delete list",
         "add_to_list" => "Add to list",
         "remove_from_list" => "Remove from list",
-        "list_list_members" => "List members",
-        "list_addable" => "List addable records"
+        "list_list_members" => "List members"
       }.freeze
 
       DESCRIPTIONS = {
@@ -93,8 +86,7 @@ module RecordingStudioLists
         "delete_list" => DELETE,
         "add_to_list" => ADD,
         "remove_from_list" => REMOVE,
-        "list_list_members" => MEMBERS,
-        "list_addable" => ADDABLE
+        "list_list_members" => MEMBERS
       }.freeze
 
       INPUTS = {
@@ -105,8 +97,7 @@ module RecordingStudioLists
         "delete_list" => {},
         "add_to_list" => { "recording_id" => { description: Api::ToolCopy::ADD_RECORDING_ID } },
         "remove_from_list" => { "recording_id" => { description: REMOVE_RECORDING_ID } },
-        "list_list_members" => {},
-        "list_addable" => {}
+        "list_list_members" => {}
       }.freeze
 
       OUTPUTS = {
@@ -117,8 +108,7 @@ module RecordingStudioLists
         "delete_list" => "The list as it was, with deleted true.",
         "add_to_list" => "The list after the record is added.",
         "remove_from_list" => "The list after the record is removed.",
-        "list_list_members" => "The records on the list.",
-        "list_addable" => "The records you can still add to the list."
+        "list_list_members" => "The records on the list."
       }.freeze
     end
   end

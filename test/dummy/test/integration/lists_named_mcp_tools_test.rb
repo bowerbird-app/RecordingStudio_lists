@@ -29,7 +29,7 @@ class ListsNamedMcpToolsTest < ActionDispatch::IntegrationTest
     names = RecordingStudioLists::McpCopy.tool_names
 
     assert_equal PUBLIC_TOOLS, names.fetch(:public)
-    assert_equal PUBLIC_TOOLS + %w[list_addable], names.fetch(:operations)
+    assert_equal RecordingStudioLists::McpCopy::METRIC_TOOL_NAMES, names.fetch(:operations)
 
     get "/recording_studio_api/api/v1/lists",
         headers: json_headers(@edit_token),
@@ -105,37 +105,25 @@ class ListsNamedMcpToolsTest < ActionDispatch::IntegrationTest
     assert RecordingStudio::Recording.exists?(@list.id)
   end
 
-  test "list_addable stays off the public API and on operations" do
-    operations_existed = RecordingStudioApi.configuration.api_names.include?("operations")
-    workspace_before = operations_registration("Workspace")
-    list_before = operations_registration(RecordingStudioLists::Api::TYPE)
-
+  test "list_addable stays off the public API" do
     get "/recording_studio_api/api/v1/lists/#{@list.id}/actions/list_addable",
         headers: json_headers(@edit_token)
     assert_response :unprocessable_entity
+  end
 
+  test "register! does not put lists on the operations API" do
     RecordingStudioApi.configuration.api(:operations)
-    unless RecordingStudioApi.recordable_registration_for("Workspace", api: :operations)
-      RecordingStudioApi.register_recordable_type_api(
-        "Workspace",
-        api: :operations,
-        operations: %i[show],
-        serializer: ->(workspace, **) { { name: workspace.name } },
-        output_keys: %i[name]
-      )
-    end
-    RecordingStudioLists::Api.register_api(:operations)
+    before = RecordingStudioApi.recordable_registration_for(RecordingStudioLists::Api::TYPE, api: :operations)
+    RecordingStudioLists::Api.register!
 
-    get "/recording_studio_api/apis/operations/v1/lists/#{@list.id}/actions/list_addable",
-        headers: json_headers(issue_token(role: :view, api: :operations))
-    assert_response :success
-    assert_includes response.parsed_body.fetch("records").map { |record| record.fetch("id") }, @page.id
-  ensure
-    restore_operations_registrations(
-      operations_existed: operations_existed,
-      workspace_before: workspace_before,
-      list_before: list_before
+    assert_same before, RecordingStudioApi.recordable_registration_for(
+      RecordingStudioLists::Api::TYPE,
+      api: :operations
     )
+    assert_equal RecordingStudioLists::McpCopy.tool_names.fetch(:public), PUBLIC_TOOLS
+    assert_equal RecordingStudioLists::McpCopy::METRIC_TOOL_NAMES,
+                 RecordingStudioLists::McpCopy.tool_names.fetch(:operations)
+    refute_includes RecordingStudioLists::McpCopy.tool_names.fetch(:operations), "create_list"
   end
 
   test "mcp registration is a no-op in this dummy without RecordingStudioMcp" do
@@ -168,37 +156,6 @@ class ListsNamedMcpToolsTest < ActionDispatch::IntegrationTest
   def grant_owner_access!(actor:, recording:)
     result = RecordingStudioAccessible.bootstrap_owner_access!(recording: recording, actor: actor)
     raise result.error if result.failure?
-  end
-
-  def operations_registration(recordable_type)
-    return unless RecordingStudioApi.configuration.api_names.include?("operations")
-
-    RecordingStudioApi.recordable_registration_for(recordable_type, api: :operations)
-  end
-
-  def restore_operations_registrations(operations_existed:, workspace_before:, list_before:)
-    return unless operations_existed
-
-    restore_workspace_registration(workspace_before)
-    restore_list_registration(list_before)
-  end
-
-  def restore_workspace_registration(registration)
-    return unless registration
-
-    RecordingStudioApi.register_recordable_type_api(
-      "Workspace",
-      api: :operations,
-      operations: registration.operations,
-      serializer: registration.serializer,
-      output_keys: registration.output_keys
-    )
-  end
-
-  def restore_list_registration(registration)
-    return unless registration
-
-    RecordingStudioLists::Api.register_api(:operations)
   end
 
   def record_page(root, title)

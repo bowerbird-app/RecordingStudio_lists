@@ -10,6 +10,7 @@ class ApiSourceTest < Minitest::Test
     refute_includes source, "const_set"
     refute_includes source, "remove_const"
     assert_includes source, "configuration.each_api"
+    assert_includes source, "next if operations_api?(api.name)"
     assert_includes source, "ToolDescriptions.type_openapi"
     refute_includes source, "Named lists of recordings"
     assert_includes source, "auto_capability_actions: false"
@@ -73,6 +74,7 @@ class ApiSourceTest < Minitest::Test
 
     assert_includes names, "recording_studio_lists.api"
     assert_includes names, "recording_studio_lists.mcp"
+    assert_includes names, "recording_studio_lists.metrics"
   end
 
   def test_does_not_fake_recording_studio_api
