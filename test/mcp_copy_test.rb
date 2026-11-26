@@ -110,7 +110,7 @@ class McpCopyTest < Minitest::Test
     assert_includes engine, 'initializer "recording_studio_lists.mcp", after: "recording_studio_lists.api"'
     assert_includes engine, "McpCopy.register!"
     assert_includes engine, 'initializer "recording_studio_lists.metrics", after: "recording_studio_lists.mcp"'
-    assert_includes engine, "Metrics.register!"
+    assert_includes engine, "Metrics.register! if defined?(::RecordingStudioMetrics)"
   end
 
   def test_writes_state_prerequisites_and_every_tool_has_output

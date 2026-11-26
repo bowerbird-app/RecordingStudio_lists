@@ -9,7 +9,7 @@ No database migration is needed.
 - This gem no longer registers Lists on the API named `operations` at boot. Public list API and public MCP tools are unchanged.
 - `RecordingStudioLists::McpCopy.tool_names[:operations]` is empty. Do not include those names on the operations MCP server.
 - `list_addable` is not registered unless the host calls `RecordingStudioLists::Api.register_api(:operations)`.
-- When Recording Studio Metrics is loaded, this gem registers `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. MCP catalog names are `lists-total`, `lists-over_time`, `list_items-total`, and `list_items-over_time`. The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)`. Metrics and MCP stay optional.
+- When Recording Studio Metrics is loaded, this gem registers `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. MCP catalog names are `lists-total`, `lists-over_time`, `list_items-total`, and `list_items-over_time`. The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)`. A caller needs Accessible view on the API access recording. Metrics and MCP stay optional.
 
 ### Upgrade Steps
 

@@ -132,7 +132,7 @@ module RecordingStudioLists
     end
 
     initializer "recording_studio_lists.metrics", after: "recording_studio_lists.mcp" do
-      config.to_prepare { Metrics.register! }
+      config.to_prepare { Metrics.register! if defined?(::RecordingStudioMetrics) }
     end
   end
 end

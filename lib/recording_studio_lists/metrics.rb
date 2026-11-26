@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 module RecordingStudioLists
-  # Registers list counts when Recording Studio Metrics is loaded.
-  # This gem does not depend on it. Hosts that skip Metrics keep the UI, API, and MCP tools.
   module Metrics
     LISTS = :lists
     LIST_ITEMS = :list_items
@@ -11,9 +9,9 @@ module RecordingStudioLists
     API = :operations
     EXPOSE = { api: [API] }.freeze
     AUTHORIZE = lambda do |context|
-      actor = context.actor
-      recording = context.access_recording
-      next false if actor.blank? || recording.blank?
+      actor = actor_for(context)
+      recording = recording_for(context)
+      return false if actor.blank? || recording.blank?
 
       RecordingStudioAccessible.authorized?(
         actor: actor,
@@ -71,6 +69,18 @@ module RecordingStudioLists
       dsl.count :total, title: "List items", description: LIST_ITEMS_TOTAL, expose: EXPOSE
       dsl.timeseries :over_time, title: "List items over time", description: LIST_ITEMS_OVER_TIME,
                                  field: :created_at, expose: EXPOSE
+    end
+
+    def actor_for(context)
+      from_method = context.actor if context.respond_to?(:actor)
+      return from_method if from_method.present?
+
+      grant = context.access_grant if context.respond_to?(:access_grant)
+      grant.actor if grant.respond_to?(:actor)
+    end
+
+    def recording_for(context)
+      context.access_recording if context.respond_to?(:access_recording)
     end
   end
 end

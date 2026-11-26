@@ -14,6 +14,35 @@ class MetricsTest < Minitest::Test
     end
   end
 
+  def test_authorize_uses_accessible_view_on_the_access_recording
+    actor = Object.new
+    recording = Object.new
+    seen = nil
+    check = lambda do |**kwargs|
+      seen = kwargs
+      true
+    end
+
+    RecordingStudioAccessible.stub(:authorized?, check) do
+      assert RecordingStudioLists::Metrics::AUTHORIZE.call(
+        Struct.new(:actor, :access_recording).new(actor, recording)
+      )
+      endpoint = Struct.new(:access_grant, :access_recording).new(Struct.new(:actor).new(actor), recording)
+      assert RecordingStudioLists::Metrics::AUTHORIZE.call(endpoint)
+    end
+
+    assert_equal({ actor: actor, recording: recording, role: :view }, seen)
+    refute RecordingStudioLists::Metrics::AUTHORIZE.call(nil)
+    refute RecordingStudioLists::Metrics::AUTHORIZE.call(Struct.new(:actor, :access_recording).new(nil, recording))
+    refute RecordingStudioLists::Metrics::AUTHORIZE.call(Struct.new(:actor, :access_recording).new(actor, nil))
+
+    RecordingStudioAccessible.stub(:authorized?, ->(**) { false }) do
+      refute RecordingStudioLists::Metrics::AUTHORIZE.call(
+        Struct.new(:actor, :access_recording).new(actor, recording)
+      )
+    end
+  end
+
   def test_gemspec_does_not_depend_on_recording_studio_metrics
     gemspec = File.read(File.expand_path("../recording_studio_lists.gemspec", __dir__))
     entry = File.read(File.expand_path("../lib/recording_studio_lists.rb", __dir__))
@@ -24,8 +53,10 @@ class MetricsTest < Minitest::Test
     refute_includes entry, 'require "recording_studio_metrics"'
     refute_includes metrics, 'require "recording_studio_metrics"'
     refute_includes metrics, "rescue"
+    refute_includes metrics, "RecordingStudioMetrics::Api.register!"
+    refute_includes metrics, "register_tool"
     assert_includes engine, 'require_relative "metrics"'
-    assert_includes engine, "Metrics.register!"
+    assert_includes engine, "Metrics.register! if defined?(::RecordingStudioMetrics)"
     assert_includes metrics, "RecordingStudioMetrics.register"
     assert_includes metrics, ":lists"
     assert_includes metrics, ":list_items"
@@ -34,7 +65,6 @@ class MetricsTest < Minitest::Test
     assert_includes metrics, "field: :created_at"
     assert_includes metrics, "blast_radius: :site"
     assert_includes metrics, "RecordingStudioAccessible.authorized?"
-    refute_includes metrics, "RecordingStudioMetrics::Api.register!"
     refute_includes engine, "RecordingStudioMetrics::Api.register!"
   end
 

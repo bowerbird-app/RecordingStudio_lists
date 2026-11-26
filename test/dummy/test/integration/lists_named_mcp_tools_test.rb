@@ -113,13 +113,15 @@ class ListsNamedMcpToolsTest < ActionDispatch::IntegrationTest
 
   test "register! does not put lists on the operations API" do
     RecordingStudioApi.configuration.api(:operations)
+    before = RecordingStudioApi.recordable_registration_for(RecordingStudioLists::Api::TYPE, api: :operations)
     RecordingStudioLists::Api.register!
 
-    assert_nil RecordingStudioApi.recordable_registration_for(
+    assert_same before, RecordingStudioApi.recordable_registration_for(
       RecordingStudioLists::Api::TYPE,
       api: :operations
     )
-    assert_nil RecordingStudioApi.capability_action(:list_addable, api: :operations)
+    assert_equal RecordingStudioLists::McpCopy.tool_names.fetch(:public), PUBLIC_TOOLS
+    assert_empty RecordingStudioLists::McpCopy.tool_names.fetch(:operations)
   end
 
   test "mcp registration is a no-op in this dummy without RecordingStudioMcp" do

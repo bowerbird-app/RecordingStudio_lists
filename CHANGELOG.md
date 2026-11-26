@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Optional list metrics when the host loads `recording_studio_metrics`: `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. MCP catalog names are `lists-total`, `lists-over_time`, `list_items-total`, and `list_items-over_time`. Metrics and MCP stay optional. The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)` to publish the catalog.
+* Optional list metrics when the host loads `recording_studio_metrics`: `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. MCP catalog names are `lists-total`, `lists-over_time`, `list_items-total`, and `list_items-over_time`. Metrics and MCP stay optional. The host still calls `RecordingStudioMetrics::Api.register!(api: :operations)` to publish the catalog. A caller needs Accessible view on the API access recording.
 
 ### Changed
 
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pin `v0.14.0`. No database migration is required.
 - Stop including `RecordingStudioLists::McpCopy.tool_names[:operations]` on the operations MCP server. Keep `[:public]` on the public server.
 - Stop calling list CRUD or `list_addable` on the operations API unless the host calls `RecordingStudioLists::Api.register_api(:operations)` on purpose.
-- Hosts that load Metrics can execute `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`.
+- Hosts that load Metrics can execute `lists.total`, `lists.over_time`, `list_items.total`, and `list_items.over_time`. The caller needs Accessible view on the API access recording.
 - See [MIGRATION_NOTES.md](MIGRATION_NOTES.md#upgrading-to-0140).
 
 ## [0.13.1] - 2026-11-23
