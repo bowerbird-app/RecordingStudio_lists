@@ -49,6 +49,7 @@ class ListsMetricsTest < ActionDispatch::IntegrationTest
 
     RecordingStudioLists::Metrics.register! unless RecordingStudioMetrics.find("lists.total")
     ensure_operations_metrics_api!
+    register_operations_workspace!
 
     other = User.create!(
       email: "lists-metrics-other-#{SecureRandom.hex(4)}@example.com",
@@ -140,6 +141,18 @@ class ListsMetricsTest < ActionDispatch::IntegrationTest
     RecordingStudioMetrics::Api.register!(api: :operations)
   rescue RecordingStudioApi::ConfigurationError
     nil
+  end
+
+  def register_operations_workspace!
+    return if RecordingStudioApi.recordable_registration_for("Workspace", api: :operations)
+
+    RecordingStudioApi.register_recordable_type_api(
+      "Workspace",
+      api: :operations,
+      operations: %i[show],
+      serializer: ->(workspace, **) { { name: workspace.name } },
+      output_keys: %i[name]
+    )
   end
 
   def staff_admin_root(staff)
